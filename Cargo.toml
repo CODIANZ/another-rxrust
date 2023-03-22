@@ -1,0 +1,12 @@
+[package]
+name = "another-rxrust"
+description = "Another Rust implementation of Reactive Extensions."
+edition = "2021"
+license = "MIT"
+homepage = "https://github.com/CODIANZ/another-rxrust"
+repository = "https://github.com/CODIANZ/another-rxrust"
+keywords = ["reactivex", "rx"]
+version = "0.0.1"
+
+[dependencies]
+anyhow = { version = "1", features = ["backtrace"] }
