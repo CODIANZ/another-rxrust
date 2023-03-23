@@ -1,15 +1,24 @@
-// use std::rc::Rc;
+use crate::all::*;
+use std::sync::Arc;
 
-// use crate::all::*;
+pub fn error<Item>(err: RxError) -> Observable<Item>
+where
+  Item: Clone + Send + Sync + 'static,
+{
+  Observable::create(move |s, _| s.error(Arc::clone(&err)))
+}
 
-// pub fn error<Item>(e: RxError) -> Observable<Item>
-// where
-//   Item: Clone + 'static,
-// {
-//   Observable::<Item> {
-//     executor: rxfn(move |mut s, _| {
-//       let e = Rc::clone(&e);
-//       s.error(e);
-//     }),
-//   }
-// }
+mod test {
+  use super::error;
+  use anyhow::anyhow;
+  use std::sync::Arc;
+
+  #[test]
+  fn basic() {
+    error::<String>(Arc::new(anyhow!("hoge"))).subscribe(
+      |x| println!("next {}", x),
+      |e| println!("{:}", e),
+      || println!("complete"),
+    );
+  }
+}
