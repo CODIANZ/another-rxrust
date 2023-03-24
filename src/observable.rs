@@ -1,4 +1,7 @@
-use crate::{all::RxError, observer::Observer};
+use crate::{
+  all::{operators, RxError},
+  observer::Observer,
+};
 use std::sync::{Arc, RwLock};
 
 pub struct Subscription {
@@ -101,50 +104,7 @@ where
     F: Fn(Item) -> Out + Send + Sync + 'static,
     Out: Clone + Send + Sync + 'static,
   {
-    struct FWrap<In, Out>
-    where
-      In: Clone + Send + Sync + 'static,
-      Out: Clone + Send + Sync + 'static,
-    {
-      func: Box<dyn Fn(In) -> Out + Send + Sync + 'static>,
-    }
-    impl<In, Out> FWrap<In, Out>
-    where
-      In: Clone + Send + Sync + 'static,
-      Out: Clone + Send + Sync + 'static,
-    {
-      fn new<F>(func: F) -> FWrap<In, Out>
-      where
-        F: Fn(In) -> Out + Send + Sync + 'static,
-        In: Clone + Send + Sync + 'static,
-        Out: Clone + Send + Sync + 'static,
-      {
-        FWrap {
-          func: Box::new(func),
-        }
-      }
-      fn call(&self, indata: In) -> Out {
-        (self.func)(indata)
-      }
-    }
-
-    let fwrap = Arc::new(FWrap::new(f));
-    let _self = self.clone();
-    Observable::<Out>::create(move |s, _| {
-      let s_next = Arc::clone(&s);
-      let s_error = Arc::clone(&s);
-      let s_complete = Arc::clone(&s);
-      let s_fwrap = Arc::clone(&fwrap);
-      _self.subscribe(
-        move |x| {
-          s_next.next(s_fwrap.call(x));
-        },
-        move |e| {
-          s_error.error(e);
-        },
-        move || s_complete.complete(),
-      );
-    })
+    operators::MapOp::new(f).execute(self.clone())
   }
 }
 
@@ -215,42 +175,5 @@ mod test {
     println!("started");
     thread::sleep(time::Duration::from_millis(1000));
     sbsc.unsubscribe();
-  }
-
-  #[test]
-  fn map() {
-    let o = Observable::<i32>::create(|s, _is_subscribed| {
-      for n in 0..10 {
-        s.next(n);
-      }
-      s.complete();
-    });
-
-    o.map(|x| x * 2).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", e),
-      || println!("complete"),
-    );
-  }
-
-  #[test]
-  fn map_thread() {
-    let o = Observable::<i32>::create(|s, _is_subscribed| {
-      let s = Arc::new(s);
-      thread::spawn(move || {
-        for n in 0..10 {
-          thread::sleep(time::Duration::from_millis(100));
-          s.next(n);
-        }
-        s.complete();
-      });
-    });
-
-    o.map(|x| format!("str {}", x)).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", e),
-      || println!("complete"),
-    );
-    thread::sleep(time::Duration::from_millis(1000));
   }
 }
