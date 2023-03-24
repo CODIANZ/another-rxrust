@@ -41,32 +41,35 @@ where
     let last_error = Arc::clone(&self.last_error);
     let subject = Arc::clone(&self.subject);
 
-    Observable::create(move |s, _| {
+    Observable::create(move |s| {
       {
         let last_item = &*last_item.read().unwrap();
         let last_error = &*last_error.read().unwrap();
 
         if let Some(err) = last_error {
           s.error(Arc::clone(&err));
-          return;
+          return Subscription::new(|| {});
         }
         if let Some(item) = last_item {
           s.next(item.clone());
         } else {
           s.complete();
-          return;
+          return Subscription::new(|| {});
         }
       }
       let s_next = Arc::clone(&s);
       let s_error = Arc::clone(&s);
       let s_complete = Arc::clone(&s);
-      subject.observable().subscribe(
+      let sbsc = subject.observable().subscribe(
         move |x| s_next.next(x),
         move |e| s_error.error(e),
         move || {
           s_complete.complete();
         },
       );
+      Subscription::new(move || {
+        sbsc.unsubscribe();
+      })
     })
   }
 }

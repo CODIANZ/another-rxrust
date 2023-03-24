@@ -4,9 +4,10 @@ pub fn just<Item>(x: Item) -> Observable<Item>
 where
   Item: Clone + Send + Sync + 'static,
 {
-  Observable::create(move |s, _| {
+  Observable::create(move |s| {
     s.next(x.clone());
     s.complete();
+    Subscription::new(|| {})
   })
 }
 

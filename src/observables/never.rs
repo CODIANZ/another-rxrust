@@ -4,7 +4,7 @@ pub fn never<Item>() -> Observable<Item>
 where
   Item: Clone + Send + Sync + 'static,
 {
-  Observable::<Item>::create(|_, _| {})
+  Observable::<Item>::create(|_| Subscription::new(|| {}))
 }
 
 #[cfg(test)]

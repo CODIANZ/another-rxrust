@@ -50,7 +50,7 @@ where
     let observables = Arc::clone(&self.observers);
     let serial = Arc::clone(&self.serial);
 
-    Observable::create(move |s, _| {
+    Observable::create(move |s| {
       let serial = {
         let mut serial = serial.write().unwrap();
         *serial += 1;
@@ -60,6 +60,10 @@ where
         let mut observables = observables.write().unwrap();
         observables.insert(serial, Arc::clone(&s));
       }
+      let observables = Arc::clone(&observables);
+      Subscription::new(move || {
+        observables.write().unwrap().remove(&serial);
+      })
     })
   }
 }

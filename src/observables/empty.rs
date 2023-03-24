@@ -4,7 +4,10 @@ pub fn empty<Item>() -> Observable<Item>
 where
   Item: Clone + Send + Sync + 'static,
 {
-  Observable::<Item>::create(|s, _| s.complete())
+  Observable::<Item>::create(|s| {
+    s.complete();
+    Subscription::new(|| {})
+  })
 }
 
 #[cfg(test)]
