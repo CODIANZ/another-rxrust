@@ -5,7 +5,7 @@ use crate::{
 use std::sync::{Arc, RwLock};
 
 pub struct Subscription {
-  fn_unsubscribe: Box<dyn Fn()>,
+  fn_unsubscribe: Box<dyn Fn() + Send + Sync + 'static>,
 }
 
 impl Subscription {
