@@ -58,6 +58,7 @@ where
         source_completed_: Arc<RwLock<bool>>,
         subscribed_: Arc<RwLock<bool>>,
         subscriber_: Arc<Observer<Item>>,
+        subscriptions_: Arc<RwLock<Vec<Subscription>>>,
       }
       impl<Item> Work<Item> {
         fn is_all_complete(&self) -> bool {
@@ -96,6 +97,20 @@ where
         fn subscriber_close(&self) {
           self.subscriber_.close();
         }
+        fn subscriptions_add(&self, sbsc: Subscription) {
+          self.subscriptions_.write().unwrap().push(sbsc);
+        }
+        fn subscriptions_unsubscribe_all(&self) {
+          self.subscriptions_.read().unwrap().iter().for_each(|x| {
+            x.unsubscribe();
+          });
+          self.subscriptions_.write().unwrap().clear();
+        }
+        fn finish(&self) {
+          self.subscriber_complete();
+          self.subscribed_set_false();
+          self.subscriptions_unsubscribe_all();
+        }
       }
 
       let work = Arc::new(Work {
@@ -103,6 +118,7 @@ where
         source_completed_: Arc::new(RwLock::new(false)),
         subscribed_: Arc::new(RwLock::new(true)),
         subscriber_: Arc::clone(&s),
+        subscriptions_: Arc::new(RwLock::new(Vec::new())),
       });
 
       let work_next = Arc::clone(&work);
@@ -111,7 +127,7 @@ where
 
       let _f_error = Arc::clone(&_f);
 
-      let source_sbsc = _source.subscribe(
+      work.subscriptions_add(_source.subscribe(
         move |x| {
           if !work_next.subscribed_get_bool() {
             work_next.subscriber_close();
@@ -124,7 +140,7 @@ where
           let work_error_error = Arc::clone(&work_error);
           let work_error_complete = Arc::clone(&work_error);
 
-          _f_error.call(e).subscribe(
+          work_error.subscriptions_add(_f_error.call(e).subscribe(
             move |xx| {
               if work_error_next.subscribed_get_bool() {
                 work_error_next.counter_increment();
@@ -135,30 +151,26 @@ where
             },
             move |ee| {
               work_error_error.subscriber_error(ee);
-              work_error_error.subscribed_set_false();
+              work_error_error.finish();
             },
             move || {
               work_error_complete.counter_decriment();
               if work_error_complete.is_all_complete() {
-                work_error_complete.subscriber_complete();
-                work_error_complete.subscribed_set_false();
+                work_error_complete.finish();
               }
             },
-          );
+          ));
         },
         move || {
           work_complete.source_completed_set_true();
           if work_complete.is_all_complete() {
-            work_complete.subscriber_complete();
-            work_complete.subscribed_set_false();
+            work_complete.finish();
           }
         },
-      );
-      let source_sbsc = Arc::new(source_sbsc);
-      let subscribed = Arc::clone(&work.subscribed_);
+      ));
+      let work = Arc::clone(&work);
       Subscription::new(move || {
-        *subscribed.write().unwrap() = false;
-        source_sbsc.unsubscribe();
+        work.finish();
       })
     })
   }
