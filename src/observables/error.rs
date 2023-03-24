@@ -10,6 +10,8 @@ where
 
 #[cfg(test)]
 mod test {
+  use crate::observable::IObservable;
+
   use super::error;
   use anyhow::anyhow;
   use std::sync::Arc;

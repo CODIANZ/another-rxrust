@@ -5,7 +5,7 @@ use crate::{
 use std::sync::{Arc, RwLock};
 
 pub struct Subscription {
-  fn_unsubscribe: Box<dyn Fn()>,
+  fn_unsubscribe: Box<dyn Fn() + Send + Sync + 'static>,
 }
 
 impl Subscription {
@@ -44,6 +44,32 @@ where
   }
 }
 
+pub trait IObservable<Item>
+where
+  Item: Clone + Send + Sync + 'static,
+{
+  fn subscribe<Next, Error, Complete>(
+    &self,
+    next: Next,
+    error: Error,
+    complete: Complete,
+  ) -> Subscription
+  where
+    Next: Fn(Item) + Send + Sync + 'static,
+    Error: Fn(RxError) + Send + Sync + 'static,
+    Complete: Fn() + Send + Sync + 'static;
+
+  fn map<Out, F>(&self, f: F) -> Observable<Out>
+  where
+    F: Fn(Item) -> Out + Send + Sync + 'static,
+    Out: Clone + Send + Sync + 'static;
+
+  fn flat_map<Out, F>(&self, f: F) -> Observable<Out>
+  where
+    F: Fn(Item) -> Observable<Out> + Send + Sync + 'static,
+    Out: Clone + Send + Sync + 'static;
+}
+
 #[derive(Clone)]
 pub struct Observable<Item>
 where
@@ -65,7 +91,29 @@ where
     }
   }
 
-  pub fn subscribe<Next, Error, Complete>(
+  pub(crate) fn inner_subscribe(
+    &self,
+    observer: Observer<Item>,
+    is_subscribed: Arc<RwLock<bool>>,
+  ) -> Subscription {
+    let observer = Arc::new(observer);
+    let unsub_observer = Arc::clone(&observer);
+    let unsub_is_subscribed = Arc::clone(&is_subscribed);
+    self.source.execute(observer, is_subscribed);
+    Subscription::new(move || {
+      unsub_observer.close();
+      if let Ok(mut is_subscribed) = unsub_is_subscribed.write() {
+        *is_subscribed = false;
+      }
+    })
+  }
+}
+
+impl<Item> IObservable<Item> for Observable<Item>
+where
+  Item: Clone + Send + Sync + 'static,
+{
+  fn subscribe<Next, Error, Complete>(
     &self,
     next: Next,
     error: Error,
@@ -82,24 +130,7 @@ where
     )
   }
 
-  pub(crate) fn inner_subscribe(
-    &self,
-    observer: Observer<Item>,
-    is_subscribed: Arc<RwLock<bool>>,
-  ) -> Subscription {
-    let observer = Arc::new(observer);
-    let unsub_observer = Arc::clone(&observer);
-    let unsub_is_subscribed = Arc::clone(&is_subscribed);
-    self.source.execute(observer, is_subscribed);
-    Subscription::new(move || {
-      unsub_observer.close();
-      if let Ok(mut state) = unsub_is_subscribed.write() {
-        *state = true;
-      }
-    })
-  }
-
-  pub fn map<Out, F>(&self, f: F) -> Observable<Out>
+  fn map<Out, F>(&self, f: F) -> Observable<Out>
   where
     F: Fn(Item) -> Out + Send + Sync + 'static,
     Out: Clone + Send + Sync + 'static,
@@ -107,7 +138,7 @@ where
     operators::MapOp::new(f).execute(self.clone())
   }
 
-  pub fn flat_map<Out, F>(&self, f: F) -> Observable<Out>
+  fn flat_map<Out, F>(&self, f: F) -> Observable<Out>
   where
     F: Fn(Item) -> Observable<Out> + Send + Sync + 'static,
     Out: Clone + Send + Sync + 'static,
@@ -118,7 +149,7 @@ where
 
 #[cfg(test)]
 mod test {
-  use super::Observable;
+  use super::{IObservable, Observable};
   use std::{sync::Arc, thread, time};
 
   #[test]
