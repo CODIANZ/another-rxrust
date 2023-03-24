@@ -8,6 +8,7 @@ where
   Observable::create(move |s, _| s.error(Arc::clone(&err)))
 }
 
+#[cfg(test)]
 mod test {
   use super::error;
   use anyhow::anyhow;

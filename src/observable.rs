@@ -106,8 +106,17 @@ where
   {
     operators::MapOp::new(f).execute(self.clone())
   }
+
+  pub fn flat_map<Out, F>(&self, f: F) -> Observable<Out>
+  where
+    F: Fn(Item) -> Observable<Out> + Send + Sync + 'static,
+    Out: Clone + Send + Sync + 'static,
+  {
+    operators::FlatMapOp::new(f).execute(self.clone())
+  }
 }
 
+#[cfg(test)]
 mod test {
   use super::Observable;
   use std::{sync::Arc, thread, time};

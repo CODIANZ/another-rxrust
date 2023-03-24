@@ -7,6 +7,7 @@ where
   Observable::<Item>::create(|s, _| s.complete())
 }
 
+#[cfg(test)]
 mod test {
   use super::empty;
 

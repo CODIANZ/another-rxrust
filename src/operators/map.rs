@@ -74,6 +74,7 @@ where
   }
 }
 
+#[cfg(test)]
 mod test {
   use crate::all::*;
   use std::{sync::Arc, thread, time};

@@ -54,6 +54,7 @@ impl<T> Observer<T> {
   }
 }
 
+#[cfg(test)]
 mod test {
   use super::Observer;
   use anyhow::anyhow;

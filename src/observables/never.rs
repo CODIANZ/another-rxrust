@@ -7,6 +7,7 @@ where
   Observable::<Item>::create(|_, _| {})
 }
 
+#[cfg(test)]
 mod test {
   use super::never;
 
