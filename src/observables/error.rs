@@ -1,4 +1,4 @@
-use crate::all::*;
+use crate::prelude::*;
 use std::sync::Arc;
 
 pub fn error<Item>(err: RxError) -> Observable<Item>

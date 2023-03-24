@@ -1,4 +1,4 @@
-use crate::all::*;
+use crate::prelude::*;
 
 pub fn just<Item>(x: Item) -> Observable<Item>
 where

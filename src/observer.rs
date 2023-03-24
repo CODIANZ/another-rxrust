@@ -1,4 +1,4 @@
-use crate::all::RxError;
+use crate::prelude::RxError;
 use std::sync::RwLock;
 
 type FnNext<T> = Box<dyn Fn(T) + Send + Sync>;

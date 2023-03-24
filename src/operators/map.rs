@@ -1,6 +1,6 @@
 use std::{marker::PhantomData, sync::Arc};
 
-use crate::all::*;
+use crate::prelude::*;
 
 struct WrapF<In, Out>
 where
@@ -79,7 +79,7 @@ where
 
 #[cfg(test)]
 mod test {
-  use crate::all::*;
+  use crate::prelude::*;
   use std::{
     sync::{Arc, RwLock},
     thread, time,

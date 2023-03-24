@@ -3,7 +3,7 @@ use std::{
   sync::{Arc, RwLock},
 };
 
-use crate::all::*;
+use crate::prelude::*;
 
 struct WrapF<In, Out>
 where
@@ -187,7 +187,7 @@ where
 
 #[cfg(test)]
 mod test {
-  use crate::all::*;
+  use crate::prelude::*;
   use std::{
     sync::{Arc, RwLock},
     thread, time,

@@ -1,6 +1,6 @@
 use std::sync::{Arc, RwLock};
 
-use crate::all::*;
+use crate::prelude::*;
 
 #[derive(Clone)]
 pub struct BehaviorSubject<Item>

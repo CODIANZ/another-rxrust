@@ -1,9 +1,9 @@
 use std::sync::{Arc, RwLock};
 
 use crate::{
-  all::RxError,
   observable::{Observable, Subscription},
   observer::Observer,
+  prelude::RxError,
 };
 
 struct WrapF<Item>
@@ -178,7 +178,7 @@ where
 
 #[cfg(test)]
 mod tset {
-  use crate::all::*;
+  use crate::prelude::*;
   use anyhow::anyhow;
   use std::sync::Arc;
 
