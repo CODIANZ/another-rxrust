@@ -70,11 +70,8 @@ where
 
 #[cfg(test)]
 mod tset {
-  use std::{thread, time};
-
-  use crate::observable::IObservable;
-
   use super::Subject;
+  use std::{thread, time};
 
   #[test]
   fn basic() {

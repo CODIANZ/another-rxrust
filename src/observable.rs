@@ -41,32 +41,6 @@ where
   }
 }
 
-pub trait IObservable<Item>
-where
-  Item: Clone + Send + Sync + 'static,
-{
-  fn subscribe<Next, Error, Complete>(
-    &self,
-    next: Next,
-    error: Error,
-    complete: Complete,
-  ) -> Subscription
-  where
-    Next: Fn(Item) + Send + Sync + 'static,
-    Error: Fn(RxError) + Send + Sync + 'static,
-    Complete: Fn() + Send + Sync + 'static;
-
-  fn map<Out, F>(&self, f: F) -> Observable<Out>
-  where
-    F: Fn(Item) -> Out + Send + Sync + 'static,
-    Out: Clone + Send + Sync + 'static;
-
-  fn flat_map<Out, F>(&self, f: F) -> Observable<Out>
-  where
-    F: Fn(Item) -> Observable<Out> + Send + Sync + 'static,
-    Out: Clone + Send + Sync + 'static;
-}
-
 #[derive(Clone)]
 pub struct Observable<Item>
 where
@@ -97,13 +71,8 @@ where
       subscription.unsubscribe();
     })
   }
-}
 
-impl<Item> IObservable<Item> for Observable<Item>
-where
-  Item: Clone + Send + Sync + 'static,
-{
-  fn subscribe<Next, Error, Complete>(
+  pub fn subscribe<Next, Error, Complete>(
     &self,
     next: Next,
     error: Error,
@@ -117,7 +86,7 @@ where
     self.inner_subscribe(Observer::new(next, error, complete))
   }
 
-  fn map<Out, F>(&self, f: F) -> Observable<Out>
+  pub fn map<Out, F>(&self, f: F) -> Observable<Out>
   where
     F: Fn(Item) -> Out + Send + Sync + 'static,
     Out: Clone + Send + Sync + 'static,
@@ -125,18 +94,25 @@ where
     operators::MapOp::new(f).execute(self.clone())
   }
 
-  fn flat_map<Out, F>(&self, f: F) -> Observable<Out>
+  pub fn flat_map<Out, F>(&self, f: F) -> Observable<Out>
   where
     F: Fn(Item) -> Observable<Out> + Send + Sync + 'static,
     Out: Clone + Send + Sync + 'static,
   {
     operators::FlatMapOp::new(f).execute(self.clone())
   }
+
+  pub fn on_error_resume_next<F>(&self, f: F) -> Observable<Item>
+  where
+    F: Fn(RxError) -> Observable<Item> + Send + Sync + 'static,
+  {
+    operators::OnErrorResumeNextOp::new(f).execute(self.clone())
+  }
 }
 
 #[cfg(test)]
 mod test {
-  use super::{IObservable, Observable, Subscription};
+  use super::{Observable, Subscription};
   use std::{
     sync::{Arc, RwLock},
     thread, time,

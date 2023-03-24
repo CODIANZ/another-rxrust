@@ -9,8 +9,6 @@ where
 
 #[cfg(test)]
 mod test {
-  use crate::observable::IObservable;
-
   use super::never;
 
   #[test]

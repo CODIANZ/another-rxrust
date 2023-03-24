@@ -77,7 +77,6 @@ where
 #[cfg(test)]
 mod tset {
   use super::BehaviorSubject;
-  use crate::observable::IObservable;
   use anyhow::anyhow;
   use std::{sync::Arc, thread, time};
 
