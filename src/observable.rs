@@ -93,8 +93,8 @@ where
     self.source.execute(observer, is_subscribed);
     Subscription::new(move || {
       unsub_observer.close();
-      if let Ok(mut state) = unsub_is_subscribed.write() {
-        *state = true;
+      if let Ok(mut is_subscribed) = unsub_is_subscribed.write() {
+        *is_subscribed = false;
       }
     })
   }
