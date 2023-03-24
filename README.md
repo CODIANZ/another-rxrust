@@ -1,7 +1,9 @@
+# another-rxrust
+
 Unlike `RxRust`, an implementation that maintains the flexibility of `Rx` at the expense of memory and speed efficiency.
 
 ```rust
-use another_rxrust::all::*;
+use another_rxrust::prelude::*;
 use anyhow::anyhow;
 use std::sync::Arc;
 
@@ -59,3 +61,24 @@ fn main() {
 // next str 40
 // error it's nine!!
 ```
+
+## Implementation status
+
+### observable
+
+- Observable
+- just
+- never
+- error
+- empty
+
+### operator
+
+- map
+- flat_map
+- on_error_resume_next
+
+### subject
+
+- Subject
+- BehaviorSubject

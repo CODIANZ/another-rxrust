@@ -1,4 +1,4 @@
-use crate::all::*;
+use crate::prelude::*;
 
 pub fn never<Item>() -> Observable<Item>
 where

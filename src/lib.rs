@@ -5,7 +5,7 @@ pub mod operators;
 pub mod subjects;
 pub mod types;
 
-pub mod all {
+pub mod prelude {
   pub use crate::observable::*;
   pub use crate::observables::*;
   pub use crate::observer::*;

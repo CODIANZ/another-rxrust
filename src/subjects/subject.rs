@@ -3,7 +3,7 @@ use std::{
   sync::{Arc, RwLock},
 };
 
-use crate::all::*;
+use crate::prelude::*;
 
 #[derive(Clone)]
 pub struct Subject<Item>
@@ -26,24 +26,21 @@ where
   }
 
   pub fn next(&self, item: Item) {
-    let observers = self.observers.read().unwrap();
-    for o in &*observers {
-      o.1.next(item.clone());
-    }
+    self.observers.read().unwrap().iter().for_each(|x| {
+      x.1.next(item.clone());
+    });
   }
   pub fn error(&self, err: RxError) {
-    let mut observers = self.observers.write().unwrap();
-    for o in &*observers {
-      o.1.error(Arc::clone(&err));
-    }
-    observers.clear();
+    self.observers.read().unwrap().iter().for_each(|x| {
+      x.1.error(Arc::clone(&err));
+    });
+    self.observers.write().unwrap().clear();
   }
   pub fn complete(&self) {
-    let mut observers = self.observers.write().unwrap();
-    for o in &*observers {
-      o.1.complete();
-    }
-    observers.clear();
+    self.observers.read().unwrap().iter().for_each(|x| {
+      x.1.complete();
+    });
+    self.observers.write().unwrap().clear();
   }
 
   pub fn observable(&self) -> Observable<Item> {
