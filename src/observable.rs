@@ -44,6 +44,32 @@ where
   }
 }
 
+pub trait IObservable<Item>
+where
+  Item: Clone + Send + Sync + 'static,
+{
+  fn subscribe<Next, Error, Complete>(
+    &self,
+    next: Next,
+    error: Error,
+    complete: Complete,
+  ) -> Subscription
+  where
+    Next: Fn(Item) + Send + Sync + 'static,
+    Error: Fn(RxError) + Send + Sync + 'static,
+    Complete: Fn() + Send + Sync + 'static;
+
+  fn map<Out, F>(&self, f: F) -> Observable<Out>
+  where
+    F: Fn(Item) -> Out + Send + Sync + 'static,
+    Out: Clone + Send + Sync + 'static;
+
+  fn flat_map<Out, F>(&self, f: F) -> Observable<Out>
+  where
+    F: Fn(Item) -> Observable<Out> + Send + Sync + 'static,
+    Out: Clone + Send + Sync + 'static;
+}
+
 #[derive(Clone)]
 pub struct Observable<Item>
 where
@@ -65,23 +91,6 @@ where
     }
   }
 
-  pub fn subscribe<Next, Error, Complete>(
-    &self,
-    next: Next,
-    error: Error,
-    complete: Complete,
-  ) -> Subscription
-  where
-    Next: Fn(Item) + Send + Sync + 'static,
-    Error: Fn(RxError) + Send + Sync + 'static,
-    Complete: Fn() + Send + Sync + 'static,
-  {
-    self.inner_subscribe(
-      Observer::new(next, error, complete),
-      Arc::new(RwLock::new(true)),
-    )
-  }
-
   pub(crate) fn inner_subscribe(
     &self,
     observer: Observer<Item>,
@@ -98,8 +107,30 @@ where
       }
     })
   }
+}
 
-  pub fn map<Out, F>(&self, f: F) -> Observable<Out>
+impl<Item> IObservable<Item> for Observable<Item>
+where
+  Item: Clone + Send + Sync + 'static,
+{
+  fn subscribe<Next, Error, Complete>(
+    &self,
+    next: Next,
+    error: Error,
+    complete: Complete,
+  ) -> Subscription
+  where
+    Next: Fn(Item) + Send + Sync + 'static,
+    Error: Fn(RxError) + Send + Sync + 'static,
+    Complete: Fn() + Send + Sync + 'static,
+  {
+    self.inner_subscribe(
+      Observer::new(next, error, complete),
+      Arc::new(RwLock::new(true)),
+    )
+  }
+
+  fn map<Out, F>(&self, f: F) -> Observable<Out>
   where
     F: Fn(Item) -> Out + Send + Sync + 'static,
     Out: Clone + Send + Sync + 'static,
@@ -107,7 +138,7 @@ where
     operators::MapOp::new(f).execute(self.clone())
   }
 
-  pub fn flat_map<Out, F>(&self, f: F) -> Observable<Out>
+  fn flat_map<Out, F>(&self, f: F) -> Observable<Out>
   where
     F: Fn(Item) -> Observable<Out> + Send + Sync + 'static,
     Out: Clone + Send + Sync + 'static,
@@ -118,7 +149,7 @@ where
 
 #[cfg(test)]
 mod test {
-  use super::Observable;
+  use super::{IObservable, Observable};
   use std::{sync::Arc, thread, time};
 
   #[test]
