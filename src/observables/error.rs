@@ -5,13 +5,14 @@ pub fn error<Item>(err: RxError) -> Observable<Item>
 where
   Item: Clone + Send + Sync + 'static,
 {
-  Observable::create(move |s, _| s.error(Arc::clone(&err)))
+  Observable::<Item>::create(move |s| {
+    s.error(Arc::clone(&err));
+    Subscription::new(|| {})
+  })
 }
 
 #[cfg(test)]
 mod test {
-  use crate::observable::IObservable;
-
   use super::error;
   use anyhow::anyhow;
   use std::sync::Arc;

@@ -4,13 +4,11 @@ pub fn never<Item>() -> Observable<Item>
 where
   Item: Clone + Send + Sync + 'static,
 {
-  Observable::<Item>::create(|_, _| {})
+  Observable::<Item>::create(|_| Subscription::new(|| {}))
 }
 
 #[cfg(test)]
 mod test {
-  use crate::observable::IObservable;
-
   use super::never;
 
   #[test]

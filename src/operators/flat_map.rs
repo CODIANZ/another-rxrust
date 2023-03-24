@@ -59,7 +59,7 @@ where
     let _f = Arc::clone(&self.wrap_f);
     let _source = Arc::new(soruce);
 
-    Observable::<Out>::create(move |s, is_subscribed| {
+    Observable::<Out>::create(move |s| {
       struct Work<Out> {
         counter_: Arc<RwLock<i32>>,
         source_completed_: Arc<RwLock<bool>>,
@@ -108,7 +108,7 @@ where
       let work = Arc::new(Work {
         counter_: Arc::new(RwLock::new(0)),
         source_completed_: Arc::new(RwLock::new(false)),
-        subscribed_: Arc::clone(&is_subscribed),
+        subscribed_: Arc::new(RwLock::new(true)),
         subscriber_: Arc::clone(&s),
       });
 
@@ -118,7 +118,7 @@ where
 
       let _f_next = Arc::clone(&_f);
 
-      _source.subscribe(
+      let source_sbsc = _source.subscribe(
         move |x| {
           if !work_next.subscribed_get_bool() {
             work_next.subscriber_close();
@@ -163,6 +163,12 @@ where
           }
         },
       );
+      let source_sbsc = Arc::new(source_sbsc);
+      let subscribed = Arc::clone(&work.subscribed_);
+      Subscription::new(move || {
+        *subscribed.write().unwrap() = false;
+        source_sbsc.unsubscribe();
+      })
     })
   }
 }
@@ -170,15 +176,19 @@ where
 #[cfg(test)]
 mod test {
   use crate::all::*;
-  use std::{sync::Arc, thread, time};
+  use std::{
+    sync::{Arc, RwLock},
+    thread, time,
+  };
 
   #[test]
   fn basic() {
-    let o = Observable::<i32>::create(|s, _is_subscribed| {
+    let o = Observable::<i32>::create(|s| {
       for n in 0..10 {
         s.next(n);
       }
       s.complete();
+      Subscription::new(|| {})
     });
 
     o.flat_map(|x| observables::just(x * 2)).subscribe(
@@ -190,15 +200,28 @@ mod test {
 
   #[test]
   fn thread() {
-    let o = Observable::<i32>::create(|s, _is_subscribed| {
-      let s = Arc::new(s);
-      thread::spawn(move || {
-        for n in 0..10 {
-          thread::sleep(time::Duration::from_millis(100));
-          s.next(n);
-        }
-        s.complete();
-      });
+    let o = Observable::<i32>::create(|s| {
+      let is_subscribed = Arc::new(RwLock::new(true));
+      {
+        let is_subscribed = Arc::clone(&is_subscribed);
+        let s = Arc::new(s);
+        thread::spawn(move || {
+          for n in 0..100 {
+            if !*is_subscribed.read().unwrap() {
+              println!("break!");
+              break;
+            }
+            s.next(n);
+            thread::sleep(time::Duration::from_millis(100));
+          }
+          if *is_subscribed.read().unwrap() {
+            s.complete();
+          }
+        });
+      }
+      Subscription::new(move || {
+        *is_subscribed.write().unwrap() = false;
+      })
     });
 
     let sbsc = o
@@ -215,15 +238,28 @@ mod test {
   #[test]
   fn composite() {
     fn o() -> Observable<i32> {
-      Observable::<i32>::create(|s, _is_subscribed| {
-        let s = Arc::new(s);
-        thread::spawn(move || {
-          for n in 0..2 {
-            thread::sleep(time::Duration::from_millis(100));
-            s.next(n);
-          }
-          s.complete();
-        });
+      Observable::<i32>::create(|s| {
+        let is_subscribed = Arc::new(RwLock::new(true));
+        {
+          let is_subscribed = Arc::clone(&is_subscribed);
+          let s = Arc::new(s);
+          thread::spawn(move || {
+            for n in 0..100 {
+              if !*is_subscribed.read().unwrap() {
+                println!("break!");
+                break;
+              }
+              s.next(n);
+              thread::sleep(time::Duration::from_millis(100));
+            }
+            if *is_subscribed.read().unwrap() {
+              s.complete();
+            }
+          });
+        }
+        Subscription::new(move || {
+          *is_subscribed.write().unwrap() = false;
+        })
       })
     }
 
