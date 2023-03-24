@@ -1,167 +1,188 @@
-use std::{cell::RefCell, rc::Rc};
+use crate::{
+  all::{operators, RxError},
+  observer::Observer,
+};
+use std::sync::{Arc, RwLock};
 
-use crate::all::*;
+pub struct Subscription {
+  fn_unsubscribe: Box<dyn Fn()>,
+}
+
+impl Subscription {
+  pub fn new<Unsub>(unsub: Unsub) -> Subscription
+  where
+    Unsub: Fn() + Send + Sync + 'static,
+  {
+    Subscription {
+      fn_unsubscribe: Box::new(unsub),
+    }
+  }
+  pub fn unsubscribe(&self) {
+    (self.fn_unsubscribe)();
+  }
+}
+
+pub struct Emitter<Item>
+where
+  Item: Clone + Send + Sync + 'static,
+{
+  func: Box<dyn Fn(Arc<Observer<Item>>, Arc<RwLock<bool>>) + Send + Sync + 'static>,
+}
+
+impl<Item> Emitter<Item>
+where
+  Item: Clone + Send + Sync + 'static,
+{
+  pub fn new<F>(f: F) -> Emitter<Item>
+  where
+    F: Fn(Arc<Observer<Item>>, Arc<RwLock<bool>>) + Send + Sync + 'static,
+  {
+    Emitter { func: Box::new(f) }
+  }
+  pub fn execute(&self, observer: Arc<Observer<Item>>, is_subscribed: Arc<RwLock<bool>>) {
+    (self.func)(observer, is_subscribed);
+  }
+}
 
 #[derive(Clone)]
 pub struct Observable<Item>
 where
-  Item: Clone + 'static,
+  Item: Clone + Send + Sync + 'static,
 {
-  pub(crate) executor: RxFn<dyn Fn(Subscriber<Item>, Rc<RefCell<bool>>)>,
+  source: Arc<Emitter<Item>>,
 }
 
 impl<Item> Observable<Item>
 where
-  Item: Clone + 'static,
+  Item: Clone + Send + Sync + 'static,
 {
-  pub fn create(f: RxFn<dyn Fn(Subscriber<Item>, Rc<RefCell<bool>>)>) -> Observable<Item> {
-    Observable { executor: f }
-  }
-
-  pub fn subscribe(
-    &self,
-    next: RxFn<dyn FnMut(Item)>,
-    error: RxFn<dyn FnMut(RxError)>,
-    complete: RxFn<dyn FnMut()>,
-  ) -> Subscription {
-    let subscribed = Rc::new(RefCell::new(true));
-    self.inner_subscribe(next, error, complete, subscribed)
-  }
-
-  fn inner_subscribe(
-    &self,
-    next: RxFn<dyn FnMut(Item)>,
-    error: RxFn<dyn FnMut(RxError)>,
-    complete: RxFn<dyn FnMut()>,
-    subscribed: Rc<RefCell<bool>>,
-  ) -> Subscription {
-    let mut subscriber = Subscriber {
-      observer: Some(Observer {
-        next,
-        error,
-        complete,
-      }),
-    };
-    if let Ok(executor) = self.executor.try_borrow() {
-      let subscriber = subscriber.clone();
-      let subscribed = subscribed.clone();
-      executor(subscriber, subscribed);
-    }
-    Subscription {
-      fn_unsubscribe: rxfn(move || {
-        *(subscribed.borrow_mut()) = false;
-        subscriber.discard()
-      }),
-    }
-  }
-
-  pub fn map<Out>(self, f: RxFn<dyn FnMut(Item) -> Out>) -> Observable<Out>
+  pub fn create<Source>(source: Source) -> Observable<Item>
   where
-    Out: Clone + 'static,
+    Source: Fn(Arc<Observer<Item>>, Arc<RwLock<bool>>) + Send + Sync + 'static,
   {
-    let _f = f.clone();
-    let mut _self = self.clone();
-    Observable::<Out> {
-      executor: rxfn(move |s, subscribed| {
-        let _f_next = _f.clone();
-        let mut _s_next = s.clone();
-        let mut _s_error = s.clone();
-        let mut _s_complete = s.clone();
-        let inner_subscribed = Rc::new(RefCell::new(true));
-        let _inner_subscribed = Rc::clone(&inner_subscribed);
-        _self.inner_subscribe(
-          rxfn(move |x| {
-            if *(subscribed.borrow()) {
-              _s_next.next((&mut *_f_next.borrow_mut())(x));
-            } else {
-              *(inner_subscribed.borrow_mut()) = false;
-              _s_next.discard();
-            }
-          }),
-          rxfn(move |e| _s_error.error(e)),
-          rxfn(move || _s_complete.complete()),
-          _inner_subscribed,
-        );
-      }),
+    Observable {
+      source: Arc::new(Emitter::new(source)),
     }
   }
 
-  pub fn flat_map<Out>(self, f: RxFn<dyn FnMut(Item) -> Observable<Out>>) -> Observable<Out>
+  pub fn subscribe<Next, Error, Complete>(
+    &self,
+    next: Next,
+    error: Error,
+    complete: Complete,
+  ) -> Subscription
   where
-    Out: Clone + 'static,
+    Next: Fn(Item) + Send + Sync + 'static,
+    Error: Fn(RxError) + Send + Sync + 'static,
+    Complete: Fn() + Send + Sync + 'static,
   {
-    let _f = f.clone();
-    let mut _self = self.clone();
+    self.inner_subscribe(
+      Observer::new(next, error, complete),
+      Arc::new(RwLock::new(true)),
+    )
+  }
 
-    Observable::<Out> {
-      executor: rxfn(move |s, subscribed| {
-        let counter = Rc::new(RefCell::new(0));
-        let source_completed = Rc::new(RefCell::new(false));
+  pub(crate) fn inner_subscribe(
+    &self,
+    observer: Observer<Item>,
+    is_subscribed: Arc<RwLock<bool>>,
+  ) -> Subscription {
+    let observer = Arc::new(observer);
+    let unsub_observer = Arc::clone(&observer);
+    let unsub_is_subscribed = Arc::clone(&is_subscribed);
+    self.source.execute(observer, is_subscribed);
+    Subscription::new(move || {
+      unsub_observer.close();
+      if let Ok(mut state) = unsub_is_subscribed.write() {
+        *state = true;
+      }
+    })
+  }
 
-        let _counter_is_complete = Rc::clone(&counter);
-        let _source_completed_is_complete = Rc::clone(&source_completed);
-        let is_complete = Rc::new(RefCell::new(move || {
-          *(_counter_is_complete.borrow()) == 0 && *(_source_completed_is_complete.borrow())
-        }));
+  pub fn map<Out, F>(&self, f: F) -> Observable<Out>
+  where
+    F: Fn(Item) -> Out + Send + Sync + 'static,
+    Out: Clone + Send + Sync + 'static,
+  {
+    operators::MapOp::new(f).execute(self.clone())
+  }
 
-        let _counter_next = Rc::clone(&counter);
-        let _is_complete_next = Rc::clone(&is_complete);
+  pub fn flat_map<Out, F>(&self, f: F) -> Observable<Out>
+  where
+    F: Fn(Item) -> Observable<Out> + Send + Sync + 'static,
+    Out: Clone + Send + Sync + 'static,
+  {
+    operators::FlatMapOp::new(f).execute(self.clone())
+  }
+}
 
-        let _source_completed_complete = Rc::clone(&source_completed);
-        let _is_complete_complete = Rc::clone(&is_complete);
+#[cfg(test)]
+mod test {
+  use super::Observable;
+  use std::{sync::Arc, thread, time};
 
-        let _f_next = _f.clone();
-        let mut _s_next = s.clone();
-        let mut _s_error = s.clone();
-        let mut _s_complete = s.clone();
+  #[test]
+  fn basic() {
+    let o = Observable::<i32>::create(|s, _is_subscribed| {
+      for n in 0..10 {
+        s.next(n);
+      }
+      s.complete();
+    });
 
-        let inner_subscribed = Rc::new(RefCell::new(true));
-        let _inner_subscribed = Rc::clone(&inner_subscribed);
+    o.subscribe(
+      |x| println!("next {}", x),
+      |e| println!("error {:}", e),
+      || println!("complete"),
+    );
 
-        _self.inner_subscribe(
-          rxfn(move |x| {
-            *(_counter_next.borrow_mut()) += 1;
-            let _counter_next_complete = Rc::clone(&_counter_next);
-            let _is_complete_next_complete = Rc::clone(&_is_complete_next);
-            let mut _s_next_next = _s_next.clone();
-            let mut _s_next_error = _s_next.clone();
-            let mut _s_next_complete = _s_next.clone();
-            let _subscribed_next = Rc::clone(&subscribed);
+    o.subscribe(
+      |x| println!("next {}", x),
+      |e| println!("error {:}", e),
+      || println!("complete"),
+    );
+  }
 
-            let _inner_subscribed = Rc::clone(&_inner_subscribed);
-            let _inner_innter_subscribed = Rc::clone(&_inner_subscribed);
+  #[test]
+  fn thread() {
+    let o = Observable::<i32>::create(|s, _is_subscribed| {
+      let s = Arc::new(s);
+      thread::spawn(move || {
+        for n in 0..100 {
+          s.next(n);
+        }
+        s.complete();
+      });
+    });
 
-            ((&mut *_f_next.borrow_mut())(x)).inner_subscribe(
-              rxfn(move |x| {
-                if *(_subscribed_next.borrow()) {
-                  _s_next_next.next(x);
-                } else {
-                  *(_inner_subscribed.borrow_mut()) = false;
-                  _s_next_next.discard();
-                }
-              }),
-              rxfn(move |e| _s_next_error.error(e)),
-              rxfn(move || {
-                *(_counter_next_complete.borrow_mut()) -= 1;
-                let is_complete = &*(_is_complete_next_complete.borrow());
-                if is_complete() {
-                  _s_next_complete.complete();
-                }
-              }),
-              _inner_innter_subscribed,
-            );
-          }),
-          rxfn(move |e| _s_error.error(e)),
-          rxfn(move || {
-            *(_source_completed_complete.borrow_mut()) = true;
-            let is_complete = &*(_is_complete_complete.borrow());
-            if is_complete() {
-              _s_complete.complete()
-            }
-          }),
-          inner_subscribed,
-        );
-      }),
-    }
+    o.subscribe(
+      |x| println!("next {}", x),
+      |e| println!("error {:}", e),
+      || println!("complete"),
+    );
+    println!("started");
+  }
+
+  #[test]
+  fn unsubscribe() {
+    let o = Observable::<i32>::create(|s, _is_subscribed| {
+      let s = Arc::new(s);
+      thread::spawn(move || {
+        for n in 0..100 {
+          thread::sleep(time::Duration::from_millis(100));
+          s.next(n);
+        }
+        s.complete();
+      });
+    });
+
+    let sbsc = o.subscribe(
+      |x| println!("next {}", x),
+      |e| println!("error {:}", e),
+      || println!("complete"),
+    );
+    println!("started");
+    thread::sleep(time::Duration::from_millis(1000));
+    sbsc.unsubscribe();
   }
 }

@@ -1,4 +1,3 @@
-use std::{cell::RefCell, rc::Rc};
+use std::sync::Arc;
 
-pub type RxError = Rc<anyhow::Error>;
-pub type RxFn<T> = Rc<RefCell<T>>;
+pub type RxError = Arc<anyhow::Error>;

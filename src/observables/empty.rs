@@ -2,9 +2,21 @@ use crate::all::*;
 
 pub fn empty<Item>() -> Observable<Item>
 where
-  Item: Clone + 'static,
+  Item: Clone + Send + Sync + 'static,
 {
-  Observable::<Item> {
-    executor: rxfn(|mut s, _| s.complete()),
+  Observable::<Item>::create(|s, _| s.complete())
+}
+
+#[cfg(test)]
+mod test {
+  use super::empty;
+
+  #[test]
+  fn basic() {
+    empty::<String>().subscribe(
+      |x| println!("next {}", x),
+      |e| println!("{:}", e),
+      || println!("complete"),
+    );
   }
 }
