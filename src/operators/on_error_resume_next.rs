@@ -1,39 +1,15 @@
-use std::sync::Arc;
-
 use crate::{
-  internals::stream_controller::StreamController,
+  internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController},
   observable::{Observable, Subscription},
   prelude::RxError,
 };
-
-struct WrapF<Item>
-where
-  Item: Clone + Send + Sync + 'static,
-{
-  func: Box<dyn Fn(RxError) -> Observable<Item> + Send + Sync + 'static>,
-}
-impl<Item> WrapF<Item>
-where
-  Item: Clone + Send + Sync + 'static,
-{
-  fn new<F>(func: F) -> WrapF<Item>
-  where
-    F: Fn(RxError) -> Observable<Item> + Send + Sync + 'static,
-  {
-    WrapF {
-      func: Box::new(func),
-    }
-  }
-  fn call(&self, indata: RxError) -> Observable<Item> {
-    (self.func)(indata)
-  }
-}
+use std::sync::Arc;
 
 pub struct OnErrorResumeNextOp<Item>
 where
   Item: Clone + Send + Sync + 'static,
 {
-  wrap_f: Arc<WrapF<Item>>,
+  wrap_f: FunctionWrapper<RxError, Observable<Item>>,
 }
 
 impl<Item> OnErrorResumeNextOp<Item>
@@ -45,11 +21,11 @@ where
     F: Fn(RxError) -> Observable<Item> + Send + Sync + 'static,
   {
     OnErrorResumeNextOp {
-      wrap_f: Arc::new(WrapF::new(f)),
+      wrap_f: FunctionWrapper::new(f),
     }
   }
   pub fn execute(&self, soruce: Observable<Item>) -> Observable<Item> {
-    let _f = Arc::clone(&self.wrap_f);
+    let _f = self.wrap_f.clone();
     let _source = Arc::new(soruce);
 
     Observable::<Item>::create(move |s| {
@@ -60,7 +36,7 @@ where
 
       let serial = sctl.upstream_prepare_sereal();
 
-      let _f_error = Arc::clone(&_f);
+      let _f_error = _f.clone();
 
       sctl.upstream_subscribe(
         &serial,

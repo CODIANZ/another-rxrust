@@ -1,40 +1,16 @@
 use std::{marker::PhantomData, sync::Arc};
 
-use crate::{internals::stream_controller::StreamController, prelude::*};
-
-struct WrapF<In, Out>
-where
-  In: Clone + Send + Sync + 'static,
-  Out: Clone + Send + Sync + 'static,
-{
-  func: Box<dyn Fn(In) -> Observable<Out> + Send + Sync + 'static>,
-}
-impl<In, Out> WrapF<In, Out>
-where
-  In: Clone + Send + Sync + 'static,
-  Out: Clone + Send + Sync + 'static,
-{
-  fn new<F>(func: F) -> WrapF<In, Out>
-  where
-    F: Fn(In) -> Observable<Out> + Send + Sync + 'static,
-    In: Clone + Send + Sync + 'static,
-    Out: Clone + Send + Sync + 'static,
-  {
-    WrapF {
-      func: Box::new(func),
-    }
-  }
-  fn call(&self, indata: In) -> Observable<Out> {
-    (self.func)(indata)
-  }
-}
+use crate::{
+  internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController},
+  prelude::*,
+};
 
 pub struct FlatMapOp<In, Out>
 where
   In: Clone + Send + Sync + 'static,
   Out: Clone + Send + Sync + 'static,
 {
-  wrap_f: Arc<WrapF<In, Out>>,
+  wrap_f: FunctionWrapper<In, Observable<Out>>,
   _in: PhantomData<In>,
 }
 
@@ -48,12 +24,12 @@ where
     F: Fn(In) -> Observable<Out> + Send + Sync + 'static,
   {
     FlatMapOp {
-      wrap_f: Arc::new(WrapF::new(f)),
+      wrap_f: FunctionWrapper::new(f),
       _in: PhantomData,
     }
   }
   pub fn execute(&self, soruce: Observable<In>) -> Observable<Out> {
-    let _f = Arc::clone(&self.wrap_f);
+    let _f = self.wrap_f.clone();
     let _source = Arc::new(soruce);
 
     Observable::<Out>::create(move |s| {
@@ -64,7 +40,7 @@ where
 
       let serial = sctl.upstream_prepare_sereal();
 
-      let _f_next = Arc::clone(&_f);
+      let _f_next = _f.clone();
 
       sctl.upstream_subscribe(
         &serial,
