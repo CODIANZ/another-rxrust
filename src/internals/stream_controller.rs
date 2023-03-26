@@ -26,7 +26,7 @@ where
     }
   }
 
-  pub fn upstream_prepare_sereal(&self) -> i32 {
+  pub fn upstream_prepare_serial(&self) -> i32 {
     let ret = {
       let mut x = self.serial.write().unwrap();
       let ret = *x;

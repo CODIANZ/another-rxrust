@@ -34,7 +34,7 @@ where
       let sctl_error = sctl.clone();
       let sctl_complete = sctl.clone();
 
-      let serial = sctl.upstream_prepare_sereal();
+      let serial = sctl.upstream_prepare_serial();
 
       let _f_next = _f.clone();
 
@@ -46,7 +46,7 @@ where
             let sctl_next_error = sctl_next.clone();
             let sctl_next_complete = sctl_next.clone();
 
-            let serial_next = sctl_next.upstream_prepare_sereal();
+            let serial_next = sctl_next.upstream_prepare_serial();
 
             sctl_next.upstream_subscribe(
               &serial_next,

@@ -1,6 +1,7 @@
 use super::schedulers::{AsyncScheduler, IScheduler};
 use std::thread;
 
+#[derive(Clone)]
 pub struct NewThreadScheduler {
   scheduler: AsyncScheduler,
 }
@@ -31,6 +32,10 @@ impl IScheduler for NewThreadScheduler {
   {
     self.scheduler.post(f);
   }
+}
+
+pub fn new_thread() -> NewThreadScheduler {
+  NewThreadScheduler::new()
 }
 
 #[cfg(test)]

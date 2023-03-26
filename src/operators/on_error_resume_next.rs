@@ -34,7 +34,7 @@ where
       let sctl_error = Arc::clone(&sctl);
       let sctl_complete = Arc::clone(&sctl);
 
-      let serial = sctl.upstream_prepare_sereal();
+      let serial = sctl.upstream_prepare_serial();
 
       let _f_error = _f.clone();
 
@@ -49,7 +49,7 @@ where
             let sctl_error_error = Arc::clone(&sctl_error);
             let sctl_error_complete = Arc::clone(&sctl_error);
 
-            let serial_error = sctl_error.upstream_prepare_sereal();
+            let serial_error = sctl_error.upstream_prepare_serial();
 
             sctl_error.upstream_subscribe(
               &serial_error,

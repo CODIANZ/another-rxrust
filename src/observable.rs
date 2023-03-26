@@ -1,3 +1,5 @@
+use scheduler::IScheduler;
+
 use crate::{internals::function_wrapper::FunctionWrapper, prelude::*};
 
 #[derive(Clone)]
@@ -84,6 +86,13 @@ where
     F: Fn(RxError) -> Observable<Item> + Send + Sync + 'static,
   {
     operators::OnErrorResumeNextOp::new(f).execute(self.clone())
+  }
+
+  pub fn observe_on<S>(&self, s: S) -> Observable<Item>
+  where
+    S: IScheduler + Clone + Send + Sync + 'static,
+  {
+    operators::ObserveOnOp::new(s).execute(self.clone())
   }
 }
 
