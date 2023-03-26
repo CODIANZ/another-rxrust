@@ -19,7 +19,7 @@ mod test {
   fn basic() {
     just("abc".to_owned()).subscribe(
       |x| println!("next {}", x),
-      |e| println!("{:}", e),
+      |e| println!("{:}", e.error),
       || println!("complete"),
     );
   }

@@ -24,23 +24,22 @@ where
       wrap_f: FunctionWrapper::new(f),
     }
   }
-  pub fn execute(&self, soruce: Observable<Item>) -> Observable<Item> {
-    let _f = self.wrap_f.clone();
-    let _source = Arc::new(soruce);
+  pub fn execute(&self, source: Observable<Item>) -> Observable<Item> {
+    let f = self.wrap_f.clone();
 
     Observable::<Item>::create(move |s| {
+      let f = f.clone();
+
       let sctl = Arc::new(StreamController::new(s));
       let sctl_next = Arc::clone(&sctl);
       let sctl_error = Arc::clone(&sctl);
       let sctl_complete = Arc::clone(&sctl);
 
-      let serial = sctl.upstream_prepare_sereal();
-
-      let _f_error = _f.clone();
+      let serial = sctl.upstream_prepare_serial();
 
       sctl.upstream_subscribe(
         &serial,
-        _source.subscribe(
+        source.subscribe(
           move |x| {
             sctl_next.sink_next(x);
           },
@@ -49,11 +48,11 @@ where
             let sctl_error_error = Arc::clone(&sctl_error);
             let sctl_error_complete = Arc::clone(&sctl_error);
 
-            let serial_error = sctl_error.upstream_prepare_sereal();
+            let serial_error = sctl_error.upstream_prepare_serial();
 
             sctl_error.upstream_subscribe(
               &serial_error,
-              _f_error.call(e).subscribe(
+              f.call(e).subscribe(
                 move |xx| {
                   sctl_error_next.sink_next(xx);
                 },
@@ -83,20 +82,19 @@ where
 mod tset {
   use crate::prelude::*;
   use anyhow::anyhow;
-  use std::sync::Arc;
 
   #[test]
   fn basic() {
     let o = Observable::<i32>::create(|s| {
       s.next(1);
-      s.error(Arc::new(anyhow!("err")));
+      s.error(RxError::new(anyhow!("err")));
       Subscription::new(|| {})
     });
 
     o.on_error_resume_next(|_err| observables::just(100))
       .subscribe(
         |x| println!("next {}", x),
-        |e| println!("error {:}", e),
+        |e| println!("error {:}", e.error),
         || println!("complete"),
       );
   }

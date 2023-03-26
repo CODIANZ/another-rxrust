@@ -4,12 +4,13 @@ use std::{
   sync::{Arc, RwLock},
 };
 
+#[derive(Clone)]
 pub struct StreamController<Item>
 where
   Item: Clone + Send + Sync + 'static,
 {
   serial: Arc<RwLock<i32>>,
-  subscriber: Arc<Observer<Item>>,
+  subscriber: Observer<Item>,
   subscriptions: Arc<RwLock<HashMap<i32, Option<Subscription>>>>,
 }
 
@@ -17,15 +18,15 @@ impl<Item> StreamController<Item>
 where
   Item: Clone + Send + Sync + 'static,
 {
-  pub fn new(subscriber: Arc<Observer<Item>>) -> StreamController<Item> {
+  pub fn new(subscriber: Observer<Item>) -> StreamController<Item> {
     StreamController {
       serial: Arc::new(RwLock::new(0)),
-      subscriber: Arc::clone(&subscriber),
+      subscriber: subscriber,
       subscriptions: Arc::new(RwLock::new(HashMap::new())),
     }
   }
 
-  pub fn upstream_prepare_sereal(&self) -> i32 {
+  pub fn upstream_prepare_serial(&self) -> i32 {
     let ret = {
       let mut x = self.serial.write().unwrap();
       let ret = *x;

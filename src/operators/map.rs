@@ -1,5 +1,4 @@
 use crate::{internals::function_wrapper::FunctionWrapper, prelude::*};
-use std::{marker::PhantomData, sync::Arc};
 
 pub struct MapOp<In, Out>
 where
@@ -7,7 +6,6 @@ where
   Out: Clone + Send + Sync + 'static,
 {
   wrap_f: FunctionWrapper<In, Out>,
-  _in: PhantomData<In>,
 }
 
 impl<In, Out> MapOp<In, Out>
@@ -21,21 +19,20 @@ where
   {
     MapOp {
       wrap_f: FunctionWrapper::new(f),
-      _in: PhantomData,
     }
   }
-  pub fn execute(&self, soruce: Observable<In>) -> Observable<Out> {
-    let _f = self.wrap_f.clone();
-    let _source = Arc::new(soruce);
+  pub fn execute(&self, source: Observable<In>) -> Observable<Out> {
+    let f = self.wrap_f.clone();
 
     Observable::<Out>::create(move |s| {
-      let s_next = Arc::clone(&s);
-      let s_error = Arc::clone(&s);
-      let s_complete = Arc::clone(&s);
-      let _f_next = _f.clone();
-      let sbsc = _source.subscribe(
+      let f = f.clone();
+
+      let s_next = s.clone();
+      let s_error = s.clone();
+      let s_complete = s.clone();
+      let sbsc = source.subscribe(
         move |x| {
-          s_next.next(_f_next.call(x));
+          s_next.next(f.call(x));
         },
         move |e| {
           s_error.error(e);
@@ -69,7 +66,7 @@ mod test {
 
     o.map(|x| x * 2).subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e),
+      |e| println!("error {:}", e.error),
       || println!("complete"),
     );
   }
@@ -102,7 +99,7 @@ mod test {
 
     let sbsc = o.map(|x| format!("str {}", x)).subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e),
+      |e| println!("error {:}", e.error),
       || println!("complete"),
     );
     thread::sleep(time::Duration::from_millis(500));

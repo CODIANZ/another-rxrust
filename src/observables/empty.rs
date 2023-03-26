@@ -18,7 +18,7 @@ mod test {
   fn basic() {
     empty::<String>().subscribe(
       |x| println!("next {}", x),
-      |e| println!("{:}", e),
+      |e| println!("{:}", e.error),
       || println!("complete"),
     );
   }

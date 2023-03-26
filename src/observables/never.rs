@@ -15,7 +15,7 @@ mod test {
   fn basic() {
     never::<String>().subscribe(
       |x| println!("next {}", x),
-      |e| println!("{:}", e),
+      |e| println!("{:}", e.error),
       || println!("complete"),
     );
   }

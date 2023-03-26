@@ -29,7 +29,7 @@ where
     self.subject.next(item);
   }
   pub fn error(&self, err: RxError) {
-    *self.last_error.write().unwrap() = Some(Arc::clone(&err));
+    *self.last_error.write().unwrap() = Some(err.clone());
     self.subject.error(err);
   }
   pub fn complete(&self) {
@@ -47,7 +47,7 @@ where
         let last_error = &*last_error.read().unwrap();
 
         if let Some(err) = last_error {
-          s.error(Arc::clone(&err));
+          s.error(err.clone());
           return Subscription::new(|| {});
         }
         if let Some(item) = last_item {
@@ -57,9 +57,9 @@ where
           return Subscription::new(|| {});
         }
       }
-      let s_next = Arc::clone(&s);
-      let s_error = Arc::clone(&s);
-      let s_complete = Arc::clone(&s);
+      let s_next = s.clone();
+      let s_error = s.clone();
+      let s_complete = s.clone();
       let sbsc = subject.observable().subscribe(
         move |x| s_next.next(x),
         move |e| s_error.error(e),
@@ -76,9 +76,11 @@ where
 
 #[cfg(test)]
 mod tset {
+  use crate::prelude::RxError;
+
   use super::BehaviorSubject;
   use anyhow::anyhow;
-  use std::{sync::Arc, thread, time};
+  use std::{thread, time};
 
   #[test]
   fn basic() {
@@ -86,7 +88,7 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", e),
+      |e| println!("#1 error {:}", e.error),
       || println!("#1 complete"),
     );
 
@@ -97,7 +99,7 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:}", e),
+      |e| println!("#2 error {:}", e.error),
       || println!("#2 complete"),
     );
   }
@@ -108,7 +110,7 @@ mod tset {
 
     let sbsc1 = sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", e),
+      |e| println!("#1 error {:}", e.error),
       || println!("#1 complete"),
     );
 
@@ -118,7 +120,7 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:}", e),
+      |e| println!("#2 error {:}", e.error),
       || println!("#2 complete"),
     );
 
@@ -132,11 +134,11 @@ mod tset {
     sbj.next(8);
     sbj.next(9);
 
-    sbj.error(Arc::new(anyhow!("err")));
+    sbj.error(RxError::new(anyhow!("err")));
 
     sbj.observable().subscribe(
       |x| println!("#3 next {}", x),
-      |e| println!("#3 error {:}", e),
+      |e| println!("#3 error {:}", e.error),
       || println!("#3 complete"),
     );
   }
@@ -156,7 +158,7 @@ mod tset {
 
     let sbsc1 = sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", e),
+      |e| println!("#1 error {:}", e.error),
       || println!("#1 complete"),
     );
 
@@ -164,7 +166,7 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:}", e),
+      |e| println!("#2 error {:}", e.error),
       || println!("#2 complete"),
     );
 
