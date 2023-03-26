@@ -24,9 +24,9 @@ where
       wrap_f: FunctionWrapper::new(f),
     }
   }
-  pub fn execute(&self, soruce: Observable<Item>) -> Observable<Item> {
+  pub fn execute(&self, source: Observable<Item>) -> Observable<Item> {
     let _f = self.wrap_f.clone();
-    let _source = Arc::new(soruce);
+    let _source = Arc::new(source);
 
     Observable::<Item>::create(move |s| {
       let sctl = Arc::new(StreamController::new(s));

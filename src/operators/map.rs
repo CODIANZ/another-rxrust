@@ -21,9 +21,9 @@ where
       wrap_f: FunctionWrapper::new(f),
     }
   }
-  pub fn execute(&self, soruce: Observable<In>) -> Observable<Out> {
+  pub fn execute(&self, source: Observable<In>) -> Observable<Out> {
     let _f = self.wrap_f.clone();
-    let _source = soruce.clone();
+    let _source = source.clone();
 
     Observable::<Out>::create(move |s| {
       let s_next = s.clone();
