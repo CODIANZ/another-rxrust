@@ -1,8 +1,8 @@
-use crate::prelude::*;
-use std::sync::Arc;
+use crate::{internals::function_wrapper::FunctionWrapper, prelude::*};
 
+#[derive(Clone)]
 pub struct Subscription {
-  fn_unsubscribe: Box<dyn Fn() + Send + Sync + 'static>,
+  fn_unsubscribe: FunctionWrapper<(), ()>,
 }
 
 impl Subscription {
@@ -11,33 +11,11 @@ impl Subscription {
     Unsub: Fn() + Send + Sync + 'static,
   {
     Subscription {
-      fn_unsubscribe: Box::new(unsub),
+      fn_unsubscribe: FunctionWrapper::new(move |_| unsub()),
     }
   }
   pub fn unsubscribe(&self) {
-    (self.fn_unsubscribe)();
-  }
-}
-
-pub struct Emitter<Item>
-where
-  Item: Clone + Send + Sync + 'static,
-{
-  func: Box<dyn Fn(Arc<Observer<Item>>) -> Subscription + Send + Sync + 'static>,
-}
-
-impl<Item> Emitter<Item>
-where
-  Item: Clone + Send + Sync + 'static,
-{
-  pub fn new<F>(f: F) -> Emitter<Item>
-  where
-    F: Fn(Arc<Observer<Item>>) -> Subscription + Send + Sync + 'static,
-  {
-    Emitter { func: Box::new(f) }
-  }
-  pub fn execute(&self, observer: Arc<Observer<Item>>) -> Subscription {
-    (self.func)(observer)
+    self.fn_unsubscribe.call_and_clear_if_available(());
   }
 }
 
@@ -46,7 +24,7 @@ pub struct Observable<Item>
 where
   Item: Clone + Send + Sync + 'static,
 {
-  source: Arc<Emitter<Item>>,
+  source: FunctionWrapper<Observer<Item>, Subscription>,
 }
 
 impl<Item> Observable<Item>
@@ -55,17 +33,16 @@ where
 {
   pub fn create<Source>(source: Source) -> Observable<Item>
   where
-    Source: Fn(Arc<Observer<Item>>) -> Subscription + Send + Sync + 'static,
+    Source: Fn(Observer<Item>) -> Subscription + Send + Sync + 'static,
   {
     Observable {
-      source: Arc::new(Emitter::new(source)),
+      source: FunctionWrapper::new(source),
     }
   }
 
   pub(crate) fn inner_subscribe(&self, observer: Observer<Item>) -> Subscription {
-    let observer = Arc::new(observer);
-    let unsub_observer = Arc::clone(&observer);
-    let subscription = self.source.execute(observer);
+    let unsub_observer = observer.clone();
+    let subscription = self.source.call(observer.clone());
     Subscription::new(move || {
       unsub_observer.close();
       subscription.unsubscribe();

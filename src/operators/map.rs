@@ -1,5 +1,4 @@
 use crate::{internals::function_wrapper::FunctionWrapper, prelude::*};
-use std::{marker::PhantomData, sync::Arc};
 
 pub struct MapOp<In, Out>
 where
@@ -7,7 +6,6 @@ where
   Out: Clone + Send + Sync + 'static,
 {
   wrap_f: FunctionWrapper<In, Out>,
-  _in: PhantomData<In>,
 }
 
 impl<In, Out> MapOp<In, Out>
@@ -21,17 +19,16 @@ where
   {
     MapOp {
       wrap_f: FunctionWrapper::new(f),
-      _in: PhantomData,
     }
   }
   pub fn execute(&self, soruce: Observable<In>) -> Observable<Out> {
     let _f = self.wrap_f.clone();
-    let _source = Arc::new(soruce);
+    let _source = soruce.clone();
 
     Observable::<Out>::create(move |s| {
-      let s_next = Arc::clone(&s);
-      let s_error = Arc::clone(&s);
-      let s_complete = Arc::clone(&s);
+      let s_next = s.clone();
+      let s_error = s.clone();
+      let s_complete = s.clone();
       let _f_next = _f.clone();
       let sbsc = _source.subscribe(
         move |x| {

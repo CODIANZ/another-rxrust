@@ -10,7 +10,7 @@ pub struct Subject<Item>
 where
   Item: Clone + Send + Sync + 'static,
 {
-  observers: Arc<RwLock<HashMap<i32, Arc<Observer<Item>>>>>,
+  observers: Arc<RwLock<HashMap<i32, Observer<Item>>>>,
   serial: Arc<RwLock<i32>>,
 }
 
@@ -55,7 +55,7 @@ where
       };
       {
         let mut observables = observables.write().unwrap();
-        observables.insert(serial, Arc::clone(&s));
+        observables.insert(serial, s);
       }
       let observables = Arc::clone(&observables);
       Subscription::new(move || {

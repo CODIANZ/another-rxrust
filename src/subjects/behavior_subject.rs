@@ -57,9 +57,9 @@ where
           return Subscription::new(|| {});
         }
       }
-      let s_next = Arc::clone(&s);
-      let s_error = Arc::clone(&s);
-      let s_complete = Arc::clone(&s);
+      let s_next = s.clone();
+      let s_error = s.clone();
+      let s_complete = s.clone();
       let sbsc = subject.observable().subscribe(
         move |x| s_next.next(x),
         move |e| s_error.error(e),

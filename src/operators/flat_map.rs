@@ -1,5 +1,3 @@
-use std::{marker::PhantomData, sync::Arc};
-
 use crate::{
   internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController},
   prelude::*,
@@ -11,7 +9,6 @@ where
   Out: Clone + Send + Sync + 'static,
 {
   wrap_f: FunctionWrapper<In, Observable<Out>>,
-  _in: PhantomData<In>,
 }
 
 impl<In, Out> FlatMapOp<In, Out>
@@ -25,18 +22,17 @@ where
   {
     FlatMapOp {
       wrap_f: FunctionWrapper::new(f),
-      _in: PhantomData,
     }
   }
   pub fn execute(&self, soruce: Observable<In>) -> Observable<Out> {
     let _f = self.wrap_f.clone();
-    let _source = Arc::new(soruce);
+    let _source = soruce.clone();
 
     Observable::<Out>::create(move |s| {
-      let sctl = Arc::new(StreamController::new(s));
-      let sctl_next = Arc::clone(&sctl);
-      let sctl_error = Arc::clone(&sctl);
-      let sctl_complete = Arc::clone(&sctl);
+      let sctl = StreamController::new(s);
+      let sctl_next = sctl.clone();
+      let sctl_error = sctl.clone();
+      let sctl_complete = sctl.clone();
 
       let serial = sctl.upstream_prepare_sereal();
 
@@ -46,9 +42,9 @@ where
         &serial,
         _source.subscribe(
           move |x| {
-            let sctl_next_next = Arc::clone(&sctl_next);
-            let sctl_next_error = Arc::clone(&sctl_next);
-            let sctl_next_complete = Arc::clone(&sctl_next);
+            let sctl_next_next = sctl_next.clone();
+            let sctl_next_error = sctl_next.clone();
+            let sctl_next_complete = sctl_next.clone();
 
             let serial_next = sctl_next.upstream_prepare_sereal();
 
@@ -142,6 +138,7 @@ mod test {
       );
     thread::sleep(time::Duration::from_millis(500));
     sbsc.unsubscribe();
+    thread::sleep(time::Duration::from_millis(500));
   }
 
   #[test]

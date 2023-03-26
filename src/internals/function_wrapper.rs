@@ -20,6 +20,9 @@ impl<In, Out> FunctionWrapper<In, Out> {
   pub fn empty(&self) -> bool {
     self.func.read().unwrap().is_none()
   }
+  pub fn exists(&self) -> bool {
+    !self.empty()
+  }
   pub fn call(&self, indata: In) -> Out {
     let f = self.func.read().unwrap();
     if let Some(ff) = &*f {
@@ -36,6 +39,18 @@ impl<In, Out> FunctionWrapper<In, Out> {
       None
     }
   }
+  pub fn call_and_clear_if_available(&self, indata: In) -> Option<Out> {
+    let mut f = self.func.write().unwrap();
+    let ret = {
+      if let Some(ff) = &*f {
+        Some(ff(indata))
+      } else {
+        None
+      }
+    };
+    *f = None;
+    ret
+  }
 }
 
 #[cfg(test)]
@@ -50,12 +65,19 @@ mod tset {
   }
 
   #[test]
-  fn if_available() {
+  fn call_if_available() {
     let f = FunctionWrapper::new(|x| x * x);
     assert_eq!(f.call_if_available(10), Some(100));
     assert_eq!(f.empty(), false);
     f.clear();
     assert_eq!(f.empty(), true);
     assert_eq!(f.call_if_available(10), None);
+  }
+
+  #[test]
+  fn call_and_clear_if_available() {
+    let f = FunctionWrapper::new(|x| x * x);
+    assert_eq!(f.call_and_clear_if_available(10), Some(100));
+    assert_eq!(f.empty(), true);
   }
 }
