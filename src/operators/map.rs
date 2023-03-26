@@ -22,17 +22,17 @@ where
     }
   }
   pub fn execute(&self, source: Observable<In>) -> Observable<Out> {
-    let _f = self.wrap_f.clone();
-    let _source = source.clone();
+    let f = self.wrap_f.clone();
 
     Observable::<Out>::create(move |s| {
+      let f = f.clone();
+
       let s_next = s.clone();
       let s_error = s.clone();
       let s_complete = s.clone();
-      let _f_next = _f.clone();
-      let sbsc = _source.subscribe(
+      let sbsc = source.subscribe(
         move |x| {
-          s_next.next(_f_next.call(x));
+          s_next.next(f.call(x));
         },
         move |e| {
           s_error.error(e);

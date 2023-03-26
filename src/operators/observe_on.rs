@@ -26,14 +26,13 @@ where
   }
 
   pub fn execute(&self, source: Observable<Item>) -> Observable<Item> {
-    let _source = source.clone();
     let scheduler = self.scheduler.clone();
     scheduler.start();
     Observable::<Item>::create(move |s| {
       let sctl = StreamController::new(s);
       {
         let sctl = sctl.clone();
-        let source_next = _source.clone();
+        let source_next = source.clone();
         scheduler.post(move || {
           let sctl_next = sctl.clone();
           let sctl_error = sctl.clone();

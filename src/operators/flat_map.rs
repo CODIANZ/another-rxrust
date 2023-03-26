@@ -25,10 +25,11 @@ where
     }
   }
   pub fn execute(&self, source: Observable<In>) -> Observable<Out> {
-    let _f = self.wrap_f.clone();
-    let _source = source.clone();
+    let f = self.wrap_f.clone();
 
     Observable::<Out>::create(move |s| {
+      let f = f.clone();
+
       let sctl = StreamController::new(s);
       let sctl_next = sctl.clone();
       let sctl_error = sctl.clone();
@@ -36,11 +37,9 @@ where
 
       let serial = sctl.upstream_prepare_serial();
 
-      let _f_next = _f.clone();
-
       sctl.upstream_subscribe(
         &serial,
-        _source.subscribe(
+        source.subscribe(
           move |x| {
             let sctl_next_next = sctl_next.clone();
             let sctl_next_error = sctl_next.clone();
@@ -50,7 +49,7 @@ where
 
             sctl_next.upstream_subscribe(
               &serial_next,
-              _f_next.call(x).subscribe(
+              f.call(x).subscribe(
                 move |xx| {
                   sctl_next_next.sink_next(xx);
                 },
