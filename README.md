@@ -77,8 +77,13 @@ fn main() {
 - map
 - flat_map
 - on_error_resume_next
+- observe_on
 
 ### subject
 
 - Subject
 - BehaviorSubject
+
+### scheduler
+
+- new_thread
