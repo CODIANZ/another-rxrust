@@ -83,20 +83,19 @@ where
 mod tset {
   use crate::prelude::*;
   use anyhow::anyhow;
-  use std::sync::Arc;
 
   #[test]
   fn basic() {
     let o = Observable::<i32>::create(|s| {
       s.next(1);
-      s.error(Arc::new(anyhow!("err")));
+      s.error(RxError::new(anyhow!("err")));
       Subscription::new(|| {})
     });
 
     o.on_error_resume_next(|_err| observables::just(100))
       .subscribe(
         |x| println!("next {}", x),
-        |e| println!("error {:}", e),
+        |e| println!("error {:}", e.error),
         || println!("complete"),
       );
   }

@@ -98,7 +98,7 @@ mod test {
 
     o.flat_map(|x| observables::just(x * 2)).subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e),
+      |e| println!("error {:}", e.error),
       || println!("complete"),
     );
   }
@@ -133,7 +133,7 @@ mod test {
       .flat_map(|x| observables::just(format!("str {}", x)))
       .subscribe(
         |x| println!("next {}", x),
-        |e| println!("error {:}", e),
+        |e| println!("error {:}", e.error),
         || println!("complete"),
       );
     thread::sleep(time::Duration::from_millis(500));
@@ -171,7 +171,7 @@ mod test {
 
     o().flat_map(move |_x| o()).subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e),
+      |e| println!("error {:}", e.error),
       || println!("complete"),
     );
     thread::sleep(time::Duration::from_millis(1000));

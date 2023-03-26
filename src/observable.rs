@@ -107,13 +107,13 @@ mod test {
 
     o.subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e),
+      |e| println!("error {:}", e.error),
       || println!("complete"),
     );
 
     o.subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e),
+      |e| println!("error {:}", e.error),
       || println!("complete"),
     );
   }
@@ -144,7 +144,7 @@ mod test {
 
     o.subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e),
+      |e| println!("error {:}", e.error),
       || println!("complete"),
     );
     println!("started");
@@ -178,7 +178,7 @@ mod test {
 
     let sbsc = o.subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e),
+      |e| println!("error {:}", e.error),
       || println!("complete"),
     );
     println!("started");

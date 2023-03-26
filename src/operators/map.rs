@@ -66,7 +66,7 @@ mod test {
 
     o.map(|x| x * 2).subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e),
+      |e| println!("error {:}", e.error),
       || println!("complete"),
     );
   }
@@ -99,7 +99,7 @@ mod test {
 
     let sbsc = o.map(|x| format!("str {}", x)).subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e),
+      |e| println!("error {:}", e.error),
       || println!("complete"),
     );
     thread::sleep(time::Duration::from_millis(500));

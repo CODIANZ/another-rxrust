@@ -38,20 +38,22 @@ impl<T> Observer<T> {
 
 #[cfg(test)]
 mod test {
+  use crate::prelude::RxError;
+
   use super::Observer;
   use anyhow::anyhow;
-  use std::{sync::Arc, thread};
+  use std::thread;
 
   #[test]
   fn basic() {
     let ob = Observer::<i32>::new(
       |x| println!("next {}", x),
-      |e| println!("{:}", e),
+      |e| println!("{:}", e.error),
       || println!("complete"),
     );
     ob.next(1);
     ob.next(2);
-    ob.error(Arc::new(anyhow!("abc")));
+    ob.error(RxError::new(anyhow!("abc")));
     ob.complete();
   }
 
@@ -60,12 +62,12 @@ mod test {
     let gain = 100;
     let ob = Observer::<i32>::new(
       move |x| println!("next {}", x + gain),
-      |e| println!("{:}", e),
+      |e| println!("{:}", e.error),
       || println!("complete"),
     );
     ob.next(1);
     ob.next(2);
-    ob.error(Arc::new(anyhow!("abc")));
+    ob.error(RxError::new(anyhow!("abc")));
     ob.complete();
   }
 
@@ -73,7 +75,7 @@ mod test {
   fn close() {
     let ob = Observer::<i32>::new(
       |x| println!("next {}", x),
-      |e| println!("{:}", e),
+      |e| println!("{:}", e.error),
       || println!("complete"),
     );
     ob.next(1);
@@ -85,7 +87,7 @@ mod test {
   fn clone_into_thread() {
     let ob = Observer::<i32>::new(
       |x| println!("next {}", x),
-      |e| println!("{:}", e),
+      |e| println!("{:}", e.error),
       || println!("complete"),
     );
     let a = ob.clone();
