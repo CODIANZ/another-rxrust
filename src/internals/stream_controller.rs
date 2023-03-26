@@ -4,6 +4,8 @@ use std::{
   sync::{Arc, RwLock},
 };
 
+use super::function_wrapper::FunctionWrapper;
+
 #[derive(Clone)]
 pub struct StreamController<Item>
 where
@@ -12,6 +14,7 @@ where
   serial: Arc<RwLock<i32>>,
   subscriber: Observer<Item>,
   subscriptions: Arc<RwLock<HashMap<i32, Option<Subscription>>>>,
+  on_finalize: Arc<RwLock<Vec<FunctionWrapper<(), ()>>>>,
 }
 
 impl<Item> StreamController<Item>
@@ -23,7 +26,19 @@ where
       serial: Arc::new(RwLock::new(0)),
       subscriber: subscriber,
       subscriptions: Arc::new(RwLock::new(HashMap::new())),
+      on_finalize: Arc::new(RwLock::new(Vec::new())),
     }
+  }
+
+  pub fn set_on_finalize<F>(&self, f: F)
+  where
+    F: Fn() + Send + Sync + 'static,
+  {
+    self
+      .on_finalize
+      .write()
+      .unwrap()
+      .push(FunctionWrapper::new(move |_| f()));
   }
 
   pub fn upstream_prepare_serial(&self) -> i32 {
@@ -60,7 +75,7 @@ where
     };
     if done_all {
       self.subscriber.complete();
-      self.subscriber.close();
+      self.finalize();
     }
   }
 
@@ -79,5 +94,8 @@ where
     });
     self.subscriptions.write().unwrap().clear();
     self.subscriber.close();
+    let mut handlers = self.on_finalize.write().unwrap();
+    handlers.iter().for_each(|h| h.call(()));
+    handlers.clear();
   }
 }

@@ -30,6 +30,10 @@ where
     scheduler.start();
     Observable::<Item>::create(move |s| {
       let sctl = StreamController::new(s);
+      let scheduler_on_finalize = scheduler.clone();
+      sctl.set_on_finalize(move || {
+        scheduler_on_finalize.stop();
+      });
       {
         let sctl = sctl.clone();
         let source_next = source.clone();
@@ -82,6 +86,6 @@ mod test {
       |e| println!("error {:}", e.error),
       || println!("complete"),
     );
-    thread::sleep(time::Duration::from_millis(500));
+    thread::sleep(time::Duration::from_millis(1000));
   }
 }
