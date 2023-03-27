@@ -7,15 +7,15 @@ use crate::{internals::stream_controller::StreamController, prelude::*};
 
 pub struct TakeOp<Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
   count: usize,
   _item: PhantomData<Item>,
 }
 
-impl<Item> TakeOp<Item>
+impl<'a, Item> TakeOp<Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
   pub fn new(count: usize) -> TakeOp<Item> {
     TakeOp {
@@ -23,7 +23,7 @@ where
       _item: PhantomData,
     }
   }
-  pub fn execute(&self, source: Observable<Item>) -> Observable<Item> {
+  pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let count = self.count;
 
     Observable::<Item>::create(move |s| {

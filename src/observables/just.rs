@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
-pub fn just<Item>(x: Item) -> Observable<Item>
+pub fn just<'a, Item>(x: Item) -> Observable<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
   Observable::create(move |s| {
     s.next(x.clone());

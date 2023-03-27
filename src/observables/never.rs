@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
-pub fn never<Item>() -> Observable<Item>
+pub fn never<'a, Item>() -> Observable<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
   Observable::<Item>::create(|_| {})
 }

@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
-pub fn error<Item>(err: RxError) -> Observable<Item>
+pub fn error<'a, Item>(err: RxError) -> Observable<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
   Observable::<Item>::create(move |s| {
     s.error(err.clone());

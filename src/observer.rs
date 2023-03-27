@@ -1,24 +1,24 @@
 use crate::{internals::function_wrapper::FunctionWrapper, prelude::RxError};
 
 #[derive(Clone)]
-pub struct Observer<T>
+pub struct Observer<'a, T>
 where
-  T: Clone + Send + Sync + 'static,
+  T: Clone + Send + Sync,
 {
-  fn_next: FunctionWrapper<T, ()>,
-  fn_error: FunctionWrapper<RxError, ()>,
-  fn_complete: FunctionWrapper<(), ()>,
+  fn_next: FunctionWrapper<'a, T, ()>,
+  fn_error: FunctionWrapper<'a, RxError, ()>,
+  fn_complete: FunctionWrapper<'a, (), ()>,
 }
 
-impl<T> Observer<T>
+impl<'a, T> Observer<'a, T>
 where
-  T: Clone + Send + Sync + 'static,
+  T: Clone + Send + Sync,
 {
-  pub fn new<Next, Error, Complete>(next: Next, error: Error, complete: Complete) -> Observer<T>
+  pub fn new<Next, Error, Complete>(next: Next, error: Error, complete: Complete) -> Observer<'a, T>
   where
-    Next: Fn(T) + Send + Sync + 'static,
-    Error: Fn(RxError) + Send + Sync + 'static,
-    Complete: Fn() -> () + Send + Sync + 'static,
+    Next: Fn(T) + Send + Sync + 'a,
+    Error: Fn(RxError) + Send + Sync + 'a,
+    Complete: Fn() -> () + Send + Sync + 'a,
   {
     Observer::<T> {
       fn_next: FunctionWrapper::new(next),

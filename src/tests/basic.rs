@@ -6,7 +6,7 @@ mod test {
 
   #[test]
   fn basic() {
-    fn ob() -> Observable<i32> {
+    fn ob() -> Observable<'static, i32> {
       Observable::create(|s| {
         s.next(1);
         s.next(2);

@@ -3,28 +3,28 @@ use crate::{
   prelude::*,
 };
 
-pub struct MapOp<In, Out>
+pub struct MapOp<'a, In, Out>
 where
-  In: Clone + Send + Sync + 'static,
-  Out: Clone + Send + Sync + 'static,
+  In: Clone + Send + Sync,
+  Out: Clone + Send + Sync,
 {
-  wrap_f: FunctionWrapper<In, Out>,
+  wrap_f: FunctionWrapper<'a, In, Out>,
 }
 
-impl<In, Out> MapOp<In, Out>
+impl<'a, In, Out> MapOp<'a, In, Out>
 where
-  In: Clone + Send + Sync + 'static,
-  Out: Clone + Send + Sync + 'static,
+  In: Clone + Send + Sync,
+  Out: Clone + Send + Sync,
 {
-  pub fn new<F>(f: F) -> MapOp<In, Out>
+  pub fn new<F>(f: F) -> MapOp<'a, In, Out>
   where
-    F: Fn(In) -> Out + Send + Sync + 'static,
+    F: Fn(In) -> Out + Send + Sync + 'a,
   {
     MapOp {
       wrap_f: FunctionWrapper::new(f),
     }
   }
-  pub fn execute(&self, source: Observable<In>) -> Observable<Out> {
+  pub fn execute(&self, source: Observable<'a, In>) -> Observable<'a, Out> {
     let f = self.wrap_f.clone();
 
     Observable::<Out>::create(move |s| {
@@ -86,7 +86,8 @@ mod test {
         }
       });
     });
-    let sbsc = o.map(|x| format!("str {}", x)).subscribe(
+    let binding = o.map(|x| format!("str {}", x));
+    let sbsc = binding.subscribe(
       |x| println!("next {}", x),
       |e| println!("error {:}", e.error),
       || println!("complete"),

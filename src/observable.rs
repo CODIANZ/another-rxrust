@@ -3,14 +3,14 @@ use scheduler::IScheduler;
 use crate::{internals::function_wrapper::FunctionWrapper, prelude::*};
 
 #[derive(Clone)]
-pub struct Subscription {
-  fn_unsubscribe: FunctionWrapper<(), ()>,
+pub struct Subscription<'a> {
+  fn_unsubscribe: FunctionWrapper<'a, (), ()>,
 }
 
-impl Subscription {
-  pub fn new<Unsub>(unsub: Unsub) -> Subscription
+impl<'a> Subscription<'a> {
+  pub fn new<Unsub>(unsub: Unsub) -> Subscription<'a>
   where
-    Unsub: Fn() + Send + Sync + 'static,
+    Unsub: Fn() + Send + Sync + 'a,
   {
     Subscription {
       fn_unsubscribe: FunctionWrapper::new(move |_| unsub()),
@@ -22,27 +22,27 @@ impl Subscription {
 }
 
 #[derive(Clone)]
-pub struct Observable<Item>
+pub struct Observable<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
-  source: FunctionWrapper<Observer<Item>, ()>,
+  source: FunctionWrapper<'a, Observer<'a, Item>, ()>,
 }
 
-impl<Item> Observable<Item>
+impl<'a, Item> Observable<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
-  pub fn create<Source>(source: Source) -> Observable<Item>
+  pub fn create<Source>(source: Source) -> Observable<'a, Item>
   where
-    Source: Fn(Observer<Item>) + Send + Sync + 'static,
+    Source: Fn(Observer<'a, Item>) + Send + Sync + 'a,
   {
     Observable {
       source: FunctionWrapper::new(source),
     }
   }
 
-  pub(crate) fn inner_subscribe(&self, observer: Observer<Item>) -> Subscription {
+  pub(crate) fn inner_subscribe(&self, observer: Observer<'a, Item>) -> Subscription {
     let unsub_observer = observer.clone();
     self.source.call(observer.clone());
     Subscription::new(move || {
@@ -57,44 +57,44 @@ where
     complete: Complete,
   ) -> Subscription
   where
-    Next: Fn(Item) + Send + Sync + 'static,
-    Error: Fn(RxError) + Send + Sync + 'static,
-    Complete: Fn() + Send + Sync + 'static,
+    Next: Fn(Item) + Send + Sync + 'a,
+    Error: Fn(RxError) + Send + Sync + 'a,
+    Complete: Fn() + Send + Sync + 'a,
   {
     self.inner_subscribe(Observer::new(next, error, complete))
   }
 
-  pub fn map<Out, F>(&self, f: F) -> Observable<Out>
+  pub fn map<Out, F>(&self, f: F) -> Observable<'a, Out>
   where
-    F: Fn(Item) -> Out + Send + Sync + 'static,
-    Out: Clone + Send + Sync + 'static,
+    F: Fn(Item) -> Out + Send + Sync + 'a,
+    Out: Clone + Send + Sync,
   {
     operators::MapOp::new(f).execute(self.clone())
   }
 
-  pub fn flat_map<Out, F>(&self, f: F) -> Observable<Out>
+  pub fn flat_map<Out, F>(&self, f: F) -> Observable<'a, Out>
   where
-    F: Fn(Item) -> Observable<Out> + Send + Sync + 'static,
-    Out: Clone + Send + Sync + 'static,
+    F: Fn(Item) -> Observable<'a, Out> + Send + Sync + 'a,
+    Out: Clone + Send + Sync,
   {
     operators::FlatMapOp::new(f).execute(self.clone())
   }
 
-  pub fn on_error_resume_next<F>(&self, f: F) -> Observable<Item>
+  pub fn on_error_resume_next<F>(&self, f: F) -> Observable<'a, Item>
   where
-    F: Fn(RxError) -> Observable<Item> + Send + Sync + 'static,
+    F: Fn(RxError) -> Observable<'a, Item> + Send + Sync + 'a,
   {
     operators::OnErrorResumeNextOp::new(f).execute(self.clone())
   }
 
-  pub fn observe_on<S>(&self, s: S) -> Observable<Item>
+  pub fn observe_on<S>(&self, s: S) -> Observable<'a, Item>
   where
-    S: IScheduler + Clone + Send + Sync + 'static,
+    S: IScheduler<'a> + Clone + Send + Sync + 'a,
   {
     operators::ObserveOnOp::new(s).execute(self.clone())
   }
 
-  pub fn take(&self, count: usize) -> Observable<Item> {
+  pub fn take(&self, count: usize) -> Observable<'a, Item> {
     operators::TakeOp::new(count).execute(self.clone())
   }
 }
