@@ -10,8 +10,8 @@ use crate::prelude::*;
 use anyhow::anyhow;
 use std::{thread, time};
 
-fn main() {
-  fn ob() -> Observable<i32> {
+fn basic() {
+  fn ob() -> Observable<'static, i32> {
     Observable::create(|s| {
       s.next(1);
       s.next(2);
@@ -46,6 +46,7 @@ fn main() {
 
   thread::sleep(time::Duration::from_millis(500));
 }
+
 // next 2
 // next 101
 // next 102
@@ -63,8 +64,8 @@ fn main() {
 Based on the problems of `rxRust`, `another-rxrust` has the following implementation policy.
 
 - It is assumed that the values and functions that can be emitted may be shared between threads.
-- Only `Clone + Send + Sync + 'static` can be issued.
-- Functions should be `Fn() + Send + Sync + 'static` only.
+- Only `Clone + Send + Sync` can be issued.
+- Functions should be `Fn() + Send + Sync` only.
 - Errors use `anyhow::Error`.
 - Prioritize flexibility over memory efficiency and execution speed.
 

@@ -4,31 +4,33 @@ use crate::{
 };
 use std::marker::PhantomData;
 
-pub struct ObserveOnOp<Scheduler, Item>
+pub struct ObserveOnOp<'a, Scheduler, Item>
 where
-  Scheduler: IScheduler + Clone + Send + Sync + 'static,
-  Item: Clone + Send + Sync + 'static,
+  Scheduler: IScheduler<'a> + Clone + Send + Sync,
+  Item: Clone + Send + Sync,
 {
   scheduler: Scheduler,
   _item: PhantomData<Item>,
+  _lifetime: PhantomData<&'a ()>,
 }
 
-impl<Scheduler, Item> ObserveOnOp<Scheduler, Item>
+impl<'a, Scheduler, Item> ObserveOnOp<'a, Scheduler, Item>
 where
-  Scheduler: IScheduler + Clone + Send + Sync + 'static,
-  Item: Clone + Send + Sync + 'static,
+  Scheduler: IScheduler<'a> + Clone + Send + Sync + 'a,
+  Item: Clone + Send + Sync,
 {
-  pub fn new(scheduler: Scheduler) -> ObserveOnOp<Scheduler, Item> {
+  pub fn new(scheduler: Scheduler) -> ObserveOnOp<'a, Scheduler, Item> {
     ObserveOnOp {
       scheduler,
       _item: PhantomData,
+      _lifetime: PhantomData,
     }
   }
 
-  pub fn execute(&self, source: Observable<Item>) -> Observable<Item> {
+  pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let scheduler = self.scheduler.clone();
     scheduler.start();
-    Observable::<Item>::create(move |s| {
+    Observable::create(move |s| {
       let sctl = StreamController::new(s);
       let scheduler_on_finalize = scheduler.clone();
       sctl.set_on_finalize(move || {

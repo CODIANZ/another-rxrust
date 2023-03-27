@@ -7,19 +7,19 @@ use std::{
 use super::function_wrapper::FunctionWrapper;
 
 #[derive(Clone)]
-pub struct StreamController<Item>
+pub struct StreamController<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync + 'a,
 {
   serial: Arc<RwLock<i32>>,
-  subscriber: Observer<Item>,
-  unscribers: Arc<RwLock<HashMap<i32, FunctionWrapper<(), ()>>>>,
-  on_finalize: Arc<RwLock<Vec<FunctionWrapper<(), ()>>>>,
+  subscriber: Observer<'a, Item>,
+  unscribers: Arc<RwLock<HashMap<i32, FunctionWrapper<'a, (), ()>>>>,
+  on_finalize: Arc<RwLock<Vec<FunctionWrapper<'a, (), ()>>>>,
 }
 
-impl<Item> StreamController<Item>
+impl<'a, Item> StreamController<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
   pub fn new(subscriber: Observer<Item>) -> StreamController<Item> {
     StreamController {
@@ -32,7 +32,7 @@ where
 
   pub fn set_on_finalize<F>(&self, f: F)
   where
-    F: Fn() + Send + Sync + 'static,
+    F: Fn() + Send + Sync + 'a,
   {
     self
       .on_finalize
@@ -46,12 +46,12 @@ where
     next: Next,
     error: Error,
     complete: Complete,
-  ) -> Observer<XItem>
+  ) -> Observer<'a, XItem>
   where
-    XItem: Clone + Send + Sync + 'static,
-    Next: Fn(i32, XItem) + Send + Sync + 'static,
-    Error: Fn(i32, RxError) + Send + Sync + 'static,
-    Complete: Fn(i32) -> () + Send + Sync + 'static,
+    XItem: Clone + Send + Sync + 'a,
+    Next: Fn(i32, XItem) + Send + Sync + 'a,
+    Error: Fn(i32, RxError) + Send + Sync + 'a,
+    Complete: Fn(i32) -> () + Send + Sync + 'a,
   {
     let serial = {
       let mut x = self.serial.write().unwrap();

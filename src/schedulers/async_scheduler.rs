@@ -4,18 +4,18 @@ use std::{
   sync::{Arc, Condvar, Mutex, RwLock},
 };
 
-struct SchedulerControl {
-  queue: Mutex<VecDeque<FunctionWrapper<(), ()>>>,
+struct SchedulerControl<'a> {
+  queue: Mutex<VecDeque<FunctionWrapper<'a, (), ()>>>,
   cond: Condvar,
   abort: RwLock<bool>,
 }
 
 #[derive(Clone)]
-pub struct AsyncScheduler {
-  ctrl: Arc<SchedulerControl>,
+pub struct AsyncScheduler<'a> {
+  ctrl: Arc<SchedulerControl<'a>>,
 }
-impl AsyncScheduler {
-  pub fn new() -> AsyncScheduler {
+impl<'a> AsyncScheduler<'a> {
+  pub fn new() -> AsyncScheduler<'a> {
     AsyncScheduler {
       ctrl: Arc::new(SchedulerControl {
         queue: Mutex::new(VecDeque::new()),
@@ -56,7 +56,7 @@ impl AsyncScheduler {
 
   pub fn post<F>(&self, f: F)
   where
-    F: Fn() + Clone + Send + Sync + 'static,
+    F: Fn() + Clone + Send + Sync + 'a,
   {
     let mut que_mtx = self.ctrl.queue.lock().unwrap();
     que_mtx.push_back(FunctionWrapper::new(move |_| f()));

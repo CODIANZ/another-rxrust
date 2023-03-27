@@ -3,31 +3,31 @@ use crate::{
   prelude::*,
 };
 
-pub struct FlatMapOp<In, Out>
+pub struct FlatMapOp<'a, In, Out>
 where
-  In: Clone + Send + Sync + 'static,
-  Out: Clone + Send + Sync + 'static,
+  In: Clone + Send + Sync,
+  Out: Clone + Send + Sync,
 {
-  wrap_f: FunctionWrapper<In, Observable<Out>>,
+  wrap_f: FunctionWrapper<'a, In, Observable<'a, Out>>,
 }
 
-impl<In, Out> FlatMapOp<In, Out>
+impl<'a, In, Out> FlatMapOp<'a, In, Out>
 where
-  In: Clone + Send + Sync + 'static,
-  Out: Clone + Send + Sync + 'static,
+  In: Clone + Send + Sync + 'a,
+  Out: Clone + Send + Sync + 'a,
 {
-  pub fn new<F>(f: F) -> FlatMapOp<In, Out>
+  pub fn new<F>(f: F) -> FlatMapOp<'a, In, Out>
   where
-    F: Fn(In) -> Observable<Out> + Send + Sync + 'static,
+    F: Fn(In) -> Observable<'a, Out> + Send + Sync + 'a,
   {
     FlatMapOp {
       wrap_f: FunctionWrapper::new(f),
     }
   }
-  pub fn execute(&self, source: Observable<In>) -> Observable<Out> {
+  pub fn execute(&self, source: Observable<'a, In>) -> Observable<'a, Out> {
     let f = self.wrap_f.clone();
 
-    Observable::<Out>::create(move |s| {
+    Observable::create(move |s| {
       let f = f.clone();
 
       let sctl = StreamController::new(s);
@@ -103,13 +103,12 @@ mod test {
       });
     });
 
-    let sbsc = o
-      .flat_map(|x| observables::just(format!("str {}", x)))
-      .subscribe(
-        |x| println!("next {}", x),
-        |e| println!("error {:}", e.error),
-        || println!("complete"),
-      );
+    let binding = o.flat_map(|x| observables::just(format!("str {}", x)));
+    let sbsc = binding.subscribe(
+      |x| println!("next {}", x),
+      |e| println!("error {:}", e.error),
+      || println!("complete"),
+    );
     thread::sleep(time::Duration::from_millis(500));
     sbsc.unsubscribe();
     thread::sleep(time::Duration::from_millis(500));
@@ -117,7 +116,7 @@ mod test {
 
   #[test]
   fn composite() {
-    fn o() -> Observable<i32> {
+    fn o() -> Observable<'static, i32> {
       Observable::create(|s| {
         thread::spawn(move || {
           for n in 0..100 {
@@ -135,7 +134,8 @@ mod test {
       })
     }
 
-    let sbsc = o().flat_map(move |_x| o()).subscribe(
+    let binding = o().flat_map(move |_x| o());
+    let sbsc = binding.subscribe(
       |x| println!("next {}", x),
       |e| println!("error {:}", e.error),
       || println!("complete"),

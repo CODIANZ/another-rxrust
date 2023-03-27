@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
-pub fn empty<Item>() -> Observable<Item>
+pub fn empty<'a, Item>() -> Observable<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
   Observable::<Item>::create(|s| {
     s.complete();

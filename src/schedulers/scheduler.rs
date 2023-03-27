@@ -1,7 +1,7 @@
-pub trait IScheduler {
+pub trait IScheduler<'a> {
   fn start(&self);
   fn stop(&self);
   fn post<F>(&self, f: F)
   where
-    F: Fn() + Clone + Send + Sync + 'static;
+    F: Fn() + Clone + Send + Sync + 'a;
 }

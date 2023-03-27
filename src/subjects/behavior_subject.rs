@@ -3,20 +3,20 @@ use std::sync::{Arc, RwLock};
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct BehaviorSubject<Item>
+pub struct BehaviorSubject<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
-  subject: Arc<subject::Subject<Item>>,
+  subject: Arc<subject::Subject<'a, Item>>,
   last_item: Arc<RwLock<Option<Item>>>,
   last_error: Arc<RwLock<Option<RxError>>>,
 }
 
-impl<Item> BehaviorSubject<Item>
+impl<'a, Item> BehaviorSubject<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
-  pub fn new(initial: Item) -> BehaviorSubject<Item> {
+  pub fn new(initial: Item) -> BehaviorSubject<'a, Item> {
     BehaviorSubject {
       subject: Arc::new(subjects::Subject::new()),
       last_item: Arc::new(RwLock::new(Some(initial))),
@@ -36,7 +36,7 @@ where
     *self.last_item.write().unwrap() = None;
     self.subject.complete();
   }
-  pub fn observable(&self) -> Observable<Item> {
+  pub fn observable(&self) -> Observable<'a, Item> {
     let last_item = Arc::clone(&self.last_item);
     let last_error = Arc::clone(&self.last_error);
     let subject = Arc::clone(&self.subject);
@@ -105,7 +105,8 @@ mod tset {
   fn double() {
     let sbj = BehaviorSubject::<i32>::new(100);
 
-    let sbsc1 = sbj.observable().subscribe(
+    let binding = sbj.observable();
+    let sbsc1 = binding.subscribe(
       |x| println!("#1 next {}", x),
       |e| println!("#1 error {:}", e.error),
       || println!("#1 complete"),
@@ -153,7 +154,8 @@ mod tset {
       sbj_thread.complete();
     });
 
-    let sbsc1 = sbj.observable().subscribe(
+    let binding = sbj.observable();
+    let sbsc1 = binding.subscribe(
       |x| println!("#1 next {}", x),
       |e| println!("#1 error {:}", e.error),
       || println!("#1 complete"),

@@ -2,19 +2,19 @@ use super::schedulers::{AsyncScheduler, IScheduler};
 use std::thread;
 
 #[derive(Clone)]
-pub struct NewThreadScheduler {
-  scheduler: AsyncScheduler,
+pub struct NewThreadScheduler<'a> {
+  scheduler: AsyncScheduler<'a>,
 }
 
-impl NewThreadScheduler {
-  pub fn new() -> NewThreadScheduler {
+impl NewThreadScheduler<'_> {
+  pub fn new() -> NewThreadScheduler<'static> {
     NewThreadScheduler {
       scheduler: AsyncScheduler::new(),
     }
   }
 }
 
-impl IScheduler for NewThreadScheduler {
+impl IScheduler<'static> for NewThreadScheduler<'static> {
   fn start(&self) {
     let scheduler = self.scheduler.clone();
     thread::spawn(move || {
@@ -34,7 +34,7 @@ impl IScheduler for NewThreadScheduler {
   }
 }
 
-pub fn new_thread() -> NewThreadScheduler {
+pub fn new_thread() -> NewThreadScheduler<'static> {
   NewThreadScheduler::new()
 }
 

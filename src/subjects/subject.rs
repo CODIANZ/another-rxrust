@@ -6,19 +6,19 @@ use std::{
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct Subject<Item>
+pub struct Subject<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
-  observers: Arc<RwLock<HashMap<i32, Observer<Item>>>>,
+  observers: Arc<RwLock<HashMap<i32, Observer<'a, Item>>>>,
   serial: Arc<RwLock<i32>>,
 }
 
-impl<Item> Subject<Item>
+impl<'a, Item> Subject<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
-  pub fn new() -> Subject<Item> {
+  pub fn new() -> Subject<'a, Item> {
     Subject {
       observers: Arc::new(RwLock::new(HashMap::new())),
       serial: Arc::new(RwLock::new(0)),
@@ -43,7 +43,7 @@ where
     self.observers.write().unwrap().clear();
   }
 
-  pub fn observable(&self) -> Observable<Item> {
+  pub fn observable(&self) -> Observable<'a, Item> {
     let observables = Arc::clone(&self.observers);
     let serial = Arc::clone(&self.serial);
 
@@ -86,7 +86,8 @@ mod tset {
   fn double() {
     let sbj = Subject::new();
 
-    let sbsc1 = sbj.observable().subscribe(
+    let binding = sbj.observable();
+    let sbsc1 = binding.subscribe(
       |x| println!("#1 next {}", x),
       |e| println!("#1 error {:}", e.error),
       || println!("#1 complete"),
@@ -128,7 +129,8 @@ mod tset {
       sbj_thread.complete();
     });
 
-    let sbsc1 = sbj.observable().subscribe(
+    let binding = sbj.observable();
+    let sbsc1 = binding.subscribe(
       |x| println!("#1 next {}", x),
       |e| println!("#1 error {:}", e.error),
       || println!("#1 complete"),

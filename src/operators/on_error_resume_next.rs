@@ -4,26 +4,26 @@ use crate::{
   prelude::RxError,
 };
 
-pub struct OnErrorResumeNextOp<Item>
+pub struct OnErrorResumeNextOp<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
-  wrap_f: FunctionWrapper<RxError, Observable<Item>>,
+  wrap_f: FunctionWrapper<'a, RxError, Observable<'a, Item>>,
 }
 
-impl<Item> OnErrorResumeNextOp<Item>
+impl<'a, Item> OnErrorResumeNextOp<'a, Item>
 where
-  Item: Clone + Send + Sync + 'static,
+  Item: Clone + Send + Sync,
 {
-  pub fn new<F>(f: F) -> OnErrorResumeNextOp<Item>
+  pub fn new<F>(f: F) -> OnErrorResumeNextOp<'a, Item>
   where
-    F: Fn(RxError) -> Observable<Item> + Send + Sync + 'static,
+    F: Fn(RxError) -> Observable<'a, Item> + Send + Sync + 'a,
   {
     OnErrorResumeNextOp {
       wrap_f: FunctionWrapper::new(f),
     }
   }
-  pub fn execute(&self, source: Observable<Item>) -> Observable<Item> {
+  pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let f = self.wrap_f.clone();
 
     Observable::<Item>::create(move |s| {

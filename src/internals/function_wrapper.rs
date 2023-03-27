@@ -1,33 +1,33 @@
 use std::sync::{Arc, RwLock};
 
 #[derive(Clone)]
-struct FunctionWrapperInner<In, Out>
+struct FunctionWrapperInner<'a, In, Out>
 where
-  In: Clone + Send + Sync + 'static,
-  Out: Clone + Send + Sync + 'static,
+  In: Clone + Send + Sync + 'a,
+  Out: Clone + Send + Sync + 'a,
 {
-  pub func: Arc<Box<dyn Fn(In) -> Out + Send + Sync + 'static>>,
+  pub func: Arc<Box<dyn Fn(In) -> Out + Send + Sync + 'a>>,
 }
 
 #[derive(Clone)]
-pub struct FunctionWrapper<In, Out>
+pub struct FunctionWrapper<'a, In, Out>
 where
-  In: Clone + Send + Sync + 'static,
-  Out: Clone + Send + Sync + 'static,
+  In: Clone + Send + Sync + 'a,
+  Out: Clone + Send + Sync + 'a,
 {
-  inner: Arc<RwLock<Option<FunctionWrapperInner<In, Out>>>>,
+  inner: Arc<RwLock<Option<FunctionWrapperInner<'a, In, Out>>>>,
 }
 
-impl<In, Out> FunctionWrapper<In, Out>
+impl<'a, In, Out> FunctionWrapper<'a, In, Out>
 where
-  In: Clone + Send + Sync + 'static,
-  Out: Clone + Send + Sync + 'static,
+  In: Clone + Send + Sync + 'a,
+  Out: Clone + Send + Sync + 'a,
 {
-  pub fn new<F>(func: F) -> FunctionWrapper<In, Out>
+  pub fn new<F>(func: F) -> FunctionWrapper<'a, In, Out>
   where
-    F: Fn(In) -> Out + Send + Sync + 'static,
-    In: Clone + Send + Sync + 'static,
-    Out: Clone + Send + Sync + 'static,
+    F: Fn(In) -> Out + Send + Sync + 'a,
+    In: Clone + Send + Sync + 'a,
+    Out: Clone + Send + Sync + 'a,
   {
     FunctionWrapper {
       inner: Arc::new(RwLock::new(Some(FunctionWrapperInner {
