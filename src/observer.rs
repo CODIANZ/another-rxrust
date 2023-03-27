@@ -52,7 +52,7 @@ mod test {
 
   #[test]
   fn basic() {
-    let ob = Observer::<i32>::new(
+    let ob = Observer::new(
       |x| println!("next {}", x),
       |e| println!("{:}", e.error),
       || println!("complete"),
@@ -66,7 +66,7 @@ mod test {
   #[test]
   fn basic_with_capture() {
     let gain = 100;
-    let ob = Observer::<i32>::new(
+    let ob = Observer::new(
       move |x| println!("next {}", x + gain),
       |e| println!("{:}", e.error),
       || println!("complete"),
@@ -79,7 +79,7 @@ mod test {
 
   #[test]
   fn close() {
-    let ob = Observer::<i32>::new(
+    let ob = Observer::new(
       |x| println!("next {}", x),
       |e| println!("{:}", e.error),
       || println!("complete"),
@@ -91,7 +91,7 @@ mod test {
 
   #[test]
   fn clone_into_thread() {
-    let ob = Observer::<i32>::new(
+    let ob = Observer::new(
       |x| println!("next {}", x),
       |e| println!("{:}", e.error),
       || println!("complete"),

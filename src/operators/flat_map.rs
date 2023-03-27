@@ -87,7 +87,7 @@ mod test {
 
   #[test]
   fn basic() {
-    let o = Observable::<i32>::create(|s| {
+    let o = Observable::create(|s| {
       for n in 0..10 {
         s.next(n);
       }
@@ -104,7 +104,7 @@ mod test {
 
   #[test]
   fn thread() {
-    let o = Observable::<i32>::create(|s| {
+    let o = Observable::create(|s| {
       let is_subscribed = Arc::new(RwLock::new(true));
       {
         let is_subscribed = Arc::clone(&is_subscribed);
@@ -143,7 +143,7 @@ mod test {
   #[test]
   fn composite() {
     fn o() -> Observable<i32> {
-      Observable::<i32>::create(|s| {
+      Observable::create(|s| {
         let is_subscribed = Arc::new(RwLock::new(true));
         {
           let is_subscribed = Arc::clone(&is_subscribed);

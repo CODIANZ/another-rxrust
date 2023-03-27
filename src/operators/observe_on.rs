@@ -72,7 +72,7 @@ mod test {
 
   #[test]
   fn basic() {
-    let o = Observable::<i32>::create(|s| {
+    let o = Observable::create(|s| {
       for n in 0..5 {
         s.next(n);
         thread::sleep(time::Duration::from_millis(100));

@@ -72,7 +72,7 @@ mod tset {
 
   #[test]
   fn basic() {
-    let sbj = Subject::<i32>::new();
+    let sbj = Subject::new();
 
     sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
@@ -88,7 +88,7 @@ mod tset {
 
   #[test]
   fn double() {
-    let sbj = Subject::<i32>::new();
+    let sbj = Subject::new();
 
     let sbsc1 = sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
@@ -121,7 +121,7 @@ mod tset {
 
   #[test]
   fn thread() {
-    let sbj = Subject::<i32>::new();
+    let sbj = Subject::new();
 
     let sbj_thread = sbj.clone();
     let th = thread::spawn(move || {
