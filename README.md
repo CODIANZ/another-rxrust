@@ -1,6 +1,9 @@
 # another-rxrust
 
-Unlike `RxRust`, an implementation that maintains the flexibility of `Rx` at the expense of memory and speed efficiency.
+## Why not `rxRust`?
+
+`rxRust` is for streaming single data, not for complex streaming of `ReactiveX`. Also, there is no error recovery, and it is different from general `ReactiveX`.
+Therefore, something that can be written easily with `another-rxrust` as shown below becomes extremely difficult with `rxRust`.
 
 ```rust
 use crate::prelude::*;
@@ -55,6 +58,16 @@ fn main() {
 // next resume err 4
 // complete
 ```
+
+## Implementation policy
+
+Based on the problems of `rxRust`, `another-rxrust` has the following implementation policy.
+
+- It is assumed that the values and functions that can be emitted may be shared between threads.
+- Only `Clone + Send + Sync + 'static` can be issued.
+- Functions should be `Fn() + Send + Sync + 'static` only.
+- Errors use `anyhow::Error`.
+- Prioritize flexibility over memory efficiency and execution speed.
 
 ## Implementation status
 
