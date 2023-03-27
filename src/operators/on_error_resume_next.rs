@@ -3,7 +3,6 @@ use crate::{
   observable::{Observable, Subscription},
   prelude::RxError,
 };
-use std::sync::Arc;
 
 pub struct OnErrorResumeNextOp<Item>
 where
@@ -30,12 +29,13 @@ where
     Observable::<Item>::create(move |s| {
       let f = f.clone();
 
-      let sctl = Arc::new(StreamController::new(s));
-      let sctl_next = Arc::clone(&sctl);
-      let sctl_error = Arc::clone(&sctl);
-      let sctl_complete = Arc::clone(&sctl);
+      let sctl = StreamController::new(s);
+      let sctl_next = sctl.clone();
+      let sctl_error = sctl.clone();
+      let sctl_complete = sctl.clone();
 
       let serial = sctl.upstream_prepare_serial();
+      let serial_upstream = serial.clone();
 
       sctl.upstream_subscribe(
         &serial,
@@ -44,9 +44,11 @@ where
             sctl_next.sink_next(x);
           },
           move |e| {
-            let sctl_error_next = Arc::clone(&sctl_error);
-            let sctl_error_error = Arc::clone(&sctl_error);
-            let sctl_error_complete = Arc::clone(&sctl_error);
+            sctl_error.upstream_unsubscribe(&serial_upstream);
+
+            let sctl_error_next = sctl_error.clone();
+            let sctl_error_error = sctl_error.clone();
+            let sctl_error_complete = sctl_error.clone();
 
             let serial_error = sctl_error.upstream_prepare_serial();
 
@@ -70,7 +72,6 @@ where
           },
         ),
       );
-      let sctl = Arc::clone(&sctl);
       Subscription::new(move || {
         sctl.finalize();
       })
@@ -85,17 +86,35 @@ mod tset {
 
   #[test]
   fn basic() {
-    let o = Observable::<i32>::create(|s| {
-      s.next(1);
-      s.error(RxError::new(anyhow!("err")));
-      Subscription::new(|| {})
-    });
-
-    o.on_error_resume_next(|_err| observables::just(100))
+    observables::error(RxError::new(anyhow!("err")))
+      .on_error_resume_next(|_e| observables::just(1))
       .subscribe(
-        |x| println!("next {}", x),
-        |e| println!("error {:}", e.error),
-        || println!("complete"),
+        move |x| {
+          println!("next {}", x);
+        },
+        |e| {
+          println!("error {:}", e.error);
+        },
+        || {
+          println!("complete");
+        },
+      );
+  }
+
+  #[test]
+  fn just() {
+    observables::just(1)
+      .on_error_resume_next(|_e| observables::just(1))
+      .subscribe(
+        move |x| {
+          println!("next {}", x);
+        },
+        |e| {
+          println!("error {:}", e.error);
+        },
+        || {
+          println!("complete");
+        },
       );
   }
 }

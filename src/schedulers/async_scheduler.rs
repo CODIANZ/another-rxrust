@@ -52,7 +52,6 @@ impl AsyncScheduler {
         break;
       }
     }
-    println!("finished");
   }
 
   pub fn post<F>(&self, f: F)

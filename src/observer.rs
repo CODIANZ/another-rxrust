@@ -1,13 +1,19 @@
 use crate::{internals::function_wrapper::FunctionWrapper, prelude::RxError};
 
 #[derive(Clone)]
-pub struct Observer<T> {
+pub struct Observer<T>
+where
+  T: Clone + Send + Sync + 'static,
+{
   fn_next: FunctionWrapper<T, ()>,
   fn_error: FunctionWrapper<RxError, ()>,
   fn_complete: FunctionWrapper<(), ()>,
 }
 
-impl<T> Observer<T> {
+impl<T> Observer<T>
+where
+  T: Clone + Send + Sync + 'static,
+{
   pub fn new<Next, Error, Complete>(next: Next, error: Error, complete: Complete) -> Observer<T>
   where
     Next: Fn(T) + Send + Sync + 'static,
@@ -46,7 +52,7 @@ mod test {
 
   #[test]
   fn basic() {
-    let ob = Observer::<i32>::new(
+    let ob = Observer::new(
       |x| println!("next {}", x),
       |e| println!("{:}", e.error),
       || println!("complete"),
@@ -60,7 +66,7 @@ mod test {
   #[test]
   fn basic_with_capture() {
     let gain = 100;
-    let ob = Observer::<i32>::new(
+    let ob = Observer::new(
       move |x| println!("next {}", x + gain),
       |e| println!("{:}", e.error),
       || println!("complete"),
@@ -73,7 +79,7 @@ mod test {
 
   #[test]
   fn close() {
-    let ob = Observer::<i32>::new(
+    let ob = Observer::new(
       |x| println!("next {}", x),
       |e| println!("{:}", e.error),
       || println!("complete"),
@@ -85,7 +91,7 @@ mod test {
 
   #[test]
   fn clone_into_thread() {
-    let ob = Observer::<i32>::new(
+    let ob = Observer::new(
       |x| println!("next {}", x),
       |e| println!("{:}", e.error),
       || println!("complete"),

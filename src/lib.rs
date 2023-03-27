@@ -6,6 +6,7 @@ pub mod operators;
 pub mod rx_error;
 pub mod schedulers;
 pub mod subjects;
+pub mod tests;
 
 pub mod prelude {
   pub use crate::observable::*;

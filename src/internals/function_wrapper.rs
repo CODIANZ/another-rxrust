@@ -1,55 +1,88 @@
 use std::sync::{Arc, RwLock};
 
 #[derive(Clone)]
-pub struct FunctionWrapper<In, Out> {
-  func: Arc<RwLock<Option<Box<dyn Fn(In) -> Out + Send + Sync + 'static>>>>,
+struct FunctionWrapperInner<In, Out>
+where
+  In: Clone + Send + Sync + 'static,
+  Out: Clone + Send + Sync + 'static,
+{
+  pub func: Arc<Box<dyn Fn(In) -> Out + Send + Sync + 'static>>,
 }
 
-impl<In, Out> FunctionWrapper<In, Out> {
+#[derive(Clone)]
+pub struct FunctionWrapper<In, Out>
+where
+  In: Clone + Send + Sync + 'static,
+  Out: Clone + Send + Sync + 'static,
+{
+  inner: Arc<RwLock<Option<FunctionWrapperInner<In, Out>>>>,
+}
+
+impl<In, Out> FunctionWrapper<In, Out>
+where
+  In: Clone + Send + Sync + 'static,
+  Out: Clone + Send + Sync + 'static,
+{
   pub fn new<F>(func: F) -> FunctionWrapper<In, Out>
   where
     F: Fn(In) -> Out + Send + Sync + 'static,
+    In: Clone + Send + Sync + 'static,
+    Out: Clone + Send + Sync + 'static,
   {
     FunctionWrapper {
-      func: Arc::new(RwLock::new(Some(Box::new(func)))),
+      inner: Arc::new(RwLock::new(Some(FunctionWrapperInner {
+        func: Arc::new(Box::new(func)),
+      }))),
     }
   }
   pub fn clear(&self) {
-    *self.func.write().unwrap() = None;
+    *self.inner.write().unwrap() = None;
   }
   pub fn empty(&self) -> bool {
-    self.func.read().unwrap().is_none()
+    self.inner.read().unwrap().is_none()
   }
   pub fn exists(&self) -> bool {
     !self.empty()
   }
+
+  fn fetch_function(&self) -> Option<FunctionWrapperInner<In, Out>> {
+    if let Some(x) = &*self.inner.read().unwrap() {
+      Some(x.clone())
+    } else {
+      None
+    }
+  }
+
   pub fn call(&self, indata: In) -> Out {
-    let f = self.func.read().unwrap();
-    if let Some(ff) = &*f {
-      ff(indata)
+    if let Some(ff) = self.fetch_function() {
+      (ff.func)(indata)
     } else {
       panic!("no func")
     }
   }
   pub fn call_if_available(&self, indata: In) -> Option<Out> {
-    let f = self.func.read().unwrap();
-    if let Some(ff) = &*f {
-      Some(ff(indata))
+    if let Some(ff) = self.fetch_function() {
+      Some((ff.func)(indata))
     } else {
       None
     }
   }
   pub fn call_and_clear_if_available(&self, indata: In) -> Option<Out> {
-    let mut f = self.func.write().unwrap();
-    let ret = {
-      if let Some(ff) = &*f {
-        Some(ff(indata))
+    let f = {
+      let mut f = self.inner.write().unwrap();
+      if let Some(x) = &*f {
+        let x = x.clone();
+        *f = None;
+        Some(x)
       } else {
         None
       }
     };
-    *f = None;
-    ret
+    if let Some(f) = f {
+      Some((f.func)(indata))
+    } else {
+      None
+    }
   }
 }
 
