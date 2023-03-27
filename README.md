@@ -78,6 +78,7 @@ Based on the problems of `rxRust`, `another-rxrust` has the following implementa
 - never
 - error
 - empty
+- from_iter
 
 ### operator
 

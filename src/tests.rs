@@ -1,5 +1,5 @@
 pub mod basic;
 
-pub mod schedulers {
+pub mod tests {
   pub use crate::tests::basic::*;
 }
