@@ -86,6 +86,16 @@ where
     }
   }
 
+  pub fn upstream_unsubscribe(&self, serial: &i32) {
+    let mut s = self.subscriptions.write().unwrap();
+    let o = s.remove(serial);
+    if let Some(o) = o {
+      if let Some(o) = o {
+        o.unsubscribe();
+      }
+    }
+  }
+
   pub fn finalize(&self) {
     self.subscriptions.read().unwrap().iter().for_each(|x| {
       if let Some(sbsc) = x.1 {
