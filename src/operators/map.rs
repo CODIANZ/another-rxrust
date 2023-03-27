@@ -1,4 +1,7 @@
-use crate::{internals::function_wrapper::FunctionWrapper, prelude::*};
+use crate::{
+  internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController},
+  prelude::*,
+};
 
 pub struct MapOp<In, Out>
 where
@@ -27,20 +30,27 @@ where
     Observable::<Out>::create(move |s| {
       let f = f.clone();
 
-      let s_next = s.clone();
-      let s_error = s.clone();
-      let s_complete = s.clone();
-      let sbsc = source.subscribe(
-        move |x| {
-          s_next.next(f.call(x));
-        },
-        move |e| {
-          s_error.error(e);
-        },
-        move || s_complete.complete(),
+      let sctl = StreamController::new(s);
+      let sctl_next = sctl.clone();
+      let sctl_error = sctl.clone();
+      let sctl_complete = sctl.clone();
+
+      let serial = sctl.upstream_prepare_serial();
+
+      sctl.upstream_subscribe(
+        &serial,
+        source.subscribe(
+          move |x| {
+            sctl_next.sink_next(f.call(x));
+          },
+          move |e| {
+            sctl_error.sink_error(e);
+          },
+          move || sctl_complete.sink_complete(&serial),
+        ),
       );
       Subscription::new(move || {
-        sbsc.unsubscribe();
+        sctl.finalize();
       })
     })
   }
