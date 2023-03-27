@@ -18,7 +18,6 @@ fn main() {
       s.next(3);
       s.next(4);
       s.complete();
-      Subscription::new(|| {})
     })
   }
 

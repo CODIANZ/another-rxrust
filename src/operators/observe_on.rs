@@ -1,6 +1,6 @@
 use crate::{
   internals::stream_controller::StreamController,
-  prelude::{schedulers::IScheduler, Observable, Subscription},
+  prelude::{schedulers::IScheduler, Observable},
 };
 use std::marker::PhantomData;
 
@@ -41,26 +41,17 @@ where
           let sctl_next = sctl.clone();
           let sctl_error = sctl.clone();
           let sctl_complete = sctl.clone();
-          let serial = sctl.upstream_prepare_serial();
-          sctl.upstream_subscribe(
-            &serial,
-            source_next.subscribe(
-              move |x| {
-                sctl_next.sink_next(x);
-              },
-              move |e| {
-                sctl_error.sink_error(e);
-              },
-              move || sctl_complete.sink_complete(&serial),
-            ),
-          );
+          source_next.inner_subscribe(sctl.new_observer(
+            move |_, x| {
+              sctl_next.sink_next(x);
+            },
+            move |_, e| {
+              sctl_error.sink_error(e);
+            },
+            move |serial| sctl_complete.sink_complete(&serial),
+          ));
         });
       }
-      let scheduler = scheduler.clone();
-      Subscription::new(move || {
-        sctl.finalize();
-        scheduler.stop();
-      })
     })
   }
 }
@@ -78,7 +69,6 @@ mod test {
         thread::sleep(time::Duration::from_millis(100));
       }
       s.complete();
-      Subscription::new(|| {})
     });
 
     o.observe_on(schedulers::new_thread()).subscribe(

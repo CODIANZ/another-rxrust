@@ -6,7 +6,6 @@ where
 {
   Observable::<Item>::create(|s| {
     s.complete();
-    Subscription::new(|| {})
   })
 }
 

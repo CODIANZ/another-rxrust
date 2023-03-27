@@ -1,4 +1,7 @@
-use crate::{internals::function_wrapper::FunctionWrapper, prelude::*};
+use crate::{
+  internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController},
+  prelude::*,
+};
 
 pub struct MapOp<In, Out>
 where
@@ -27,21 +30,20 @@ where
     Observable::<Out>::create(move |s| {
       let f = f.clone();
 
-      let s_next = s.clone();
-      let s_error = s.clone();
-      let s_complete = s.clone();
-      let sbsc = source.subscribe(
-        move |x| {
-          s_next.next(f.call(x));
+      let sctl = StreamController::new(s);
+      let sctl_next = sctl.clone();
+      let sctl_error = sctl.clone();
+      let sctl_complete = sctl.clone();
+
+      source.inner_subscribe(sctl.new_observer(
+        move |_, x| {
+          sctl_next.sink_next(f.call(x));
         },
-        move |e| {
-          s_error.error(e);
+        move |_, e| {
+          sctl_error.sink_error(e);
         },
-        move || s_complete.complete(),
-      );
-      Subscription::new(move || {
-        sbsc.unsubscribe();
-      })
+        move |serial| sctl_complete.sink_complete(&serial),
+      ));
     })
   }
 }
@@ -49,10 +51,7 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use std::{
-    sync::{Arc, RwLock},
-    thread, time,
-  };
+  use std::{thread, time};
 
   #[test]
   fn basic() {
@@ -61,7 +60,6 @@ mod test {
         s.next(n);
       }
       s.complete();
-      Subscription::new(|| {})
     });
 
     o.map(|x| x * 2).subscribe(
@@ -74,29 +72,20 @@ mod test {
   #[test]
   fn map_thread() {
     let o = Observable::create(|s| {
-      let is_subscribed = Arc::new(RwLock::new(true));
-      {
-        let is_subscribed = Arc::clone(&is_subscribed);
-        let s = Arc::new(s);
-        thread::spawn(move || {
-          for n in 0..100 {
-            if !*is_subscribed.read().unwrap() {
-              println!("break!");
-              break;
-            }
-            s.next(n);
-            thread::sleep(time::Duration::from_millis(100));
+      thread::spawn(move || {
+        for n in 0..100 {
+          if !s.is_subscribed() {
+            println!("break!");
+            break;
           }
-          if *is_subscribed.read().unwrap() {
-            s.complete();
-          }
-        });
-      }
-      Subscription::new(move || {
-        *is_subscribed.write().unwrap() = false;
-      })
+          s.next(n);
+          thread::sleep(time::Duration::from_millis(100));
+        }
+        if s.is_subscribed() {
+          s.complete();
+        }
+      });
     });
-
     let sbsc = o.map(|x| format!("str {}", x)).subscribe(
       |x| println!("next {}", x),
       |e| println!("error {:}", e.error),

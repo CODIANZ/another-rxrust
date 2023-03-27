@@ -7,7 +7,6 @@ where
   Observable::create(move |s| {
     s.next(x.clone());
     s.complete();
-    Subscription::new(|| {})
   })
 }
 
