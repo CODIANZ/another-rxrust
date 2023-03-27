@@ -13,7 +13,7 @@ where
 {
   serial: Arc<RwLock<i32>>,
   subscriber: Observer<Item>,
-  subscriptions: Arc<RwLock<HashMap<i32, Option<Subscription>>>>,
+  unscribers: Arc<RwLock<HashMap<i32, FunctionWrapper<(), ()>>>>,
   on_finalize: Arc<RwLock<Vec<FunctionWrapper<(), ()>>>>,
 }
 
@@ -25,7 +25,7 @@ where
     StreamController {
       serial: Arc::new(RwLock::new(0)),
       subscriber: subscriber,
-      subscriptions: Arc::new(RwLock::new(HashMap::new())),
+      unscribers: Arc::new(RwLock::new(HashMap::new())),
       on_finalize: Arc::new(RwLock::new(Vec::new())),
     }
   }
@@ -41,69 +41,90 @@ where
       .push(FunctionWrapper::new(move |_| f()));
   }
 
-  pub fn upstream_prepare_serial(&self) -> i32 {
-    let ret = {
+  pub fn new_observer<XItem, Next, Error, Complete>(
+    &self,
+    next: Next,
+    error: Error,
+    complete: Complete,
+  ) -> Observer<XItem>
+  where
+    XItem: Clone + Send + Sync + 'static,
+    Next: Fn(i32, XItem) + Send + Sync + 'static,
+    Error: Fn(i32, RxError) + Send + Sync + 'static,
+    Complete: Fn(i32) -> () + Send + Sync + 'static,
+  {
+    let serial = {
       let mut x = self.serial.write().unwrap();
       let ret = *x;
       *x += 1;
       ret
     };
 
-    self
-      .subscriptions
-      .write()
-      .unwrap()
-      .insert(ret.clone(), None);
+    let serial_next = serial.clone();
+    let serial_error = serial.clone();
+    let serial_complete = serial.clone();
+    let observer = Observer::new(
+      move |x| next(serial_next, x),
+      move |e| error(serial_error, e),
+      move || complete(serial_complete),
+    );
+    let o_unsub = observer.clone();
 
-    ret
+    let mut unsubscribers = self.unscribers.write().unwrap();
+    unsubscribers.insert(
+      serial.clone(),
+      FunctionWrapper::new(move |_| o_unsub.unsubscribe()),
+    );
+    observer
   }
 
   pub fn sink_next(&self, x: Item) {
-    self.subscriber.next(x);
-  }
-
-  pub fn sink_error(&self, e: RxError) {
-    self.subscriber.error(e);
-    self.finalize();
-  }
-
-  pub fn sink_complete(&self, serial: &i32) {
-    let done_all = {
-      let mut s = self.subscriptions.write().unwrap();
-      s.remove(serial);
-      s.len() == 0
-    };
-    if done_all {
-      self.subscriber.complete();
+    if self.subscriber.is_subscribed() {
+      self.subscriber.next(x);
+    } else {
       self.finalize();
     }
   }
 
-  pub fn upstream_subscribe(&self, serial: &i32, sbsc: Subscription) {
-    let mut s = self.subscriptions.write().unwrap();
-    if s.contains_key(serial) {
-      s.insert(serial.clone(), Some(sbsc));
+  pub fn sink_error(&self, e: RxError) {
+    if self.subscriber.is_subscribed() {
+      self.subscriber.error(e);
+      self.finalize();
+    } else {
+      self.finalize();
     }
   }
 
-  pub fn upstream_unsubscribe(&self, serial: &i32) {
-    let mut s = self.subscriptions.write().unwrap();
-    let o = s.remove(serial);
-    if let Some(o) = o {
-      if let Some(o) = o {
-        o.unsubscribe();
+  pub fn sink_complete(&self, serial: &i32) {
+    if self.subscriber.is_subscribed() {
+      let done_all = {
+        let mut observers = self.unscribers.write().unwrap();
+        observers.remove(serial);
+        observers.len() == 0
+      };
+      if done_all {
+        self.subscriber.complete();
+        self.finalize();
       }
+    } else {
+      self.finalize();
+    }
+  }
+
+  pub fn upstream_abort_observe(&self, serial: &i32) {
+    let mut observers = self.unscribers.write().unwrap();
+    let o = observers.remove(serial);
+    if let Some(o) = o {
+      o.call(());
     }
   }
 
   pub fn finalize(&self) {
-    self.subscriptions.read().unwrap().iter().for_each(|x| {
-      if let Some(sbsc) = x.1 {
-        sbsc.unsubscribe();
-      }
+    self.unscribers.read().unwrap().iter().for_each(|x| {
+      x.1.call(());
     });
-    self.subscriptions.write().unwrap().clear();
-    self.subscriber.close();
+    self.unscribers.write().unwrap().clear();
+    self.subscriber.unsubscribe();
     let mut handlers = self.on_finalize.write().unwrap();
     handlers.iter().for_each(|h| h.call(()));
     handlers.clear();

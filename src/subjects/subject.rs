@@ -57,10 +57,6 @@ where
         let mut observables = observables.write().unwrap();
         observables.insert(serial, s);
       }
-      let observables = Arc::clone(&observables);
-      Subscription::new(move || {
-        observables.write().unwrap().remove(&serial);
-      })
     })
   }
 }

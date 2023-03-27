@@ -35,23 +35,15 @@ where
       let sctl_error = sctl.clone();
       let sctl_complete = sctl.clone();
 
-      let serial = sctl.upstream_prepare_serial();
-
-      sctl.upstream_subscribe(
-        &serial,
-        source.subscribe(
-          move |x| {
-            sctl_next.sink_next(f.call(x));
-          },
-          move |e| {
-            sctl_error.sink_error(e);
-          },
-          move || sctl_complete.sink_complete(&serial),
-        ),
-      );
-      Subscription::new(move || {
-        sctl.finalize();
-      })
+      source.inner_subscribe(sctl.new_observer(
+        move |_, x| {
+          sctl_next.sink_next(f.call(x));
+        },
+        move |_, e| {
+          sctl_error.sink_error(e);
+        },
+        move |serial| sctl_complete.sink_complete(&serial),
+      ));
     })
   }
 }
@@ -59,10 +51,7 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use std::{
-    sync::{Arc, RwLock},
-    thread, time,
-  };
+  use std::{thread, time};
 
   #[test]
   fn basic() {
@@ -71,7 +60,6 @@ mod test {
         s.next(n);
       }
       s.complete();
-      Subscription::new(|| {})
     });
 
     o.map(|x| x * 2).subscribe(
@@ -84,29 +72,20 @@ mod test {
   #[test]
   fn map_thread() {
     let o = Observable::create(|s| {
-      let is_subscribed = Arc::new(RwLock::new(true));
-      {
-        let is_subscribed = Arc::clone(&is_subscribed);
-        let s = Arc::new(s);
-        thread::spawn(move || {
-          for n in 0..100 {
-            if !*is_subscribed.read().unwrap() {
-              println!("break!");
-              break;
-            }
-            s.next(n);
-            thread::sleep(time::Duration::from_millis(100));
+      thread::spawn(move || {
+        for n in 0..100 {
+          if !s.is_subscribed() {
+            println!("break!");
+            break;
           }
-          if *is_subscribed.read().unwrap() {
-            s.complete();
-          }
-        });
-      }
-      Subscription::new(move || {
-        *is_subscribed.write().unwrap() = false;
-      })
+          s.next(n);
+          thread::sleep(time::Duration::from_millis(100));
+        }
+        if s.is_subscribed() {
+          s.complete();
+        }
+      });
     });
-
     let sbsc = o.map(|x| format!("str {}", x)).subscribe(
       |x| println!("next {}", x),
       |e| println!("error {:}", e.error),

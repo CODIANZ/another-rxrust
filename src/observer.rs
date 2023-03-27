@@ -35,10 +35,13 @@ where
   pub fn complete(&self) {
     self.fn_complete.call_and_clear_if_available(());
   }
-  pub fn close(&self) {
+  pub fn unsubscribe(&self) {
     self.fn_next.clear();
     self.fn_error.clear();
     self.fn_complete.clear();
+  }
+  pub fn is_subscribed(&self) -> bool {
+    self.fn_next.exists() && self.fn_error.exists() && self.fn_complete.exists()
   }
 }
 
@@ -86,7 +89,7 @@ mod test {
     );
     ob.next(1);
     ob.next(2);
-    ob.close();
+    ob.unsubscribe();
   }
 
   #[test]

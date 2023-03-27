@@ -35,44 +35,31 @@ where
       let sctl_error = sctl.clone();
       let sctl_complete = sctl.clone();
 
-      let serial = sctl.upstream_prepare_serial();
+      source.inner_subscribe(sctl.new_observer(
+        move |_, x| {
+          let sctl_next_next = sctl_next.clone();
+          let sctl_next_error = sctl_next.clone();
+          let sctl_next_complete = sctl_next.clone();
 
-      sctl.upstream_subscribe(
-        &serial,
-        source.subscribe(
-          move |x| {
-            let sctl_next_next = sctl_next.clone();
-            let sctl_next_error = sctl_next.clone();
-            let sctl_next_complete = sctl_next.clone();
-
-            let serial_next = sctl_next.upstream_prepare_serial();
-
-            sctl_next.upstream_subscribe(
-              &serial_next,
-              f.call(x).subscribe(
-                move |xx| {
-                  sctl_next_next.sink_next(xx);
-                },
-                move |ee| {
-                  sctl_next_error.sink_error(ee);
-                },
-                move || {
-                  sctl_next_complete.sink_complete(&serial_next);
-                },
-              ),
-            );
-          },
-          move |e| {
-            sctl_error.sink_error(e);
-          },
-          move || {
-            sctl_complete.sink_complete(&serial);
-          },
-        ),
-      );
-      Subscription::new(move || {
-        sctl.finalize();
-      })
+          f.call(x).inner_subscribe(sctl_next.new_observer(
+            move |_, xx| {
+              sctl_next_next.sink_next(xx);
+            },
+            move |_, ee| {
+              sctl_next_error.sink_error(ee);
+            },
+            move |serial| {
+              sctl_next_complete.sink_complete(&serial);
+            },
+          ));
+        },
+        move |_, e| {
+          sctl_error.sink_error(e);
+        },
+        move |serial| {
+          sctl_complete.sink_complete(&serial);
+        },
+      ));
     })
   }
 }
@@ -80,10 +67,7 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use std::{
-    sync::{Arc, RwLock},
-    thread, time,
-  };
+  use std::{thread, time};
 
   #[test]
   fn basic() {
@@ -92,7 +76,6 @@ mod test {
         s.next(n);
       }
       s.complete();
-      Subscription::new(|| {})
     });
 
     o.flat_map(|x| observables::just(x * 2)).subscribe(
@@ -105,27 +88,19 @@ mod test {
   #[test]
   fn thread() {
     let o = Observable::create(|s| {
-      let is_subscribed = Arc::new(RwLock::new(true));
-      {
-        let is_subscribed = Arc::clone(&is_subscribed);
-        let s = Arc::new(s);
-        thread::spawn(move || {
-          for n in 0..100 {
-            if !*is_subscribed.read().unwrap() {
-              println!("break!");
-              break;
-            }
-            s.next(n);
-            thread::sleep(time::Duration::from_millis(100));
+      thread::spawn(move || {
+        for n in 0..100 {
+          if !s.is_subscribed() {
+            println!("break!");
+            break;
           }
-          if *is_subscribed.read().unwrap() {
-            s.complete();
-          }
-        });
-      }
-      Subscription::new(move || {
-        *is_subscribed.write().unwrap() = false;
-      })
+          s.next(n);
+          thread::sleep(time::Duration::from_millis(100));
+        }
+        if s.is_subscribed() {
+          s.complete();
+        }
+      });
     });
 
     let sbsc = o
@@ -144,35 +119,29 @@ mod test {
   fn composite() {
     fn o() -> Observable<i32> {
       Observable::create(|s| {
-        let is_subscribed = Arc::new(RwLock::new(true));
-        {
-          let is_subscribed = Arc::clone(&is_subscribed);
-          let s = Arc::new(s);
-          thread::spawn(move || {
-            for n in 0..100 {
-              if !*is_subscribed.read().unwrap() {
-                println!("break!");
-                break;
-              }
-              s.next(n);
-              thread::sleep(time::Duration::from_millis(100));
+        thread::spawn(move || {
+          for n in 0..100 {
+            if !s.is_subscribed() {
+              println!("break!");
+              break;
             }
-            if *is_subscribed.read().unwrap() {
-              s.complete();
-            }
-          });
-        }
-        Subscription::new(move || {
-          *is_subscribed.write().unwrap() = false;
-        })
+            s.next(n);
+            thread::sleep(time::Duration::from_millis(100));
+          }
+          if s.is_subscribed() {
+            s.complete();
+          }
+        });
       })
     }
 
-    o().flat_map(move |_x| o()).subscribe(
+    let sbsc = o().flat_map(move |_x| o()).subscribe(
       |x| println!("next {}", x),
       |e| println!("error {:}", e.error),
       || println!("complete"),
     );
-    thread::sleep(time::Duration::from_millis(1000));
+    thread::sleep(time::Duration::from_millis(500));
+    sbsc.unsubscribe();
+    thread::sleep(time::Duration::from_millis(500));
   }
 }

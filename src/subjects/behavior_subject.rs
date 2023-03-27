@@ -48,28 +48,25 @@ where
 
         if let Some(err) = last_error {
           s.error(err.clone());
-          return Subscription::new(|| {});
+          return;
         }
         if let Some(item) = last_item {
           s.next(item.clone());
         } else {
           s.complete();
-          return Subscription::new(|| {});
+          return;
         }
       }
       let s_next = s.clone();
       let s_error = s.clone();
       let s_complete = s.clone();
-      let sbsc = subject.observable().subscribe(
+      subject.observable().subscribe(
         move |x| s_next.next(x),
         move |e| s_error.error(e),
         move || {
           s_complete.complete();
         },
       );
-      Subscription::new(move || {
-        sbsc.unsubscribe();
-      })
     })
   }
 }

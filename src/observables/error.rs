@@ -6,7 +6,6 @@ where
 {
   Observable::<Item>::create(move |s| {
     s.error(err.clone());
-    Subscription::new(|| {})
   })
 }
 

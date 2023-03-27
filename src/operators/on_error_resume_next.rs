@@ -1,6 +1,6 @@
 use crate::{
   internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController},
-  observable::{Observable, Subscription},
+  observable::Observable,
   prelude::RxError,
 };
 
@@ -34,47 +34,33 @@ where
       let sctl_error = sctl.clone();
       let sctl_complete = sctl.clone();
 
-      let serial = sctl.upstream_prepare_serial();
-      let serial_upstream = serial.clone();
+      source.inner_subscribe(sctl.new_observer(
+        move |_, x| {
+          sctl_next.sink_next(x);
+        },
+        move |serial, e| {
+          sctl_error.upstream_abort_observe(&serial);
 
-      sctl.upstream_subscribe(
-        &serial,
-        source.subscribe(
-          move |x| {
-            sctl_next.sink_next(x);
-          },
-          move |e| {
-            sctl_error.upstream_unsubscribe(&serial_upstream);
+          let sctl_error_next = sctl_error.clone();
+          let sctl_error_error = sctl_error.clone();
+          let sctl_error_complete = sctl_error.clone();
 
-            let sctl_error_next = sctl_error.clone();
-            let sctl_error_error = sctl_error.clone();
-            let sctl_error_complete = sctl_error.clone();
-
-            let serial_error = sctl_error.upstream_prepare_serial();
-
-            sctl_error.upstream_subscribe(
-              &serial_error,
-              f.call(e).subscribe(
-                move |xx| {
-                  sctl_error_next.sink_next(xx);
-                },
-                move |ee| {
-                  sctl_error_error.sink_error(ee);
-                },
-                move || {
-                  sctl_error_complete.sink_complete(&serial_error);
-                },
-              ),
-            );
-          },
-          move || {
-            sctl_complete.sink_complete(&serial);
-          },
-        ),
-      );
-      Subscription::new(move || {
-        sctl.finalize();
-      })
+          f.call(e).inner_subscribe(sctl_error.new_observer(
+            move |_, xx| {
+              sctl_error_next.sink_next(xx);
+            },
+            move |_, ee| {
+              sctl_error_error.sink_error(ee);
+            },
+            move |serial| {
+              sctl_error_complete.sink_complete(&serial);
+            },
+          ));
+        },
+        move |serial| {
+          sctl_complete.sink_complete(&serial);
+        },
+      ));
     })
   }
 }

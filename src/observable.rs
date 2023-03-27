@@ -26,7 +26,7 @@ pub struct Observable<Item>
 where
   Item: Clone + Send + Sync + 'static,
 {
-  source: FunctionWrapper<Observer<Item>, Subscription>,
+  source: FunctionWrapper<Observer<Item>, ()>,
 }
 
 impl<Item> Observable<Item>
@@ -35,7 +35,7 @@ where
 {
   pub fn create<Source>(source: Source) -> Observable<Item>
   where
-    Source: Fn(Observer<Item>) -> Subscription + Send + Sync + 'static,
+    Source: Fn(Observer<Item>) + Send + Sync + 'static,
   {
     Observable {
       source: FunctionWrapper::new(source),
@@ -44,10 +44,9 @@ where
 
   pub(crate) fn inner_subscribe(&self, observer: Observer<Item>) -> Subscription {
     let unsub_observer = observer.clone();
-    let subscription = self.source.call(observer.clone());
+    self.source.call(observer.clone());
     Subscription::new(move || {
-      unsub_observer.close();
-      subscription.unsubscribe();
+      unsub_observer.unsubscribe();
     })
   }
 
@@ -94,15 +93,16 @@ where
   {
     operators::ObserveOnOp::new(s).execute(self.clone())
   }
+
+  pub fn take(&self, count: usize) -> Observable<Item> {
+    operators::TakeOp::new(count).execute(self.clone())
+  }
 }
 
 #[cfg(test)]
 mod test {
-  use super::{Observable, Subscription};
-  use std::{
-    sync::{Arc, RwLock},
-    thread, time,
-  };
+  use super::Observable;
+  use std::{thread, time};
 
   #[test]
   fn basic() {
@@ -111,7 +111,6 @@ mod test {
         s.next(n);
       }
       s.complete();
-      Subscription::new(|| {})
     });
 
     o.subscribe(
@@ -130,25 +129,17 @@ mod test {
   #[test]
   fn thread() {
     let o = Observable::create(|s| {
-      let is_subscribed = Arc::new(RwLock::new(true));
-      {
-        let is_subscribed = Arc::clone(&is_subscribed);
-        let s = Arc::new(s);
-        thread::spawn(move || {
-          for n in 0..100 {
-            if !*is_subscribed.read().unwrap() {
-              break;
-            }
-            s.next(n);
+      thread::spawn(move || {
+        for n in 0..100 {
+          if !s.is_subscribed() {
+            break;
           }
-          if *is_subscribed.read().unwrap() {
-            s.complete();
-          }
-        });
-      }
-      Subscription::new(move || {
-        *is_subscribed.write().unwrap() = false;
-      })
+          s.next(n);
+        }
+        if s.is_subscribed() {
+          s.complete();
+        }
+      });
     });
 
     o.subscribe(
@@ -162,27 +153,19 @@ mod test {
   #[test]
   fn unsubscribe() {
     let o = Observable::create(|s| {
-      let is_subscribed = Arc::new(RwLock::new(true));
-      {
-        let is_subscribed = Arc::clone(&is_subscribed);
-        let s = Arc::new(s);
-        thread::spawn(move || {
-          for n in 0..100 {
-            if !*is_subscribed.read().unwrap() {
-              println!("break!");
-              break;
-            }
-            s.next(n);
-            thread::sleep(time::Duration::from_millis(100));
+      thread::spawn(move || {
+        for n in 0..100 {
+          if !s.is_subscribed() {
+            println!("break!");
+            break;
           }
-          if *is_subscribed.read().unwrap() {
-            s.complete();
-          }
-        });
-      }
-      Subscription::new(move || {
-        *is_subscribed.write().unwrap() = false;
-      })
+          s.next(n);
+          thread::sleep(time::Duration::from_millis(100));
+        }
+        if s.is_subscribed() {
+          s.complete();
+        }
+      });
     });
 
     let sbsc = o.subscribe(
