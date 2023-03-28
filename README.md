@@ -22,7 +22,7 @@ fn basic() {
   }
 
   ob()
-    .observe_on(schedulers::new_thread())
+    .observe_on(schedulers::new_thread_scheduler())
     .flat_map(|x| match x {
       1 => observables::empty(),
       2 => observables::just(x),
@@ -79,6 +79,7 @@ Based on the problems of `rxRust`, `another-rxrust` has the following implementa
 - error
 - empty
 - from_iter
+- timer
 
 ### operator
 
@@ -98,4 +99,5 @@ Based on the problems of `rxRust`, `another-rxrust` has the following implementa
 
 ### scheduler
 
-- new_thread
+- new_thread_scheduler
+- default_scheduler
