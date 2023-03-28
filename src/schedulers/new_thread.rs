@@ -28,7 +28,7 @@ impl IScheduler<'static> for NewThreadScheduler<'static> {
 
   fn post<F>(&self, f: F)
   where
-    F: Fn() + Clone + Send + Sync + 'static,
+    F: Fn() + Send + Sync + 'static,
   {
     self.scheduler.post(f);
   }
