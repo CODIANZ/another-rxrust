@@ -19,8 +19,8 @@ impl IScheduler<'_> for DefaultScheduler {
   fn abort(&self) {}
 }
 
-pub fn default_scheduler() -> DefaultScheduler {
-  DefaultScheduler::new()
+pub fn default_scheduler() -> fn() -> DefaultScheduler {
+  || DefaultScheduler::new()
 }
 
 #[cfg(test)]
@@ -32,7 +32,7 @@ mod test {
   #[test]
   fn basic() {
     {
-      let s = schedulers::default_scheduler();
+      let s = schedulers::default_scheduler()();
 
       s.post(|| {
         println!("#1 start");

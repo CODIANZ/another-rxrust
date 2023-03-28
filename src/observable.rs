@@ -86,18 +86,26 @@ where
     operators::OnErrorResumeNextOp::new(f).execute(self.clone())
   }
 
-  pub fn observe_on<S>(&self, s: S) -> Observable<'a, Item>
+  pub fn observe_on<Scheduler, SchedulerCreator>(
+    &self,
+    scheduler_ctor: SchedulerCreator,
+  ) -> Observable<'a, Item>
   where
-    S: IScheduler<'a> + Clone + Send + Sync + 'a,
+    Scheduler: IScheduler<'a> + Clone + Send + Sync + 'a,
+    SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
   {
-    operators::ObserveOnOp::new(s).execute(self.clone())
+    operators::ObserveOnOp::new(scheduler_ctor).execute(self.clone())
   }
 
-  pub fn subscribe_on<S>(&self, s: S) -> Observable<'a, Item>
+  pub fn subscribe_on<Scheduler, SchedulerCreator>(
+    &self,
+    scheduler_ctor: SchedulerCreator,
+  ) -> Observable<'a, Item>
   where
-    S: IScheduler<'a> + Clone + Send + Sync + 'a,
+    Scheduler: IScheduler<'a> + Clone + Send + Sync + 'a,
+    SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
   {
-    operators::SubscribeOnOp::new(s).execute(self.clone())
+    operators::SubscribeOnOp::new(scheduler_ctor).execute(self.clone())
   }
 
   pub fn take(&self, count: usize) -> Observable<'a, Item> {

@@ -1,5 +1,5 @@
 use crate::{
-  internals::stream_controller::StreamController,
+  internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController},
   prelude::{schedulers::IScheduler, Observable},
 };
 use std::marker::PhantomData;
@@ -9,27 +9,34 @@ where
   Scheduler: IScheduler<'a> + Clone + Send + Sync,
   Item: Clone + Send + Sync,
 {
-  scheduler: Scheduler,
+  scheduler_ctor: FunctionWrapper<'a, (), Scheduler>,
   _item: PhantomData<Item>,
   _lifetime: PhantomData<&'a ()>,
 }
 
 impl<'a, Scheduler, Item> SubscribeOnOp<'a, Scheduler, Item>
 where
-  Scheduler: IScheduler<'a> + Clone + Send + Sync + 'a,
+  Scheduler: IScheduler<'a> + Clone + Send + Sync,
   Item: Clone + Send + Sync,
 {
-  pub fn new(scheduler: Scheduler) -> SubscribeOnOp<'a, Scheduler, Item> {
+  pub fn new<SchedulerCreator>(
+    scheduler_ctor: SchedulerCreator,
+  ) -> SubscribeOnOp<'a, Scheduler, Item>
+  where
+    SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
+  {
     SubscribeOnOp {
-      scheduler,
+      scheduler_ctor: FunctionWrapper::new(move |_| scheduler_ctor()),
       _item: PhantomData,
       _lifetime: PhantomData,
     }
   }
 
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
-    let scheduler = self.scheduler.clone();
+    let scheduler_ctor = self.scheduler_ctor.clone();
     Observable::create(move |s| {
+      let scheduler = scheduler_ctor.call(());
+
       let sctl = StreamController::new(s);
 
       let sctl_next = sctl.clone();
@@ -92,6 +99,32 @@ mod test {
         |e| println!("error {:}", e.error),
         || println!("complete"),
       );
+    thread::sleep(time::Duration::from_millis(1000));
+  }
+
+  #[test]
+  fn multiple() {
+    let o = Observable::create(|s| {
+      for n in 0..5 {
+        s.next(n);
+        thread::sleep(time::Duration::from_millis(100));
+      }
+      s.complete();
+    })
+    .subscribe_on(schedulers::new_thread_scheduler());
+
+    o.subscribe(
+      |x| println!("#1 next {}", x),
+      |e| println!("#1 error {:}", e.error),
+      || println!("#1 complete"),
+    );
+
+    o.subscribe(
+      |x| println!("#2 next {}", x),
+      |e| println!("#2 error {:}", e.error),
+      || println!("#2 complete"),
+    );
+
     thread::sleep(time::Duration::from_millis(1000));
   }
 }

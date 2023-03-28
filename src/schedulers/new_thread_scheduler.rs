@@ -31,20 +31,20 @@ impl IScheduler<'static> for NewThreadScheduler<'static> {
   }
 }
 
-pub fn new_thread_scheduler() -> NewThreadScheduler<'static> {
-  NewThreadScheduler::new()
+pub fn new_thread_scheduler<'a>() -> fn() -> NewThreadScheduler<'static> {
+  || NewThreadScheduler::new()
 }
 
 #[cfg(test)]
 mod test {
-  use super::NewThreadScheduler;
+  use super::new_thread_scheduler;
   use crate::prelude::schedulers::IScheduler;
   use std::{thread, time};
 
   #[test]
   fn basic() {
     {
-      let s = NewThreadScheduler::new();
+      let s = new_thread_scheduler()();
 
       s.post(|| {
         println!("#1 start");
