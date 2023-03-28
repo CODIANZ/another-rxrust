@@ -97,6 +97,10 @@ where
   pub fn take(&self, count: usize) -> Observable<'a, Item> {
     operators::TakeOp::new(count).execute(self.clone())
   }
+
+  pub fn take_last(&self, count: usize) -> Observable<'a, Item> {
+    operators::TakeLastOp::new(count).execute(self.clone())
+  }
 }
 
 #[cfg(test)]

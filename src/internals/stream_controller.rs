@@ -113,4 +113,17 @@ where
     self.unscribers.write().unwrap().clear();
     self.subscriber.unsubscribe();
   }
+
+  pub fn is_subscribed(&self) -> bool {
+    self.subscriber.is_subscribed()
+  }
+}
+
+impl<'a, Item> Drop for StreamController<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  fn drop(&mut self) {
+    self.finalize();
+  }
 }
