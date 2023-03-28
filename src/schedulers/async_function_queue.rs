@@ -4,20 +4,20 @@ use std::{
   sync::{Arc, Condvar, Mutex, RwLock},
 };
 
-struct SchedulerControl<'a> {
+struct AsyncFunctionQueueData<'a> {
   queue: Mutex<VecDeque<FunctionWrapper<'a, (), ()>>>,
   cond: Condvar,
   abort: RwLock<bool>,
 }
 
 #[derive(Clone)]
-pub struct AsyncScheduler<'a> {
-  ctrl: Arc<SchedulerControl<'a>>,
+pub struct AsyncFunctionQueue<'a> {
+  data: Arc<AsyncFunctionQueueData<'a>>,
 }
-impl<'a> AsyncScheduler<'a> {
-  pub fn new() -> AsyncScheduler<'a> {
-    AsyncScheduler {
-      ctrl: Arc::new(SchedulerControl {
+impl<'a> AsyncFunctionQueue<'a> {
+  pub fn new() -> AsyncFunctionQueue<'a> {
+    AsyncFunctionQueue {
+      data: Arc::new(AsyncFunctionQueueData {
         queue: Mutex::new(VecDeque::new()),
         cond: Condvar::new(),
         abort: RwLock::new(false),
@@ -28,19 +28,19 @@ impl<'a> AsyncScheduler<'a> {
   pub fn scheduling(&self) {
     loop {
       let f = {
-        let que_mtx = self.ctrl.queue.lock().unwrap();
+        let que_mtx = self.data.queue.lock().unwrap();
         let mut que_mtx = self
-          .ctrl
+          .data
           .cond
           .wait_while(que_mtx, |que| {
-            if *self.ctrl.abort.read().unwrap() {
+            if *self.data.abort.read().unwrap() {
               false
             } else {
               que.is_empty()
             }
           })
           .unwrap();
-        if *self.ctrl.abort.read().unwrap() {
+        if *self.data.abort.read().unwrap() {
           None
         } else {
           que_mtx.pop_front()
@@ -58,27 +58,27 @@ impl<'a> AsyncScheduler<'a> {
   where
     F: Fn() + Send + Sync + 'a,
   {
-    let mut que_mtx = self.ctrl.queue.lock().unwrap();
+    let mut que_mtx = self.data.queue.lock().unwrap();
     que_mtx.push_back(FunctionWrapper::new(move |_| f()));
-    self.ctrl.cond.notify_one();
+    self.data.cond.notify_one();
   }
 
   pub fn stop(&self) {
-    let mut que_mtx = self.ctrl.queue.lock().unwrap();
+    let mut que_mtx = self.data.queue.lock().unwrap();
     que_mtx.clear();
-    *self.ctrl.abort.write().unwrap() = true;
-    self.ctrl.cond.notify_one();
+    *self.data.abort.write().unwrap() = true;
+    self.data.cond.notify_one();
   }
 }
 
 #[cfg(test)]
 mod test {
-  use crate::prelude::schedulers::AsyncScheduler;
+  use crate::prelude::schedulers::AsyncFunctionQueue;
   use std::{thread, time};
 
   #[test]
   fn basic() {
-    let scheduler = AsyncScheduler::new();
+    let scheduler = AsyncFunctionQueue::new();
     let scheduler_thread = scheduler.clone();
     thread::spawn(move || {
       scheduler_thread.scheduling();

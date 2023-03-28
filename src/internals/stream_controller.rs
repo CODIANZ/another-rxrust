@@ -98,6 +98,13 @@ where
     }
   }
 
+  pub fn sink_complete_force(&self) {
+    if self.subscriber.is_subscribed() {
+      self.subscriber.complete();
+    }
+    self.finalize();
+  }
+
   pub fn upstream_abort_observe(&self, serial: &i32) {
     let mut observers = self.unscribers.write().unwrap();
     let o = observers.remove(serial);
@@ -119,11 +126,11 @@ where
   }
 }
 
-impl<'a, Item> Drop for StreamController<'a, Item>
-where
-  Item: Clone + Send + Sync,
-{
-  fn drop(&mut self) {
-    self.finalize();
-  }
-}
+// impl<'a, Item> Drop for StreamController<'a, Item>
+// where
+//   Item: Clone + Send + Sync,
+// {
+//   fn drop(&mut self) {
+//     self.finalize();
+//   }
+// }

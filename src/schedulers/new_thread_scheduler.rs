@@ -1,14 +1,14 @@
-use super::schedulers::{AsyncScheduler, IScheduler};
+use super::schedulers::{AsyncFunctionQueue, IScheduler};
 use std::thread;
 
 #[derive(Clone)]
 pub struct NewThreadScheduler<'a> {
-  scheduler: AsyncScheduler<'a>,
+  scheduler: AsyncFunctionQueue<'a>,
 }
 
 impl NewThreadScheduler<'_> {
   pub fn new() -> NewThreadScheduler<'static> {
-    let scheduler = AsyncScheduler::new();
+    let scheduler = AsyncFunctionQueue::new();
 
     let scheduler_thread = scheduler.clone();
     thread::spawn(move || {
@@ -34,7 +34,7 @@ impl Drop for NewThreadScheduler<'_> {
   }
 }
 
-pub fn new_thread() -> NewThreadScheduler<'static> {
+pub fn new_thread_scheduler() -> NewThreadScheduler<'static> {
   NewThreadScheduler::new()
 }
 
