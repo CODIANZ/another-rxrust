@@ -93,6 +93,13 @@ where
     operators::ObserveOnOp::new(s).execute(self.clone())
   }
 
+  pub fn subscribe_on<S>(&self, s: S) -> Observable<'a, Item>
+  where
+    S: IScheduler<'a> + Clone + Send + Sync + 'a,
+  {
+    operators::SubscribeOnOp::new(s).execute(self.clone())
+  }
+
   pub fn take(&self, count: usize) -> Observable<'a, Item> {
     operators::TakeOp::new(count).execute(self.clone())
   }
