@@ -6,7 +6,7 @@ license = "MIT"
 homepage = "https://github.com/CODIANZ/another-rxrust"
 repository = "https://github.com/CODIANZ/another-rxrust"
 keywords = ["reactivex", "rx", "rxrust"]
-version = "0.0.9"
+version = "0.0.10"
 
 [dependencies]
 anyhow = { version = "1", features = ["backtrace"] }
