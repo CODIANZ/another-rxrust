@@ -144,6 +144,15 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync + PartialEq,
+{
+  pub fn distinct_until_changed(&self) -> Observable<'a, Item> {
+    operators::DistinctUntilChangedOp::new().execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use super::Observable;
