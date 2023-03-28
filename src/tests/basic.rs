@@ -41,4 +41,44 @@ mod test {
 
     thread::sleep(time::Duration::from_millis(500));
   }
+
+  #[test]
+  fn outside_var() {
+    #[derive(Clone)]
+    struct OutsideVar {
+      data: String,
+    }
+    let x = OutsideVar {
+      data: "abc".to_owned(),
+    };
+
+    let xx = x.clone();
+    let xxx = x.clone();
+
+    let jx = observables::just(x);
+
+    jx.subscribe(
+      |x| {
+        println!("next {}", x.data);
+      },
+      |e| {
+        println!("error {:}", e.error);
+      },
+      move || {
+        println!("complete {}", xx.data);
+      },
+    );
+
+    jx.subscribe(
+      |x| {
+        println!("next {}", x.data);
+      },
+      |e| {
+        println!("error {:}", e.error);
+      },
+      move || {
+        println!("complete {}", xxx.data);
+      },
+    );
+  }
 }
