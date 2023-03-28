@@ -26,10 +26,7 @@ impl IScheduler<'static> for NewThreadScheduler<'static> {
   {
     self.scheduler.post(f);
   }
-}
-
-impl Drop for NewThreadScheduler<'_> {
-  fn drop(&mut self) {
+  fn abort(&self) {
     self.scheduler.stop();
   }
 }

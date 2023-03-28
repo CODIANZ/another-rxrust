@@ -31,24 +31,27 @@ where
     let scheduler = self.scheduler.clone();
     Observable::create(move |s| {
       let sctl = StreamController::new(s);
-      {
-        let sctl = sctl.clone();
-        let source_next = source.clone();
-        scheduler.post(move || {
-          let sctl_next = sctl.clone();
-          let sctl_error = sctl.clone();
-          let sctl_complete = sctl.clone();
-          source_next.inner_subscribe(sctl.new_observer(
-            move |_, x| {
-              sctl_next.sink_next(x);
-            },
-            move |_, e| {
-              sctl_error.sink_error(e);
-            },
-            move |serial| sctl_complete.sink_complete(&serial),
-          ));
-        });
-      }
+      let source_next = source.clone();
+
+      let scheduler_on_finalize = scheduler.clone();
+      sctl.set_on_finalize(move || {
+        scheduler_on_finalize.abort();
+      });
+
+      scheduler.post(move || {
+        let sctl_next = sctl.clone();
+        let sctl_error = sctl.clone();
+        let sctl_complete = sctl.clone();
+        source_next.inner_subscribe(sctl.new_observer(
+          move |_, x| {
+            sctl_next.sink_next(x);
+          },
+          move |_, e| {
+            sctl_error.sink_error(e);
+          },
+          move |serial| sctl_complete.sink_complete(&serial),
+        ));
+      });
     })
   }
 }

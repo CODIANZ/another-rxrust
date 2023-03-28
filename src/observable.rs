@@ -93,6 +93,13 @@ where
     operators::ObserveOnOp::new(s).execute(self.clone())
   }
 
+  pub fn subscribe_on<S>(&self, s: S) -> Observable<'a, Item>
+  where
+    S: IScheduler<'a> + Clone + Send + Sync + 'a,
+  {
+    operators::SubscribeOnOp::new(s).execute(self.clone())
+  }
+
   pub fn take(&self, count: usize) -> Observable<'a, Item> {
     operators::TakeOp::new(count).execute(self.clone())
   }
@@ -141,6 +148,15 @@ where
     F: Fn(Item) -> bool + Send + Sync + 'a,
   {
     operators::SkipWhileOp::new(f).execute(self.clone())
+  }
+}
+
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync + PartialEq,
+{
+  pub fn distinct_until_changed(&self) -> Observable<'a, Item> {
+    operators::DistinctUntilChangedOp::new().execute(self.clone())
   }
 }
 

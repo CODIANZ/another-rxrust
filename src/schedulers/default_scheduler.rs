@@ -16,6 +16,7 @@ impl IScheduler<'_> for DefaultScheduler {
   {
     f();
   }
+  fn abort(&self) {}
 }
 
 pub fn default_scheduler() -> DefaultScheduler {

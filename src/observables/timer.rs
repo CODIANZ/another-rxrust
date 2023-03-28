@@ -4,13 +4,15 @@ use std::{thread, time::Duration};
 
 pub fn timer<'a, Scheduler>(dur: Duration, scheduler: Scheduler) -> Observable<'a, ()>
 where
-  Scheduler: IScheduler<'a> + Send + Sync + 'a,
+  Scheduler: IScheduler<'a> + Clone + Send + Sync + 'a,
 {
   Observable::create(move |s| {
+    let scheduler_in_post = scheduler.clone();
     scheduler.post(move || {
       thread::sleep(dur);
       s.next(());
       s.complete();
+      scheduler_in_post.abort();
     })
   })
 }

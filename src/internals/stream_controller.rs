@@ -14,6 +14,7 @@ where
   serial: Arc<RwLock<i32>>,
   subscriber: Observer<'a, Item>,
   unscribers: Arc<RwLock<HashMap<i32, FunctionWrapper<'a, (), ()>>>>,
+  on_finalize: Arc<RwLock<Vec<FunctionWrapper<'a, (), ()>>>>,
 }
 
 impl<'a, Item> StreamController<'a, Item>
@@ -25,7 +26,19 @@ where
       serial: Arc::new(RwLock::new(0)),
       subscriber: subscriber,
       unscribers: Arc::new(RwLock::new(HashMap::new())),
+      on_finalize: Arc::new(RwLock::new(Vec::new())),
     }
+  }
+
+  pub fn set_on_finalize<F>(&self, f: F)
+  where
+    F: Fn() + Send + Sync + 'a,
+  {
+    self
+      .on_finalize
+      .write()
+      .unwrap()
+      .push(FunctionWrapper::new(move |_| f()));
   }
 
   pub fn new_observer<XItem, Next, Error, Complete>(
@@ -119,18 +132,12 @@ where
     });
     self.unscribers.write().unwrap().clear();
     self.subscriber.unsubscribe();
+    let mut handlers = self.on_finalize.write().unwrap();
+    handlers.iter().for_each(|h| h.call(()));
+    handlers.clear();
   }
 
   pub fn is_subscribed(&self) -> bool {
     self.subscriber.is_subscribed()
   }
 }
-
-// impl<'a, Item> Drop for StreamController<'a, Item>
-// where
-//   Item: Clone + Send + Sync,
-// {
-//   fn drop(&mut self) {
-//     self.finalize();
-//   }
-// }
