@@ -86,6 +86,10 @@ Based on the problems of `rxRust`, `another-rxrust` has the following implementa
 - flat_map
 - on_error_resume_next
 - observe_on
+- skip
+- skip_last
+- take
+- take_last
 
 ### subject
 

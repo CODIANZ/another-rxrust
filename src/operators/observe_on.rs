@@ -29,13 +29,8 @@ where
 
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let scheduler = self.scheduler.clone();
-    scheduler.start();
     Observable::create(move |s| {
       let sctl = StreamController::new(s);
-      let scheduler_on_finalize = scheduler.clone();
-      sctl.set_on_finalize(move || {
-        scheduler_on_finalize.stop();
-      });
       {
         let sctl = sctl.clone();
         let source_next = source.clone();

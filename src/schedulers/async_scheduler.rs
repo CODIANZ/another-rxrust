@@ -56,7 +56,7 @@ impl<'a> AsyncScheduler<'a> {
 
   pub fn post<F>(&self, f: F)
   where
-    F: Fn() + Clone + Send + Sync + 'a,
+    F: Fn() + Send + Sync + 'a,
   {
     let mut que_mtx = self.ctrl.queue.lock().unwrap();
     que_mtx.push_back(FunctionWrapper::new(move |_| f()));
