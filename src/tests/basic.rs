@@ -17,7 +17,7 @@ mod test {
     }
 
     ob()
-      .observe_on(schedulers::new_thread())
+      .observe_on(schedulers::new_thread_scheduler())
       .flat_map(|x| match x {
         1 => observables::empty(),
         2 => observables::just(x),

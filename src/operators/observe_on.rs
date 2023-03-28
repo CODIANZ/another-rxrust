@@ -68,7 +68,7 @@ mod test {
       s.complete();
     });
 
-    o.observe_on(schedulers::new_thread()).subscribe(
+    o.observe_on(schedulers::new_thread_scheduler()).subscribe(
       |x| println!("next {}", x),
       |e| println!("error {:}", e.error),
       || println!("complete"),
