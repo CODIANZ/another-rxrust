@@ -119,11 +119,11 @@ where
   }
 }
 
-impl<'a, Item> Drop for StreamController<'a, Item>
-where
-  Item: Clone + Send + Sync,
-{
-  fn drop(&mut self) {
-    self.finalize();
-  }
-}
+// impl<'a, Item> Drop for StreamController<'a, Item>
+// where
+//   Item: Clone + Send + Sync,
+// {
+//   fn drop(&mut self) {
+//     self.finalize();
+//   }
+// }
