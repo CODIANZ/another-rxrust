@@ -89,8 +89,12 @@ Based on the problems of `rxRust`, `another-rxrust` has the following implementa
 - observe_on
 - skip
 - skip_last
+- skip_until
+- skip_while
 - take
 - take_last
+- take_until
+- take_while
 
 ### subject
 

@@ -1,6 +1,5 @@
-use scheduler::IScheduler;
-
 use crate::{internals::function_wrapper::FunctionWrapper, prelude::*};
+use scheduler::IScheduler;
 
 #[derive(Clone)]
 pub struct Subscription<'a> {
@@ -108,6 +107,40 @@ where
 
   pub fn skip_last(&self, count: usize) -> Observable<'a, Item> {
     operators::SkipLastOp::new(count).execute(self.clone())
+  }
+
+  pub fn take_until<TriggerValue>(
+    &self,
+    trigger: Observable<'a, TriggerValue>,
+  ) -> Observable<'a, Item>
+  where
+    TriggerValue: Clone + Send + Sync,
+  {
+    operators::TakeUntilOp::new(trigger).execute(self.clone())
+  }
+
+  pub fn skip_until<TriggerValue>(
+    &self,
+    trigger: Observable<'a, TriggerValue>,
+  ) -> Observable<'a, Item>
+  where
+    TriggerValue: Clone + Send + Sync,
+  {
+    operators::SkipUntilOp::new(trigger).execute(self.clone())
+  }
+
+  pub fn take_while<F>(&self, f: F) -> Observable<'a, Item>
+  where
+    F: Fn(Item) -> bool + Send + Sync + 'a,
+  {
+    operators::TakeWhileOp::new(f).execute(self.clone())
+  }
+
+  pub fn skip_while<F>(&self, f: F) -> Observable<'a, Item>
+  where
+    F: Fn(Item) -> bool + Send + Sync + 'a,
+  {
+    operators::SkipWhileOp::new(f).execute(self.clone())
   }
 }
 
