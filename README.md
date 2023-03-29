@@ -10,23 +10,21 @@ use crate::prelude::*;
 use anyhow::anyhow;
 use std::{thread, time};
 
-fn basic() {
+fn main() {
   fn ob() -> Observable<'static, i32> {
     Observable::create(|s| {
-      s.next(1);
-      s.next(2);
-      s.next(3);
-      s.next(4);
+      s.next(100);
+      s.next(200);
       s.complete();
     })
   }
 
-  ob()
+  observables::from_iter(vec![1, 2, 3, 4, 5].into_iter())
     .observe_on(schedulers::new_thread_scheduler())
     .flat_map(|x| match x {
       1 => observables::empty(),
       2 => observables::just(x),
-      3 => ob().map(|x| (x + 100)),
+      3 => ob().map(move |y| (y + x)),
       4 => observables::error(RxError::new(anyhow!("err"))),
       _ => observables::never(),
     })
@@ -44,18 +42,14 @@ fn basic() {
       },
     );
 
-  thread::sleep(time::Duration::from_millis(500));
+  thread::sleep(time::Duration::from_millis(600));
 }
 
 // next 2
-// next 101
-// next 102
 // next 103
-// next 104
-// next resume err 1
-// next resume err 2
-// next resume err 3
-// next resume err 4
+// next 203
+// next resume err 100
+// next resume err 200
 // complete
 ```
 
@@ -64,9 +58,10 @@ fn basic() {
 Based on the problems of `rxRust`, `another-rxrust` has the following implementation policy.
 
 - It is assumed that the values and functions that can be emitted may be shared between threads.
-- Only `Clone + Send + Sync` can be issued.
+- Value to emit should be `Clone + Send + Sync` only.
+- Use `move` to emit values ​​as much as possible.
 - Functions should be `Fn() + Send + Sync` only.
-- Errors use `anyhow::Error`.
+- Errors use `anyhow::Error`.(`anyhow` dependencies are optional. Add `anyhow` by yourself.)
 - Prioritize flexibility over memory efficiency and execution speed.
 
 ## Implementation status

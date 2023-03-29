@@ -1,5 +1,7 @@
 [package]
 name = "another-rxrust"
+authors = ["Terukazu Inoue <terukazu.inoue@codianz.com>"]
+categories = ["asynchronous"]
 description = "another implementation of `rxRust`."
 edition = "2021"
 license = "MIT"
@@ -7,7 +9,11 @@ documentation = "https://docs.rs/another-rxrust/"
 homepage = "https://github.com/CODIANZ/another-rxrust"
 repository = "https://github.com/CODIANZ/another-rxrust"
 keywords = ["reactivex", "rx", "rxrust"]
-version = "0.0.15"
+version = "0.0.16"
 
-[dependencies]
+[dependencies.anyhow]
+version = "1"
+optional = true
+
+[dev-dependencies]
 anyhow = { version = "1", features = ["backtrace"] }

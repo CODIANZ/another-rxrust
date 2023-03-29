@@ -8,20 +8,18 @@ mod test {
   fn basic() {
     fn ob() -> Observable<'static, i32> {
       Observable::create(|s| {
-        s.next(1);
-        s.next(2);
-        s.next(3);
-        s.next(4);
+        s.next(100);
+        s.next(200);
         s.complete();
       })
     }
 
-    ob()
+    observables::from_iter(vec![1, 2, 3, 4, 5].into_iter())
       .observe_on(schedulers::new_thread_scheduler())
       .flat_map(|x| match x {
         1 => observables::empty(),
         2 => observables::just(x),
-        3 => ob().map(|x| (x + 100)),
+        3 => ob().map(move |y| (y + x)),
         4 => observables::error(RxError::new(anyhow!("err"))),
         _ => observables::never(),
       })
