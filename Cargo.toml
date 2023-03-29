@@ -3,10 +3,11 @@ name = "another-rxrust"
 description = "another implementation of `rxRust`."
 edition = "2021"
 license = "MIT"
+documentation = "https://docs.rs/another-rxrust/"
 homepage = "https://github.com/CODIANZ/another-rxrust"
 repository = "https://github.com/CODIANZ/another-rxrust"
 keywords = ["reactivex", "rx", "rxrust"]
-version = "0.0.14"
+version = "0.0.15"
 
 [dependencies]
 anyhow = { version = "1", features = ["backtrace"] }

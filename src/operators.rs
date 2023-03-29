@@ -12,6 +12,7 @@ pub mod take;
 pub mod take_last;
 pub mod take_until;
 pub mod take_while;
+pub mod tap;
 
 pub mod operators {
   pub use crate::operators::distinct_until_changed::*;
@@ -28,4 +29,5 @@ pub mod operators {
   pub use crate::operators::take_last::*;
   pub use crate::operators::take_until::*;
   pub use crate::operators::take_while::*;
+  pub use crate::operators::tap::*;
 }

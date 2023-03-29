@@ -157,6 +157,20 @@ where
   {
     operators::SkipWhileOp::new(f).execute(self.clone())
   }
+
+  pub fn tap<Next, Error, Complete>(
+    &self,
+    next: Next,
+    error: Error,
+    complete: Complete,
+  ) -> Observable<'a, Item>
+  where
+    Next: Fn(Item) + Send + Sync + 'a,
+    Error: Fn(RxError) + Send + Sync + 'a,
+    Complete: Fn() + Send + Sync + 'a,
+  {
+    operators::TapOp::new(next, error, complete).execute(self.clone())
+  }
 }
 
 impl<'a, Item> Observable<'a, Item>
