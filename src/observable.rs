@@ -172,6 +172,10 @@ where
   {
     operators::TapOp::new(next, error, complete).execute(self.clone())
   }
+
+  pub fn retry(&self, max_retry: usize) -> Observable<'a, Item> {
+    operators::RetryOp::new(max_retry).execute(self.clone())
+  }
 }
 
 impl<'a, Item> Observable<'a, Item>
