@@ -1,7 +1,5 @@
-use crate::{
-  internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController},
-  prelude::*,
-};
+use crate::internals::{function_wrapper::*, stream_controller::*};
+use crate::prelude::*;
 
 pub struct FlatMapOp<'a, In, Out>
 where

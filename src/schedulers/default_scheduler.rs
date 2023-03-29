@@ -1,4 +1,4 @@
-use super::schedulers::IScheduler;
+use super::scheduler::IScheduler;
 
 #[derive(Clone)]
 pub struct DefaultScheduler {}

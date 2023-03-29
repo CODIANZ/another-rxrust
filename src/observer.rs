@@ -1,4 +1,5 @@
-use crate::{internals::function_wrapper::FunctionWrapper, prelude::RxError};
+use crate::internals::function_wrapper::*;
+use crate::prelude::*;
 
 #[derive(Clone)]
 pub struct Observer<'a, T>

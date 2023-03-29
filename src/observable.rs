@@ -1,4 +1,5 @@
-use crate::{internals::function_wrapper::FunctionWrapper, prelude::*};
+use crate::internals::function_wrapper::*;
+use crate::prelude::*;
 use scheduler::IScheduler;
 
 #[derive(Clone)]

@@ -73,7 +73,7 @@ impl<'a> AsyncFunctionQueue<'a> {
 
 #[cfg(test)]
 mod test {
-  use crate::prelude::schedulers::AsyncFunctionQueue;
+  use super::AsyncFunctionQueue;
   use std::{thread, time};
 
   #[test]

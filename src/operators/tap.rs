@@ -1,7 +1,5 @@
-use crate::{
-  internals::stream_controller::StreamController,
-  prelude::{Observable, Observer, RxError},
-};
+use crate::internals::stream_controller::*;
+use crate::prelude::*;
 
 pub struct TapOp<'a, Item>
 where
