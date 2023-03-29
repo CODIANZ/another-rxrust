@@ -96,6 +96,7 @@ Based on the problems of `rxRust`, `another-rxrust` has the following implementa
 - take_last
 - take_until
 - take_while
+- tap
 - distinct_until_changed
 
 ### subject
