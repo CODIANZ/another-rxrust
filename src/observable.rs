@@ -183,6 +183,14 @@ where
   {
     operators::RetryWhenOp::new(f).execute(self.clone())
   }
+
+  pub fn lift<F, Out>(&self, f: F) -> Observable<'a, Out>
+  where
+    Out: Clone + Send + Sync,
+    F: Fn(Observable<Item>) -> Observable<Out>,
+  {
+    f(self.clone())
+  }
 }
 
 impl<'a, Item> Observable<'a, Item>
@@ -273,5 +281,16 @@ mod test {
     thread::sleep(time::Duration::from_millis(1000));
     sbsc.unsubscribe();
     thread::sleep(time::Duration::from_millis(1000));
+  }
+
+  #[test]
+  fn lift() {
+    observables::just(1)
+      .lift(|s| operators::MapOp::new(|x| x * 2).execute(s))
+      .subscribe(
+        |x| println!("next {}", x),
+        |e| println!("error {:}", error_to_string(&e)),
+        || println!("complete"),
+      );
   }
 }
