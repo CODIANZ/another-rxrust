@@ -176,6 +176,13 @@ where
   pub fn retry(&self, max_retry: usize) -> Observable<'a, Item> {
     operators::RetryOp::new(max_retry).execute(self.clone())
   }
+
+  pub fn retry_when<F>(&self, f: F) -> Observable<'a, Item>
+  where
+    F: Fn(RxError) -> bool + Send + Sync + 'a,
+  {
+    operators::RetryWhenOp::new(f).execute(self.clone())
+  }
 }
 
 impl<'a, Item> Observable<'a, Item>
