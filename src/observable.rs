@@ -1,4 +1,5 @@
-use crate::{internals::function_wrapper::FunctionWrapper, prelude::*};
+use crate::internals::function_wrapper::*;
+use crate::prelude::*;
 use scheduler::IScheduler;
 
 #[derive(Clone)]
@@ -170,6 +171,17 @@ where
     Complete: Fn() + Send + Sync + 'a,
   {
     operators::TapOp::new(next, error, complete).execute(self.clone())
+  }
+
+  pub fn retry(&self, max_retry: usize) -> Observable<'a, Item> {
+    operators::RetryOp::new(max_retry).execute(self.clone())
+  }
+
+  pub fn retry_when<F>(&self, f: F) -> Observable<'a, Item>
+  where
+    F: Fn(RxError) -> bool + Send + Sync + 'a,
+  {
+    operators::RetryWhenOp::new(f).execute(self.clone())
   }
 }
 

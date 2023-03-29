@@ -1,4 +1,5 @@
-use crate::{internals::stream_controller::StreamController, prelude::*};
+use crate::internals::stream_controller::*;
+use crate::prelude::*;
 use std::{
   marker::PhantomData,
   sync::{Arc, RwLock},

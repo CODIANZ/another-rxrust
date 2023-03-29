@@ -37,14 +37,14 @@ pub fn new_thread_scheduler<'a>() -> fn() -> NewThreadScheduler<'static> {
 
 #[cfg(test)]
 mod test {
-  use super::new_thread_scheduler;
-  use crate::prelude::schedulers::IScheduler;
+  use crate::prelude::*;
+  use scheduler::IScheduler;
   use std::{thread, time};
 
   #[test]
   fn basic() {
     {
-      let s = new_thread_scheduler()();
+      let s = schedulers::new_thread_scheduler()();
 
       s.post(|| {
         println!("#1 start");

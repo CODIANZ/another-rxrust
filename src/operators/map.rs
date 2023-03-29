@@ -1,7 +1,5 @@
-use crate::{
-  internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController},
-  prelude::*,
-};
+use crate::internals::{function_wrapper::*, stream_controller::*};
+use crate::prelude::*;
 
 pub struct MapOp<'a, In, Out>
 where

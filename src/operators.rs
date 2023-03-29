@@ -3,6 +3,8 @@ pub mod flat_map;
 pub mod map;
 pub mod observe_on;
 pub mod on_error_resume_next;
+pub mod retry;
+pub mod retry_when;
 pub mod skip;
 pub mod skip_last;
 pub mod skip_until;
@@ -20,6 +22,8 @@ pub mod operators {
   pub use crate::operators::map::*;
   pub use crate::operators::observe_on::*;
   pub use crate::operators::on_error_resume_next::*;
+  pub use crate::operators::retry::*;
+  pub use crate::operators::retry_when::*;
   pub use crate::operators::skip::*;
   pub use crate::operators::skip_last::*;
   pub use crate::operators::skip_until::*;

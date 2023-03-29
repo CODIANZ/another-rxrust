@@ -1,7 +1,6 @@
-use crate::{
-  internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController},
-  prelude::{schedulers::IScheduler, Observable},
-};
+use crate::internals::{function_wrapper::*, stream_controller::*};
+use crate::prelude::*;
+use scheduler::IScheduler;
 use std::marker::PhantomData;
 
 pub struct SubscribeOnOp<'a, Scheduler, Item>

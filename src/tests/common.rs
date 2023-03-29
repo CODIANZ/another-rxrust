@@ -12,7 +12,7 @@ pub fn error_to_string(e: &RxError) -> String {
 
 #[cfg(not(feature = "anyhow"))]
 pub fn generate_error() -> RxError {
-  RxError::new(Box::new("any error"))
+  RxError::new(Box::new("any error".to_owned()))
 }
 #[cfg(not(feature = "anyhow"))]
 pub fn error_to_string(e: &RxError) -> &String {

@@ -1,8 +1,5 @@
-use crate::{
-  internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController},
-  observable::Observable,
-  prelude::RxError,
-};
+use crate::internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController};
+use crate::prelude::*;
 
 pub struct OnErrorResumeNextOp<'a, Item>
 where

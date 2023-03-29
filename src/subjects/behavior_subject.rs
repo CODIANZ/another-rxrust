@@ -1,6 +1,5 @@
-use std::sync::{Arc, RwLock};
-
 use crate::prelude::*;
+use std::sync::{Arc, RwLock};
 
 #[derive(Clone)]
 pub struct BehaviorSubject<'a, Item>
@@ -76,19 +75,6 @@ mod tset {
   use crate::prelude::*;
   use crate::tests::common::*;
   use std::{thread, time};
-
-  #[cfg(feature = "anyhow")]
-  use anyhow::anyhow;
-
-  #[cfg(feature = "anyhow")]
-  fn generate_error() -> RxError {
-    RxError::new(anyhow!("anyhow error"))
-  }
-
-  #[cfg(not(feature = "anyhow"))]
-  fn generate_error() -> RxError {
-    RxError::new(Box::new("any error"))
-  }
 
   #[test]
   fn basic() {
