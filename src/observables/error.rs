@@ -11,28 +11,14 @@ where
 
 #[cfg(test)]
 mod test {
-  use crate::prelude::RxError;
-
-  use super::error;
-
-  #[cfg(feature = "anyhow")]
-  use anyhow::anyhow;
-
-  #[cfg(feature = "anyhow")]
-  fn generate_error() -> RxError {
-    RxError::new(anyhow!("anyhow error"))
-  }
-
-  #[cfg(not(feature = "anyhow"))]
-  fn generate_error() -> RxError {
-    RxError::new("string error".to_owned())
-  }
+  use crate::prelude::*;
+  use crate::tests::common::*;
 
   #[test]
   fn basic() {
-    error::<String>(generate_error()).subscribe(
+    observables::error::<String>(generate_error()).subscribe(
       |x| println!("next {}", x),
-      |e| println!("{:}", e.error),
+      |e| println!("{:}", error_to_string(&e)),
       || println!("complete"),
     );
   }

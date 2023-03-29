@@ -21,22 +21,23 @@ where
 
 #[cfg(test)]
 mod test {
-  use super::from_iter;
+  use crate::prelude::*;
+  use crate::tests::common::*;
 
   #[test]
   fn basic() {
-    from_iter(0..10).subscribe(
+    observables::from_iter(0..10).subscribe(
       |x| println!("next {}", x),
-      |e| println!("{:}", e.error),
+      |e| println!("{:}", error_to_string(&e)),
       || println!("complete"),
     );
   }
 
   #[test]
   fn vec() {
-    from_iter(vec!["a", "b"].iter()).subscribe(
+    observables::from_iter(vec!["a", "b"].iter()).subscribe(
       |x| println!("next {}", x),
-      |e| println!("{:}", e.error),
+      |e| println!("{:}", error_to_string(&e)),
       || println!("complete"),
     );
   }

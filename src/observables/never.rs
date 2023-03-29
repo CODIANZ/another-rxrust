@@ -9,13 +9,14 @@ where
 
 #[cfg(test)]
 mod test {
-  use super::never;
+  use crate::prelude::*;
+  use crate::tests::common::*;
 
   #[test]
   fn basic() {
-    never::<String>().subscribe(
+    observables::never::<String>().subscribe(
       |x| println!("next {}", x),
-      |e| println!("{:}", e.error),
+      |e| println!("{:}", error_to_string(&e)),
       || println!("complete"),
     );
   }

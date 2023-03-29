@@ -1,9 +1,8 @@
+use crate::{internals::stream_controller::StreamController, prelude::*};
 use std::{
   marker::PhantomData,
   sync::{Arc, RwLock},
 };
-
-use crate::{internals::stream_controller::StreamController, prelude::*};
 
 pub struct DistinctUntilChangedOp<Item>
 where
@@ -59,6 +58,7 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
+  use crate::tests::common::*;
 
   #[test]
   fn basic() {
@@ -77,7 +77,7 @@ mod test {
 
     o.distinct_until_changed().subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
   }

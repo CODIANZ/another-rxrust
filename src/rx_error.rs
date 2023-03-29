@@ -17,11 +17,11 @@ impl RxError {
 #[cfg(not(feature = "anyhow"))]
 #[derive(Clone)]
 pub struct RxError {
-  pub error: Arc<String>,
+  pub error: Arc<Box<dyn std::any::Any + Send + Sync>>,
 }
 #[cfg(not(feature = "anyhow"))]
 impl RxError {
-  pub fn new(error: String) -> RxError {
+  pub fn new(error: Box<dyn std::any::Any + Send + Sync>) -> RxError {
     RxError {
       error: Arc::new(error),
     }

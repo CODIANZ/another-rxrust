@@ -68,19 +68,7 @@ where
 #[cfg(test)]
 mod tset {
   use crate::prelude::*;
-
-  #[cfg(feature = "anyhow")]
-  use anyhow::anyhow;
-
-  #[cfg(feature = "anyhow")]
-  fn generate_error() -> RxError {
-    RxError::new(anyhow!("anyhow error"))
-  }
-
-  #[cfg(not(feature = "anyhow"))]
-  fn generate_error() -> RxError {
-    RxError::new("string error".to_owned())
-  }
+  use crate::tests::common::*;
 
   #[test]
   fn basic() {
@@ -91,7 +79,7 @@ mod tset {
           println!("next {}", x);
         },
         |e| {
-          println!("error {:}", e.error);
+          println!("error {:}", error_to_string(&e));
         },
         || {
           println!("complete");
@@ -108,7 +96,7 @@ mod tset {
           println!("next {}", x);
         },
         |e| {
-          println!("error {:}", e.error);
+          println!("error {:}", error_to_string(&e));
         },
         || {
           println!("complete");

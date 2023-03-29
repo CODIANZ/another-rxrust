@@ -73,8 +73,8 @@ where
 
 #[cfg(test)]
 mod tset {
-  use super::BehaviorSubject;
-  use crate::prelude::RxError;
+  use crate::prelude::*;
+  use crate::tests::common::*;
   use std::{thread, time};
 
   #[cfg(feature = "anyhow")]
@@ -87,16 +87,16 @@ mod tset {
 
   #[cfg(not(feature = "anyhow"))]
   fn generate_error() -> RxError {
-    RxError::new("string error".to_owned())
+    RxError::new(Box::new("any error"))
   }
 
   #[test]
   fn basic() {
-    let sbj = BehaviorSubject::<i32>::new(100);
+    let sbj = subjects::BehaviorSubject::<i32>::new(100);
 
     sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", e.error),
+      |e| println!("#1 error {:}", error_to_string(&e)),
       || println!("#1 complete"),
     );
 
@@ -107,19 +107,19 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:}", e.error),
+      |e| println!("#2 error {:}", error_to_string(&e)),
       || println!("#2 complete"),
     );
   }
 
   #[test]
   fn double() {
-    let sbj = BehaviorSubject::<i32>::new(100);
+    let sbj = subjects::BehaviorSubject::<i32>::new(100);
 
     let binding = sbj.observable();
     let sbsc1 = binding.subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", e.error),
+      |e| println!("#1 error {:}", error_to_string(&e)),
       || println!("#1 complete"),
     );
 
@@ -129,7 +129,7 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:}", e.error),
+      |e| println!("#2 error {:}", error_to_string(&e)),
       || println!("#2 complete"),
     );
 
@@ -147,14 +147,14 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#3 next {}", x),
-      |e| println!("#3 error {:}", e.error),
+      |e| println!("#3 error {:}", error_to_string(&e)),
       || println!("#3 complete"),
     );
   }
 
   #[test]
   fn thread() {
-    let sbj = BehaviorSubject::<i32>::new(100);
+    let sbj = subjects::BehaviorSubject::<i32>::new(100);
 
     let sbj_thread = sbj.clone();
     let th = thread::spawn(move || {
@@ -168,7 +168,7 @@ mod tset {
     let binding = sbj.observable();
     let sbsc1 = binding.subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", e.error),
+      |e| println!("#1 error {:}", error_to_string(&e)),
       || println!("#1 complete"),
     );
 
@@ -176,7 +176,7 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:}", e.error),
+      |e| println!("#2 error {:}", error_to_string(&e)),
       || println!("#2 complete"),
     );
 

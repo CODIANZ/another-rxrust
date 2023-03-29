@@ -1,20 +1,8 @@
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
+  use crate::tests::common::*;
   use std::{thread, time};
-
-  #[cfg(feature = "anyhow")]
-  use anyhow::anyhow;
-
-  #[cfg(feature = "anyhow")]
-  fn generate_error() -> RxError {
-    RxError::new(anyhow!("anyhow error"))
-  }
-
-  #[cfg(not(feature = "anyhow"))]
-  fn generate_error() -> RxError {
-    RxError::new("string error".to_owned())
-  }
 
   #[test]
   fn basic() {
@@ -36,13 +24,13 @@ mod test {
         _ => observables::never(),
       })
       .map(|x| format!("{}", x))
-      .on_error_resume_next(|e| ob().map(move |x| format!("resume {:} {}", e.error, x)))
+      .on_error_resume_next(|e| ob().map(move |x| format!("resume {:} {}", error_to_string(&e), x)))
       .subscribe(
         |x| {
           println!("next {}", x);
         },
         |e| {
-          println!("error {:}", e.error);
+          println!("error {}", error_to_string(&e));
         },
         || {
           println!("complete");
@@ -72,7 +60,7 @@ mod test {
         println!("next {}", x.data);
       },
       |e| {
-        println!("error {:}", e.error);
+        println!("error {:}", error_to_string(&e));
       },
       move || {
         println!("complete {}", xx.data);
@@ -84,7 +72,7 @@ mod test {
         println!("next {}", x.data);
       },
       |e| {
-        println!("error {:}", e.error);
+        println!("error {:}", error_to_string(&e));
       },
       move || {
         println!("complete {}", xxx.data);
