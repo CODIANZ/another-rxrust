@@ -11,13 +11,14 @@ where
 
 #[cfg(test)]
 mod test {
-  use super::empty;
+  use crate::prelude::*;
+  use crate::tests::common::*;
 
   #[test]
   fn basic() {
-    empty::<String>().subscribe(
+    observables::empty::<String>().subscribe(
       |x| println!("next {}", x),
-      |e| println!("{:}", e.error),
+      |e| println!("{:}", error_to_string(&e)),
       || println!("complete"),
     );
   }

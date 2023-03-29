@@ -68,18 +68,18 @@ where
 #[cfg(test)]
 mod tset {
   use crate::prelude::*;
-  use anyhow::anyhow;
+  use crate::tests::common::*;
 
   #[test]
   fn basic() {
-    observables::error(RxError::new(anyhow!("err")))
+    observables::error(generate_error())
       .on_error_resume_next(|_e| observables::just(1))
       .subscribe(
         move |x| {
           println!("next {}", x);
         },
         |e| {
-          println!("error {:}", e.error);
+          println!("error {:}", error_to_string(&e));
         },
         || {
           println!("complete");
@@ -96,7 +96,7 @@ mod tset {
           println!("next {}", x);
         },
         |e| {
-          println!("error {:}", e.error);
+          println!("error {:}", error_to_string(&e));
         },
         || {
           println!("complete");

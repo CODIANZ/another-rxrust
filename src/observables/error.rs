@@ -11,16 +11,14 @@ where
 
 #[cfg(test)]
 mod test {
-  use crate::prelude::RxError;
-
-  use super::error;
-  use anyhow::anyhow;
+  use crate::prelude::*;
+  use crate::tests::common::*;
 
   #[test]
   fn basic() {
-    error::<String>(RxError::new(anyhow!("hoge"))).subscribe(
+    observables::error::<String>(generate_error()).subscribe(
       |x| println!("next {}", x),
-      |e| println!("{:}", e.error),
+      |e| println!("{:}", error_to_string(&e)),
       || println!("complete"),
     );
   }

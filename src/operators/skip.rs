@@ -1,9 +1,8 @@
+use crate::{internals::stream_controller::StreamController, prelude::*};
 use std::{
   marker::PhantomData,
   sync::{Arc, RwLock},
 };
-
-use crate::{internals::stream_controller::StreamController, prelude::*};
 
 pub struct SkipOp<Item>
 where
@@ -58,6 +57,7 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
+  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -71,7 +71,7 @@ mod test {
 
     o.skip(2).subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
   }
@@ -95,7 +95,7 @@ mod test {
 
     o.skip(2).subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
     thread::sleep(time::Duration::from_millis(1000));

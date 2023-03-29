@@ -51,6 +51,7 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
+  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -64,7 +65,7 @@ mod test {
 
     o.map(|x| x * 2).subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
   }
@@ -89,7 +90,7 @@ mod test {
     let binding = o.map(|x| format!("str {}", x));
     let sbsc = binding.subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
     thread::sleep(time::Duration::from_millis(500));

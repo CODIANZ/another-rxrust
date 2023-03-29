@@ -59,7 +59,7 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use anyhow::anyhow;
+  use crate::tests::common::*;
 
   #[test]
   fn basic() {
@@ -72,13 +72,13 @@ mod test {
 
     o.tap(
       |x| println!("tap next {}", x),
-      |e| println!("tap error {:}", e.error),
+      |e| println!("tap error {:}", error_to_string(&e)),
       || println!("tap complete"),
     )
     .map(|x| x + 100)
     .subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
   }
@@ -89,18 +89,18 @@ mod test {
       for n in 0..5 {
         s.next(n);
       }
-      s.error(RxError::new(anyhow!("aaa")));
+      s.error(generate_error());
     });
 
     o.tap(
       |x| println!("tap next {}", x),
-      |e| println!("tap error {:}", e.error),
+      |e| println!("tap error {:}", error_to_string(&e)),
       || println!("tap complete"),
     )
     .map(|x| x + 100)
     .subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
   }

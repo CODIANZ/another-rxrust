@@ -1,9 +1,8 @@
-use std::sync::{Arc, RwLock};
-
 use crate::{
   internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController},
   prelude::*,
 };
+use std::sync::{Arc, RwLock};
 
 pub struct SkipWhileOp<'a, Item>
 where
@@ -60,6 +59,7 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
+  use crate::tests::common::*;
 
   #[test]
   fn basic() {
@@ -72,7 +72,7 @@ mod test {
 
     o.skip_while(|x| x > 5).subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
   }

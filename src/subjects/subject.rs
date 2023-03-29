@@ -1,9 +1,8 @@
+use crate::prelude::*;
 use std::{
   collections::HashMap,
   sync::{Arc, RwLock},
 };
-
-use crate::prelude::*;
 
 #[derive(Clone)]
 pub struct Subject<'a, Item>
@@ -63,16 +62,17 @@ where
 
 #[cfg(test)]
 mod tset {
-  use super::Subject;
+  use crate::prelude::*;
+  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
   fn basic() {
-    let sbj = Subject::new();
+    let sbj = subjects::Subject::new();
 
     sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", e.error),
+      |e| println!("#1 error {:}", error_to_string(&e)),
       || println!("#1 complete"),
     );
 
@@ -84,12 +84,12 @@ mod tset {
 
   #[test]
   fn double() {
-    let sbj = Subject::new();
+    let sbj = subjects::Subject::new();
 
     let binding = sbj.observable();
     let sbsc1 = binding.subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", e.error),
+      |e| println!("#1 error {:}", error_to_string(&e)),
       || println!("#1 complete"),
     );
 
@@ -99,7 +99,7 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:}", e.error),
+      |e| println!("#2 error {:}", error_to_string(&e)),
       || println!("#2 complete"),
     );
 
@@ -118,7 +118,7 @@ mod tset {
 
   #[test]
   fn thread() {
-    let sbj = Subject::new();
+    let sbj = subjects::Subject::new();
 
     let sbj_thread = sbj.clone();
     let th = thread::spawn(move || {
@@ -132,7 +132,7 @@ mod tset {
     let binding = sbj.observable();
     let sbsc1 = binding.subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", e.error),
+      |e| println!("#1 error {:}", error_to_string(&e)),
       || println!("#1 complete"),
     );
 
@@ -140,7 +140,7 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:}", e.error),
+      |e| println!("#2 error {:}", error_to_string(&e)),
       || println!("#2 complete"),
     );
 

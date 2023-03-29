@@ -47,22 +47,20 @@ where
 
 #[cfg(test)]
 mod test {
-  use crate::prelude::RxError;
-
-  use super::Observer;
-  use anyhow::anyhow;
+  use crate::prelude::*;
+  use crate::tests::common::*;
   use std::thread;
 
   #[test]
   fn basic() {
     let ob = Observer::new(
       |x| println!("next {}", x),
-      |e| println!("{:}", e.error),
+      |e| println!("{:}", error_to_string(&e)),
       || println!("complete"),
     );
     ob.next(1);
     ob.next(2);
-    ob.error(RxError::new(anyhow!("abc")));
+    ob.error(generate_error());
     ob.complete();
   }
 
@@ -71,12 +69,12 @@ mod test {
     let gain = 100;
     let ob = Observer::new(
       move |x| println!("next {}", x + gain),
-      |e| println!("{:}", e.error),
+      |e| println!("{:}", error_to_string(&e)),
       || println!("complete"),
     );
     ob.next(1);
     ob.next(2);
-    ob.error(RxError::new(anyhow!("abc")));
+    ob.error(generate_error());
     ob.complete();
   }
 
@@ -84,7 +82,7 @@ mod test {
   fn close() {
     let ob = Observer::new(
       |x| println!("next {}", x),
-      |e| println!("{:}", e.error),
+      |e| println!("{:}", error_to_string(&e)),
       || println!("complete"),
     );
     ob.next(1);
@@ -96,7 +94,7 @@ mod test {
   fn clone_into_thread() {
     let ob = Observer::new(
       |x| println!("next {}", x),
-      |e| println!("{:}", e.error),
+      |e| println!("{:}", error_to_string(&e)),
       || println!("complete"),
     );
     let a = ob.clone();

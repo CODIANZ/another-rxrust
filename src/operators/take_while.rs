@@ -53,6 +53,7 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
+  use crate::tests::common::*;
 
   #[test]
   fn basic() {
@@ -65,7 +66,7 @@ mod test {
 
     o.take_while(|x| x < 5).subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
   }

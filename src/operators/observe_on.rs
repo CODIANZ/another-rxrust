@@ -63,6 +63,7 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
+  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -77,7 +78,7 @@ mod test {
 
     o.observe_on(schedulers::new_thread_scheduler()).subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
     thread::sleep(time::Duration::from_millis(1000));
@@ -96,13 +97,13 @@ mod test {
 
     o.subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", e.error),
+      |e| println!("#1 error {:}", error_to_string(&e)),
       || println!("#1 complete"),
     );
 
     o.subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:}", e.error),
+      |e| println!("#2 error {:}", error_to_string(&e)),
       || println!("#2 complete"),
     );
     thread::sleep(time::Duration::from_millis(1000));

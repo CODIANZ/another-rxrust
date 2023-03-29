@@ -67,6 +67,7 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
+  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -80,7 +81,7 @@ mod test {
 
     o.flat_map(|x| observables::just(x * 2)).subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
   }
@@ -106,7 +107,7 @@ mod test {
     let binding = o.flat_map(|x| observables::just(format!("str {}", x)));
     let sbsc = binding.subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
     thread::sleep(time::Duration::from_millis(500));
@@ -137,7 +138,7 @@ mod test {
     let binding = o().flat_map(move |_x| o());
     let sbsc = binding.subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
     thread::sleep(time::Duration::from_millis(500));

@@ -24,24 +24,32 @@ where
 
 #[cfg(test)]
 mod test {
-  use super::timer;
-  use crate::prelude::{default_scheduler::default_scheduler, schedulers::new_thread_scheduler};
+  use crate::prelude::*;
+  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
   fn basic() {
-    timer(time::Duration::from_millis(1000), default_scheduler()).subscribe(
+    observables::timer(
+      time::Duration::from_millis(1000),
+      schedulers::default_scheduler(),
+    )
+    .subscribe(
       |_| println!("next"),
-      |e| println!("{:}", e.error),
+      |e| println!("{:}", error_to_string(&e)),
       || println!("complete"),
     );
   }
 
   #[test]
   fn thread() {
-    timer(time::Duration::from_millis(1000), new_thread_scheduler()).subscribe(
+    observables::timer(
+      time::Duration::from_millis(1000),
+      schedulers::new_thread_scheduler(),
+    )
+    .subscribe(
       |_| println!("next"),
-      |e| println!("{:}", e.error),
+      |e| println!("{:}", error_to_string(&e)),
       || println!("complete"),
     );
     thread::sleep(time::Duration::from_millis(1500));

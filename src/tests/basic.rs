@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use anyhow::anyhow;
+  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -20,17 +20,17 @@ mod test {
         1 => observables::empty(),
         2 => observables::just(x),
         3 => ob().map(move |y| (y + x)),
-        4 => observables::error(RxError::new(anyhow!("err"))),
+        4 => observables::error(generate_error()),
         _ => observables::never(),
       })
       .map(|x| format!("{}", x))
-      .on_error_resume_next(|e| ob().map(move |x| format!("resume {:} {}", e.error, x)))
+      .on_error_resume_next(|e| ob().map(move |x| format!("resume {:} {}", error_to_string(&e), x)))
       .subscribe(
         |x| {
           println!("next {}", x);
         },
         |e| {
-          println!("error {:}", e.error);
+          println!("error {}", error_to_string(&e));
         },
         || {
           println!("complete");
@@ -60,7 +60,7 @@ mod test {
         println!("next {}", x.data);
       },
       |e| {
-        println!("error {:}", e.error);
+        println!("error {:}", error_to_string(&e));
       },
       move || {
         println!("complete {}", xx.data);
@@ -72,7 +72,7 @@ mod test {
         println!("next {}", x.data);
       },
       |e| {
-        println!("error {:}", e.error);
+        println!("error {:}", error_to_string(&e));
       },
       move || {
         println!("complete {}", xxx.data);

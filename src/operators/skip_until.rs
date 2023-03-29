@@ -67,6 +67,7 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
+  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -85,7 +86,7 @@ mod test {
     ))
     .subscribe(
       |x| println!("next {}", x),
-      |e| println!("error {:}", e.error),
+      |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
     );
   }
