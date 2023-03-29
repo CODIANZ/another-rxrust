@@ -68,11 +68,23 @@ where
 #[cfg(test)]
 mod tset {
   use crate::prelude::*;
+
+  #[cfg(feature = "anyhow")]
   use anyhow::anyhow;
+
+  #[cfg(feature = "anyhow")]
+  fn generate_error() -> RxError {
+    RxError::new(anyhow!("anyhow error"))
+  }
+
+  #[cfg(not(feature = "anyhow"))]
+  fn generate_error() -> RxError {
+    RxError::new("string error".to_owned())
+  }
 
   #[test]
   fn basic() {
-    observables::error(RxError::new(anyhow!("err")))
+    observables::error(generate_error())
       .on_error_resume_next(|_e| observables::just(1))
       .subscribe(
         move |x| {

@@ -59,7 +59,19 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
+
+  #[cfg(feature = "anyhow")]
   use anyhow::anyhow;
+
+  #[cfg(feature = "anyhow")]
+  fn generate_error() -> RxError {
+    RxError::new(anyhow!("anyhow error"))
+  }
+
+  #[cfg(not(feature = "anyhow"))]
+  fn generate_error() -> RxError {
+    RxError::new("string error".to_owned())
+  }
 
   #[test]
   fn basic() {
@@ -89,7 +101,7 @@ mod test {
       for n in 0..5 {
         s.next(n);
       }
-      s.error(RxError::new(anyhow!("aaa")));
+      s.error(generate_error());
     });
 
     o.tap(

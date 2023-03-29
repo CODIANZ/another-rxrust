@@ -9,7 +9,13 @@
       "request": "launch",
       "name": "Debug unit tests",
       "cargo": {
-        "args": ["test", "--no-run", "--lib", "--package=another-rxrust"],
+        "args": [
+          "test",
+          "--no-run",
+          "--lib",
+          "--package=another-rxrust",
+          "--all-features"
+        ],
         "filter": {
           "name": "another-rxrust",
           "kind": "lib"

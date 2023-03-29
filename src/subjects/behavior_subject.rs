@@ -73,11 +73,22 @@ where
 
 #[cfg(test)]
 mod tset {
-  use crate::prelude::RxError;
-
   use super::BehaviorSubject;
-  use anyhow::anyhow;
+  use crate::prelude::RxError;
   use std::{thread, time};
+
+  #[cfg(feature = "anyhow")]
+  use anyhow::anyhow;
+
+  #[cfg(feature = "anyhow")]
+  fn generate_error() -> RxError {
+    RxError::new(anyhow!("anyhow error"))
+  }
+
+  #[cfg(not(feature = "anyhow"))]
+  fn generate_error() -> RxError {
+    RxError::new("string error".to_owned())
+  }
 
   #[test]
   fn basic() {
@@ -132,7 +143,7 @@ mod tset {
     sbj.next(8);
     sbj.next(9);
 
-    sbj.error(RxError::new(anyhow!("err")));
+    sbj.error(generate_error());
 
     sbj.observable().subscribe(
       |x| println!("#3 next {}", x),

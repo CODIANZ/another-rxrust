@@ -1,8 +1,20 @@
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use anyhow::anyhow;
   use std::{thread, time};
+
+  #[cfg(feature = "anyhow")]
+  use anyhow::anyhow;
+
+  #[cfg(feature = "anyhow")]
+  fn generate_error() -> RxError {
+    RxError::new(anyhow!("anyhow error"))
+  }
+
+  #[cfg(not(feature = "anyhow"))]
+  fn generate_error() -> RxError {
+    RxError::new("string error".to_owned())
+  }
 
   #[test]
   fn basic() {
@@ -20,7 +32,7 @@ mod test {
         1 => observables::empty(),
         2 => observables::just(x),
         3 => ob().map(move |y| (y + x)),
-        4 => observables::error(RxError::new(anyhow!("err"))),
+        4 => observables::error(generate_error()),
         _ => observables::never(),
       })
       .map(|x| format!("{}", x))

@@ -47,11 +47,22 @@ where
 
 #[cfg(test)]
 mod test {
-  use crate::prelude::RxError;
-
   use super::Observer;
-  use anyhow::anyhow;
+  use crate::prelude::RxError;
   use std::thread;
+
+  #[cfg(feature = "anyhow")]
+  use anyhow::anyhow;
+
+  #[cfg(feature = "anyhow")]
+  fn generate_error() -> RxError {
+    RxError::new(anyhow!("anyhow error"))
+  }
+
+  #[cfg(not(feature = "anyhow"))]
+  fn generate_error() -> RxError {
+    RxError::new("string error".to_owned())
+  }
 
   #[test]
   fn basic() {
@@ -62,7 +73,7 @@ mod test {
     );
     ob.next(1);
     ob.next(2);
-    ob.error(RxError::new(anyhow!("abc")));
+    ob.error(generate_error());
     ob.complete();
   }
 
@@ -76,7 +87,7 @@ mod test {
     );
     ob.next(1);
     ob.next(2);
-    ob.error(RxError::new(anyhow!("abc")));
+    ob.error(generate_error());
     ob.complete();
   }
 

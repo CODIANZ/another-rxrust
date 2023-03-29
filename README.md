@@ -61,7 +61,7 @@ Based on the problems of `rxRust`, `another-rxrust` has the following implementa
 - Value to emit should be `Clone + Send + Sync` only.
 - Use `move` to emit values ​​as much as possible.
 - Functions should be `Fn() + Send + Sync` only.
-- Errors use `anyhow::Error`.(`anyhow` dependencies are optional. Add `anyhow` by yourself.)
+- Default errors use `String`. If `feature="anyhow"` use `anyhow::Error`.
 - Prioritize flexibility over memory efficiency and execution speed.
 
 ## Implementation status
