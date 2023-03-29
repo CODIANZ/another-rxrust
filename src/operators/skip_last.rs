@@ -1,6 +1,7 @@
 use crate::{internals::stream_controller::StreamController, prelude::*};
 use std::{
   collections::VecDeque,
+  marker::PhantomData,
   sync::{Arc, RwLock},
 };
 
@@ -9,7 +10,7 @@ where
   Item: Clone + Send + Sync,
 {
   count: usize,
-  items: Arc<RwLock<VecDeque<Item>>>,
+  _item: PhantomData<Item>,
 }
 
 impl<'a, Item> SkipLastOp<Item>
@@ -19,14 +20,13 @@ where
   pub fn new(count: usize) -> SkipLastOp<Item> {
     SkipLastOp {
       count,
-      items: Arc::new(RwLock::new(VecDeque::new())),
+      _item: PhantomData,
     }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let count = self.count;
-    let items = Arc::clone(&self.items);
-
     Observable::<Item>::create(move |s| {
+      let items = Arc::new(RwLock::new(VecDeque::new()));
       let items_next = Arc::clone(&items);
       let sctl = StreamController::new(s);
       let sctl_next = sctl.clone();

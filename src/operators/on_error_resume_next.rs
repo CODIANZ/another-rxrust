@@ -8,7 +8,7 @@ pub struct OnErrorResumeNextOp<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  wrap_f: FunctionWrapper<'a, RxError, Observable<'a, Item>>,
+  resume_f: FunctionWrapper<'a, RxError, Observable<'a, Item>>,
 }
 
 impl<'a, Item> OnErrorResumeNextOp<'a, Item>
@@ -20,11 +20,11 @@ where
     F: Fn(RxError) -> Observable<'a, Item> + Send + Sync + 'a,
   {
     OnErrorResumeNextOp {
-      wrap_f: FunctionWrapper::new(f),
+      resume_f: FunctionWrapper::new(f),
     }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
-    let f = self.wrap_f.clone();
+    let f = self.resume_f.clone();
 
     Observable::<Item>::create(move |s| {
       let f = f.clone();

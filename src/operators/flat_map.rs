@@ -8,7 +8,7 @@ where
   In: Clone + Send + Sync,
   Out: Clone + Send + Sync,
 {
-  wrap_f: FunctionWrapper<'a, In, Observable<'a, Out>>,
+  flatmap_f: FunctionWrapper<'a, In, Observable<'a, Out>>,
 }
 
 impl<'a, In, Out> FlatMapOp<'a, In, Out>
@@ -21,11 +21,11 @@ where
     F: Fn(In) -> Observable<'a, Out> + Send + Sync + 'a,
   {
     FlatMapOp {
-      wrap_f: FunctionWrapper::new(f),
+      flatmap_f: FunctionWrapper::new(f),
     }
   }
   pub fn execute(&self, source: Observable<'a, In>) -> Observable<'a, Out> {
-    let f = self.wrap_f.clone();
+    let f = self.flatmap_f.clone();
 
     Observable::create(move |s| {
       let f = f.clone();
