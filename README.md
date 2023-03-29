@@ -95,6 +95,7 @@ Based on the problems of `rxRust`, `another-rxrust` has the following implementa
 - distinct_until_changed
 - retry
 - retry_when
+- lift (for custom operators)
 
 ### subject
 
