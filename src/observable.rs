@@ -184,7 +184,7 @@ where
     operators::RetryWhenOp::new(f).execute(self.clone())
   }
 
-  pub fn lift<F, Out>(&self, f: F) -> Observable<'a, Out>
+  pub fn pipe<F, Out>(&self, f: F) -> Observable<'a, Out>
   where
     Out: Clone + Send + Sync,
     F: Fn(Observable<Item>) -> Observable<Out>,
@@ -284,9 +284,9 @@ mod test {
   }
 
   #[test]
-  fn lift() {
+  fn pipe() {
     observables::just(1)
-      .lift(|s| operators::MapOp::new(|x| x * 2).execute(s))
+      .pipe(|s| operators::MapOp::new(|x| x * 2).execute(s))
       .subscribe(
         |x| println!("next {}", x),
         |e| println!("error {:}", error_to_string(&e)),
