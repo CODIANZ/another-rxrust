@@ -1,0 +1,67 @@
+use crate::prelude::*;
+use scheduler::IScheduler;
+use std::{thread, time::Duration};
+
+pub fn interval<'a, Scheduler, SchedulerCreator>(
+  dur: Duration,
+  scheduler_ctor: SchedulerCreator,
+) -> Observable<'a, u64>
+where
+  Scheduler: IScheduler<'a> + Clone + Send + Sync + 'a,
+  SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
+{
+  Observable::create(move |s| {
+    let scheduler = scheduler_ctor();
+    let scheduler_in_post = scheduler.clone();
+    scheduler.post(move || {
+      let mut n = 0;
+      loop {
+        thread::sleep(dur);
+        if !s.is_subscribed() {
+          break;
+        }
+        s.next(n);
+        n += 1;
+      }
+      scheduler_in_post.abort();
+    })
+  })
+}
+
+#[cfg(test)]
+mod test {
+  use crate::prelude::*;
+  use crate::tests::common::*;
+  use std::{thread, time};
+
+  #[test]
+  fn basic() {
+    observables::interval(
+      time::Duration::from_millis(100),
+      schedulers::default_scheduler(),
+    )
+    .take(5)
+    .subscribe(
+      |x| println!("next {}", x),
+      |e| println!("{:}", error_to_string(&e)),
+      || println!("complete"),
+    );
+    println!("marker");
+  }
+
+  #[test]
+  fn thread() {
+    observables::interval(
+      time::Duration::from_millis(100),
+      schedulers::new_thread_scheduler(),
+    )
+    .take(5)
+    .subscribe(
+      |x| println!("next {}", x),
+      |e| println!("{:}", error_to_string(&e)),
+      || println!("complete"),
+    );
+    println!("marker");
+    thread::sleep(time::Duration::from_millis(1500));
+  }
+}

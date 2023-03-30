@@ -184,6 +184,10 @@ where
     operators::RetryWhenOp::new(f).execute(self.clone())
   }
 
+  pub fn merge(&self, observables: &[Observable<'a, Item>]) -> Observable<'a, Item> {
+    operators::MergeOp::new(observables).execute(self.clone())
+  }
+
   pub fn pipe<F, Out>(&self, f: F) -> Observable<'a, Out>
   where
     Out: Clone + Send + Sync,
