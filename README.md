@@ -124,14 +124,14 @@ Operators that selectively emit items from a source Observable.
   - distinct_until_changed
 - [ ] ElementAt — emit only item n emitted by an Observable
 - [ ] Filter — emit only those items from an Observable that pass a predicate test
-- [ ] First — emit only the first item, or the first item that meets a condition, from an Observable
+- [x] First — emit only the first item, or the first item that meets a condition, from an Observable
 - [ ] IgnoreElements — do not emit any items from an Observable but mirror its termination notification
-- [ ] Last — emit only the last item emitted by an Observable
+- [x] Last — emit only the last item emitted by an Observable
 - [ ] Sample — emit the most recent item emitted by an Observable within periodic time intervals
 - [x] Skip — suppress the first n items emitted by an Observable
-- [ ] SkipLast — suppress the last n items emitted by an Observable
+- [x] SkipLast — suppress the last n items emitted by an Observable
 - [x] Take — emit only the first n items emitted by an Observable
-- [ ] TakeLast — emit only the last n items emitted by an Observable
+- [x] TakeLast — emit only the last n items emitted by an Observable
 
 ### Combining Observables
 
