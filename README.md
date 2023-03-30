@@ -97,7 +97,7 @@ Operators that originate new Observables.
 - [x] Empty/Never/Throw — create Observables that have very precise and limited behavior
 - [x] From — convert some other object or data structure into an Observable
   - `from_iter`
-- [ ] Interval — create an Observable that emits a sequence of integers spaced by a particular time interval
+- [x] Interval — create an Observable that emits a sequence of integers spaced by a particular time interval
 - [x] Just — convert an object or a set of objects into an Observable that emits that or those objects
 - [ ] Range — create an Observable that emits a range of sequential integers
 - [ ] Repeat — create an Observable that emits a particular item or sequence of items repeatedly
@@ -124,14 +124,14 @@ Operators that selectively emit items from a source Observable.
   - distinct_until_changed
 - [ ] ElementAt — emit only item n emitted by an Observable
 - [ ] Filter — emit only those items from an Observable that pass a predicate test
-- [ ] First — emit only the first item, or the first item that meets a condition, from an Observable
+- [x] First — emit only the first item, or the first item that meets a condition, from an Observable
 - [ ] IgnoreElements — do not emit any items from an Observable but mirror its termination notification
-- [ ] Last — emit only the last item emitted by an Observable
+- [x] Last — emit only the last item emitted by an Observable
 - [ ] Sample — emit the most recent item emitted by an Observable within periodic time intervals
 - [x] Skip — suppress the first n items emitted by an Observable
-- [ ] SkipLast — suppress the last n items emitted by an Observable
+- [x] SkipLast — suppress the last n items emitted by an Observable
 - [x] Take — emit only the first n items emitted by an Observable
-- [ ] TakeLast — emit only the last n items emitted by an Observable
+- [x] TakeLast — emit only the last n items emitted by an Observable
 
 ### Combining Observables
 
@@ -140,7 +140,7 @@ Operators that work with multiple source Observables to create a single Observab
 - [ ] And/Then/When — combine sets of items emitted by two or more Observables by means of Pattern and Plan intermediaries
 - [ ] CombineLatest — when an item is emitted by either of two Observables, combine the latest item emitted by each Observable via a specified function and emit items based on the results of this function
 - [ ] Join — combine items emitted by two Observables whenever an item from one Observable is emitted during a time window defined according to an item emitted by the other Observable
-- [ ] Merge — combine multiple Observables into one by merging their emissions
+- [x] Merge — combine multiple Observables into one by merging their emissions
 - [ ] StartWith — emit a specified sequence of items before beginning to emit the items from the source Observable
 - [ ] Switch — convert an Observable that emits Observables into a single Observable that emits the items emitted by the most-recently-emitted of those Observables
 - [ ] Zip — combine the emissions of multiple Observables together via a specified function and emit single items for each combination based on the results of this function
