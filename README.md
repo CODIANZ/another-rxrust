@@ -95,7 +95,7 @@ Operators that originate new Observables.
 - [x] Create — create an Observable from scratch by calling observer methods programmatically
 - [ ] Defer — do not create the Observable until the observer subscribes, and create a fresh Observable for each observer
 - [x] Empty/Never/Throw — create Observables that have very precise and limited behavior
-- [-] From — convert some other object or data structure into an Observable
+- [x] From — convert some other object or data structure into an Observable
   - `from_iter`
 - [ ] Interval — create an Observable that emits a sequence of integers spaced by a particular time interval
 - [x] Just — convert an object or a set of objects into an Observable that emits that or those objects
@@ -121,6 +121,7 @@ Operators that selectively emit items from a source Observable.
 
 - [ ] Debounce — only emit an item from an Observable if a particular timespan has passed without it emitting another item
 - [x] Distinct — suppress duplicate items emitted by an Observable
+  - distinct_until_changed
 - [ ] ElementAt — emit only item n emitted by an Observable
 - [ ] Filter — emit only those items from an Observable that pass a predicate test
 - [ ] First — emit only the first item, or the first item that meets a condition, from an Observable
