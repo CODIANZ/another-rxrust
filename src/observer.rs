@@ -1,5 +1,6 @@
 use crate::internals::function_wrapper::*;
 use crate::prelude::*;
+use std::sync::{Arc, RwLock};
 
 #[derive(Clone)]
 pub struct Observer<'a, T>
@@ -9,6 +10,7 @@ where
   fn_next: FunctionWrapper<'a, T, ()>,
   fn_error: FunctionWrapper<'a, RxError, ()>,
   fn_complete: FunctionWrapper<'a, (), ()>,
+  fn_on_unsubscribe: Arc<RwLock<Option<FunctionWrapper<'a, (), ()>>>>,
 }
 
 impl<'a, T> Observer<'a, T>
@@ -25,6 +27,7 @@ where
       fn_next: FunctionWrapper::new(next),
       fn_error: FunctionWrapper::new(error),
       fn_complete: FunctionWrapper::new(move |_| complete()),
+      fn_on_unsubscribe: Arc::new(RwLock::new(None)),
     }
   }
   pub fn next(&self, x: T) {
@@ -40,9 +43,19 @@ where
     self.fn_next.clear();
     self.fn_error.clear();
     self.fn_complete.clear();
+    if let Some(f) = &*self.fn_on_unsubscribe.read().unwrap() {
+      f.call(());
+    }
+    *self.fn_on_unsubscribe.write().unwrap() = None;
   }
   pub fn is_subscribed(&self) -> bool {
     self.fn_next.exists() && self.fn_error.exists() && self.fn_complete.exists()
+  }
+  pub fn set_on_unsubscribe<F>(&self, f: F)
+  where
+    F: Fn() -> () + Send + Sync + 'a,
+  {
+    *self.fn_on_unsubscribe.write().unwrap() = Some(FunctionWrapper::new(move |_| f()));
   }
 }
 
