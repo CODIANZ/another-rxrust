@@ -40,7 +40,7 @@ where
           let mut items = items_next.write().unwrap();
           items.push_back(x);
           if items.len() > count {
-            items.pop_back();
+            items.pop_front();
           }
         },
         move |_, e| {
