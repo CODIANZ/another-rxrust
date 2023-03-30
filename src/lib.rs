@@ -1,3 +1,5 @@
+//! Another implementation of `rxRust`.
+//! This library based on [ReactiveX](http://reactivex.io/).
 pub mod internals;
 pub mod observable;
 pub mod observables;
