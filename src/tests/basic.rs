@@ -14,7 +14,7 @@ mod test {
       })
     }
 
-    observables::from_iter(vec![1, 2, 3, 4, 5].into_iter())
+    observables::from_iter(1..10)
       .observe_on(schedulers::new_thread_scheduler())
       .flat_map(|x| match x {
         1 => observables::empty(),
