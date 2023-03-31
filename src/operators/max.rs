@@ -5,37 +5,45 @@ use std::{
   sync::{Arc, RwLock},
 };
 
-pub struct CountOp<Item> {
+pub struct MaxOp<Item> {
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> CountOp<Item>
+impl<'a, Item> MaxOp<Item>
 where
-  Item: Clone + Send + Sync,
+  Item: Clone + Send + Sync + PartialOrd,
 {
-  pub fn new() -> CountOp<Item> {
-    CountOp { _item: PhantomData }
+  pub fn new() -> MaxOp<Item> {
+    MaxOp { _item: PhantomData }
   }
-  pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, usize> {
-    Observable::<usize>::create(move |s| {
-      let n = Arc::new(RwLock::new(0usize));
+  pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
+    Observable::<Item>::create(move |s| {
+      let result = Arc::new(RwLock::new(None::<Item>));
 
       let sctl = StreamController::new(s);
       let sctl_error = sctl.clone();
       let sctl_complete = sctl.clone();
 
-      let n_next = Arc::clone(&n);
+      let result_next = Arc::clone(&result);
 
       source.inner_subscribe(sctl.new_observer(
-        move |_, _| {
-          *n_next.write().unwrap() += 1;
+        move |_, x| {
+          let mut r = result_next.write().unwrap();
+          if let Some(xx) = &*r {
+            if x > *xx {
+              *r = Some(x);
+            }
+          } else {
+            *r = Some(x);
+          }
         },
         move |_, e| {
           sctl_error.sink_error(e);
         },
         move |serial| {
-          let n = *n.read().unwrap();
-          sctl_complete.sink_next(n);
+          if let Some(x) = &*result.read().unwrap() {
+            sctl_complete.sink_next(x.clone());
+          }
           sctl_complete.sink_complete(&serial);
         },
       ));
@@ -51,16 +59,14 @@ mod test {
 
   #[test]
   fn basic() {
-    observables::repeat(()).take(100).count().subscribe(
-      print_next_fmt!("{}"),
-      print_error!(),
-      print_complete!(),
-    );
+    observables::from_iter([5, 6, 2, 7].into_iter())
+      .max()
+      .subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
   }
 
   #[test]
   fn empty() {
-    observables::empty::<i32>().count().subscribe(
+    observables::empty::<i32>().max().subscribe(
       print_next_fmt!("{}"),
       print_error!(),
       print_complete!(),
@@ -73,7 +79,7 @@ mod test {
       s.next(1);
       s.error(generate_error())
     })
-    .count()
+    .max()
     .subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
   }
 }

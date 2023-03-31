@@ -229,6 +229,19 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync + PartialOrd,
+{
+  pub fn min(&self) -> Observable<'a, Item> {
+    operators::MinOp::new().execute(self.clone())
+  }
+
+  pub fn max(&self) -> Observable<'a, Item> {
+    operators::MaxOp::new().execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
