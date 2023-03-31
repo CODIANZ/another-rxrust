@@ -214,6 +214,10 @@ where
   {
     operators::StartWithOp::new(iter).execute(self.clone())
   }
+
+  pub fn count(&self) -> Observable<'a, usize> {
+    operators::CountOp::new().execute(self.clone())
+  }
 }
 
 impl<'a, Item> Observable<'a, Item>

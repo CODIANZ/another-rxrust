@@ -1,5 +1,8 @@
 //! Another implementation of `rxRust`.
 //! This library based on [ReactiveX](http://reactivex.io/).
+
+#![doc = include_str!("../README.md")]
+
 pub mod internals;
 pub mod observable;
 pub mod observables;
