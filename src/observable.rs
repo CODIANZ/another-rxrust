@@ -196,12 +196,23 @@ where
     operators::MergeOp::new(observables).execute(self.clone())
   }
 
+  pub fn amb(&self, observables: &[Observable<'a, Item>]) -> Observable<'a, Item> {
+    operators::AmbOp::new(observables).execute(self.clone())
+  }
+
   pub fn pipe<F, Out>(&self, f: F) -> Observable<'a, Out>
   where
     Out: Clone + Send + Sync,
     F: Fn(Observable<Item>) -> Observable<Out>,
   {
     f(self.clone())
+  }
+
+  pub fn start_with<Iter>(&self, iter: Iter) -> Observable<'a, Item>
+  where
+    Iter: Iterator<Item = Item> + Clone + Send + Sync + 'a,
+  {
+    operators::StartWithOp::new(iter).execute(self.clone())
   }
 }
 

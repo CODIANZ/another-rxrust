@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod test {
-  use crate::{prelude::*, tests::common::generate_error};
+  use crate::prelude::*;
+  use crate::tests::common::generate_error;
 
   #[test]
   fn basic() {
@@ -23,8 +24,13 @@ mod test {
   }
 
   #[test]
-  fn print_unit() {
-    observables::just(()).subscribe(print_next!(), print_error!(), print_complete!());
+  fn print_debug() {
+    observables::just(()).subscribe(print_next_fmt!("{:?}"), print_error!(), print_complete!());
+  }
+
+  #[test]
+  fn print_display() {
+    observables::just(1).subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
   }
 
   #[test]
