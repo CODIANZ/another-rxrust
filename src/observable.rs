@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::internals::function_wrapper::*;
 use crate::prelude::*;
 use scheduler::IScheduler;
@@ -224,6 +226,10 @@ where
 
   pub fn count(&self) -> Observable<'a, usize> {
     operators::CountOp::new().execute(self.clone())
+  }
+
+  pub fn delay(&self, dur: Duration) -> Observable<'a, Item> {
+    operators::DelayOp::new(dur).execute(self.clone())
   }
 }
 
