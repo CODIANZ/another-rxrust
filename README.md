@@ -93,7 +93,7 @@ Quoted from [ReactiveX](https://reactivex.io/).
 Operators that originate new Observables.
 
 - [x] [Create](https://reactivex.io/documentation/operators/create.html) — create an Observable from scratch by calling observer methods programmatically
-- [ ] [Defer](https://reactivex.io/documentation/operators/defer.html) — do not create the Observable until the observer subscribes, and create a fresh Observable for each observer
+- [x] [Defer](https://reactivex.io/documentation/operators/defer.html) — do not create the Observable until the observer subscribes, and create a fresh Observable for each observer
 - [x] [Empty/Never/Throw](https://reactivex.io/documentation/operators/empty-never-throw.html) — create Observables that have very precise and limited behavior
   - Throw - `error`
 - [x] [From](https://reactivex.io/documentation/operators/from.html) — convert some other object or data structure into an Observable
