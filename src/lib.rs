@@ -1,4 +1,4 @@
-//! Another implementation of `rxRust`.
+//! A different implementation than `rxRust` for easier use of `ReactiveX` in `Rust`.
 //! This library based on [ReactiveX](http://reactivex.io/).
 
 #![doc = include_str!("../README.md")]

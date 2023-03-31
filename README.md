@@ -1,5 +1,7 @@
 # another-rxrust
 
+A different implementation than `rxRust` for easier use of `ReactiveX` in `Rust`.
+
 ## Why not `rxRust`?
 
 `rxRust` is a great `Rust` implementation of `ReactiveX`. However, when `rxRust` combines `observable` in a slightly complicated way, `rust` peculiar difficulties are exposed.

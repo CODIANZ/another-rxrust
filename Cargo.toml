@@ -2,14 +2,14 @@
 name = "another-rxrust"
 authors = ["Terukazu Inoue <terukazu.inoue@codianz.com>"]
 categories = ["asynchronous"]
-description = "another implementation of `rxRust`."
+description = "A different implementation than `rxRust` for easier use of `ReactiveX` in `Rust`."
 edition = "2021"
 license = "MIT"
 documentation = "https://docs.rs/another-rxrust/"
 homepage = "https://github.com/CODIANZ/another-rxrust"
 repository = "https://github.com/CODIANZ/another-rxrust"
-keywords = ["reactivex", "rx", "rxrust"]
-version = "0.0.24"
+keywords = ["reactivex", "rx", "rxrust", "asynchronous"]
+version = "0.0.25"
 
 
 [dependencies]
