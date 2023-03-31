@@ -19,5 +19,8 @@ pub mod prelude {
   pub use crate::subjects::*;
 }
 
+#[macro_use]
+pub mod macros;
+
 #[cfg(test)]
 pub mod tests;
