@@ -2,7 +2,7 @@
 
 ## Why not `rxRust`?
 
-I think `rxRust` is a great `Rust` implementation of `ReactiveX`. However, when `rxRust` combines `observable` in a slightly complicated way, `rust` peculiar difficulties are exposed.
+`rxRust` is a great `Rust` implementation of `ReactiveX`. However, when `rxRust` combines `observable` in a slightly complicated way, `rust` peculiar difficulties are exposed.
 
 Therefore, I implemented `ReactiveX` in a different way than `rxRust`, and created `another-rxrust` that can be easily described even if the following `observable` is combined in a complicated manner.
 
@@ -227,3 +227,14 @@ Specialty Observables that have more precisely-controlled subscription dynamics
 ### Others
 
 - [x] [pipe](https://reactivex.io/documentation/implement-operator.html) - for custom operators.
+
+## Utilities
+
+- subscribe macros
+  - `junk_next!()`
+  - `junk_error!()`
+  - `junk_complete!()`
+  - `panic_error!()`
+  - `print_next!()`
+  - `print_error!()`
+  - `print_complete!()`
