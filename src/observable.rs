@@ -208,6 +208,13 @@ where
     f(self.clone())
   }
 
+  pub fn reduce<F>(&self, f: F) -> Observable<'a, Item>
+  where
+    F: Fn((Item, Item)) -> Item + Send + Sync + 'a,
+  {
+    operators::ReduceOp::new(f).execute(self.clone())
+  }
+
   pub fn start_with<Iter>(&self, iter: Iter) -> Observable<'a, Item>
   where
     Iter: Iterator<Item = Item> + Clone + Send + Sync + 'a,
