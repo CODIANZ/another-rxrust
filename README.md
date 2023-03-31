@@ -102,7 +102,7 @@ Operators that originate new Observables.
 - [x] [Just](https://reactivex.io/documentation/operators/just.html) — convert an object or a set of objects into an Observable that emits that or those objects
 - [ ] [Range](https://reactivex.io/documentation/operators/range.html) — create an Observable that emits a range of sequential integers
 - [x] [Repeat](https://reactivex.io/documentation/operators/repeat.html) — create an Observable that emits a particular item or sequence of items repeatedly
-- [ ] [Start](https://reactivex.io/documentation/operators/start.html) — create an Observable that emits the return value of a function
+- [x] [Start](https://reactivex.io/documentation/operators/start.html) — create an Observable that emits the return value of a function
 - [x] [Timer](https://reactivex.io/documentation/operators/timer.html) — create an Observable that emits a single item after a given delay
 
 ### Transforming Observables
