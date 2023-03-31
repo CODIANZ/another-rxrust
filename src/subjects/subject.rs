@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{internals::function_wrapper::FunctionWrapper, prelude::*};
 use std::{
   collections::HashMap,
   sync::{Arc, RwLock},
@@ -11,6 +11,8 @@ where
 {
   observers: Arc<RwLock<HashMap<i32, Observer<'a, Item>>>>,
   serial: Arc<RwLock<i32>>,
+  on_subscribe: Arc<RwLock<Option<FunctionWrapper<'a, usize, ()>>>>,
+  on_unsubscribe: Arc<RwLock<Option<FunctionWrapper<'a, usize, ()>>>>,
 }
 
 impl<'a, Item> Subject<'a, Item>
@@ -21,6 +23,8 @@ where
     Subject {
       observers: Arc::new(RwLock::new(HashMap::new())),
       serial: Arc::new(RwLock::new(0)),
+      on_subscribe: Arc::new(RwLock::new(None)),
+      on_unsubscribe: Arc::new(RwLock::new(None)),
     }
   }
 
@@ -46,6 +50,9 @@ where
     let observers = Arc::clone(&self.observers);
     let serial = Arc::clone(&self.serial);
 
+    let on_subscribe = Arc::clone(&self.on_subscribe);
+    let on_unsubscribe = Arc::clone(&self.on_unsubscribe);
+
     Observable::create(move |s| {
       let serial = {
         let mut serial = serial.write().unwrap();
@@ -53,19 +60,40 @@ where
         *serial
       };
       {
-        let observers = observers.clone();
+        let observers = Arc::clone(&observers);
+        let on_unsubscribe = Arc::clone(&on_unsubscribe);
         s.set_on_unsubscribe(move || {
-          observers.write().unwrap().remove(&serial);
+          let mut observers = observers.write().unwrap();
+          observers.remove(&serial);
+          if let Some(on_unsubscribe) = &*on_unsubscribe.read().unwrap() {
+            on_unsubscribe.call(observers.len());
+          }
         });
       }
       {
         let mut observers = observers.write().unwrap();
         observers.insert(serial, s);
+        if let Some(on_subscribe) = &*on_subscribe.read().unwrap() {
+          on_subscribe.call(observers.len());
+        }
       }
     })
   }
   pub fn ref_count(&self) -> usize {
     self.observers.read().unwrap().len()
+  }
+  pub fn set_on_subscribe<F>(&self, f: F)
+  where
+    F: Fn(usize) + Send + Sync + 'a,
+  {
+    *self.on_subscribe.write().unwrap() = Some(FunctionWrapper::new(f));
+  }
+
+  pub fn set_on_unsubscribe<F>(&self, f: F)
+  where
+    F: Fn(usize) + Send + Sync + 'a,
+  {
+    *self.on_unsubscribe.write().unwrap() = Some(FunctionWrapper::new(f));
   }
 }
 
@@ -95,6 +123,9 @@ mod tset {
   fn double() {
     let sbj = subjects::Subject::new();
     println!("observers {}", sbj.ref_count());
+
+    sbj.set_on_subscribe(|x| println!("on_subscribe {}", x));
+    sbj.set_on_unsubscribe(|x| println!("on_unsubscribe {}", x));
 
     let binding = sbj.observable();
     let sbsc1 = binding.subscribe(
