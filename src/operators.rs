@@ -9,6 +9,7 @@ pub mod merge;
 pub mod min;
 pub mod observe_on;
 pub mod on_error_resume_next;
+pub mod publish;
 pub mod reduce;
 pub mod retry;
 pub mod retry_when;
@@ -36,6 +37,7 @@ pub mod operators {
   pub use crate::operators::min::*;
   pub use crate::operators::observe_on::*;
   pub use crate::operators::on_error_resume_next::*;
+  pub use crate::operators::publish::*;
   pub use crate::operators::reduce::*;
   pub use crate::operators::retry::*;
   pub use crate::operators::retry_when::*;

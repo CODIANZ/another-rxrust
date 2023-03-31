@@ -231,6 +231,10 @@ where
   pub fn delay(&self, dur: Duration) -> Observable<'a, Item> {
     operators::DelayOp::new(dur).execute(self.clone())
   }
+
+  pub fn publish(&self) -> publish::PublishOp<'a, Item> {
+    operators::PublishOp::new(self.clone())
+  }
 }
 
 impl<'a, Item> Observable<'a, Item>
