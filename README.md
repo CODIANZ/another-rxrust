@@ -205,9 +205,9 @@ Operators that operate on the entire sequence of items emitted by an Observable
 
 Specialty Observables that have more precisely-controlled subscription dynamics
 
-- [ ] [Connect](https://reactivex.io/documentation/operators/connect.html) — instruct a connectable Observable to begin emitting items to its subscribers
-- [ ] [Publish](https://reactivex.io/documentation/operators/publish.html) — convert an ordinary Observable into a connectable Observable
-- [ ] [RefCount](https://reactivex.io/documentation/operators/refcount.html) — make a Connectable Observable behave like an ordinary Observable
+- [x] [Connect](https://reactivex.io/documentation/operators/connect.html) — instruct a connectable Observable to begin emitting items to its subscribers
+- [x] [Publish](https://reactivex.io/documentation/operators/publish.html) — convert an ordinary Observable into a connectable Observable
+- [x] [RefCount](https://reactivex.io/documentation/operators/refcount.html) — make a Connectable Observable behave like an ordinary Observable
 - [ ] [Replay](https://reactivex.io/documentation/operators/replay.html) — ensure that all observers see the same sequence of emitted items, even if they subscribe after the Observable has begun emitting items
 
 ### Operators to Convert Observables
