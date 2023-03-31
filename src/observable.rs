@@ -207,6 +207,13 @@ where
   {
     f(self.clone())
   }
+
+  pub fn start_with<Iter>(&self, iter: Iter) -> Observable<'a, Item>
+  where
+    Iter: Iterator<Item = Item> + Clone + Send + Sync + 'a,
+  {
+    operators::StartWithOp::new(iter).execute(self.clone())
+  }
 }
 
 impl<'a, Item> Observable<'a, Item>
