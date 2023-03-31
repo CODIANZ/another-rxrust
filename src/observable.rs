@@ -196,6 +196,10 @@ where
     operators::MergeOp::new(observables).execute(self.clone())
   }
 
+  pub fn amb(&self, observables: &[Observable<'a, Item>]) -> Observable<'a, Item> {
+    operators::AmbOp::new(observables).execute(self.clone())
+  }
+
   pub fn pipe<F, Out>(&self, f: F) -> Observable<'a, Out>
   where
     Out: Clone + Send + Sync,
