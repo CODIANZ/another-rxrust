@@ -20,12 +20,17 @@ macro_rules! panic_error (
 
 #[macro_export]
 macro_rules! print_next (
-  () => ( |x| { println!("{:?}", x); } )
+  () => ( |_| { println!("next"); } )
+);
+
+#[macro_export]
+macro_rules! print_next_fmt (
+  ($e: expr) => ( |x| { println!("next - {}", format!($e, x)); } )
 );
 
 #[macro_export]
 macro_rules! print_error (
-  () => ( |e| { println!("{:?}", e.error); } )
+  () => ( |e| { println!("error - {:?}", e.error); } )
 );
 
 #[macro_export]
