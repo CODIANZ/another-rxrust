@@ -4,6 +4,7 @@ pub mod from_iter;
 pub mod interval;
 pub mod just;
 pub mod never;
+pub mod repeat;
 pub mod timer;
 
 pub mod observables {
@@ -13,5 +14,6 @@ pub mod observables {
   pub use crate::observables::interval::*;
   pub use crate::observables::just::*;
   pub use crate::observables::never::*;
+  pub use crate::observables::repeat::*;
   pub use crate::observables::timer::*;
 }
