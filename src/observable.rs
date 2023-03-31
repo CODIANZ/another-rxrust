@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::internals::function_wrapper::*;
 use crate::prelude::*;
 use scheduler::IScheduler;
@@ -208,11 +210,26 @@ where
     f(self.clone())
   }
 
+  pub fn reduce<F>(&self, f: F) -> Observable<'a, Item>
+  where
+    F: Fn((Item, Item)) -> Item + Send + Sync + 'a,
+  {
+    operators::ReduceOp::new(f).execute(self.clone())
+  }
+
   pub fn start_with<Iter>(&self, iter: Iter) -> Observable<'a, Item>
   where
     Iter: Iterator<Item = Item> + Clone + Send + Sync + 'a,
   {
     operators::StartWithOp::new(iter).execute(self.clone())
+  }
+
+  pub fn count(&self) -> Observable<'a, usize> {
+    operators::CountOp::new().execute(self.clone())
+  }
+
+  pub fn delay(&self, dur: Duration) -> Observable<'a, Item> {
+    operators::DelayOp::new(dur).execute(self.clone())
   }
 }
 
@@ -222,6 +239,19 @@ where
 {
   pub fn distinct_until_changed(&self) -> Observable<'a, Item> {
     operators::DistinctUntilChangedOp::new().execute(self.clone())
+  }
+}
+
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync + PartialOrd,
+{
+  pub fn min(&self) -> Observable<'a, Item> {
+    operators::MinOp::new().execute(self.clone())
+  }
+
+  pub fn max(&self) -> Observable<'a, Item> {
+    operators::MaxOp::new().execute(self.clone())
   }
 }
 

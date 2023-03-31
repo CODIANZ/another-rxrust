@@ -1,5 +1,7 @@
 # another-rxrust
 
+A different implementation than `rxRust` for easier use of `ReactiveX` in `Rust`.
+
 ## Why not `rxRust`?
 
 `rxRust` is a great `Rust` implementation of `ReactiveX`. However, when `rxRust` combines `observable` in a slightly complicated way, `rust` peculiar difficulties are exposed.
@@ -160,7 +162,7 @@ Operators that help to recover from error notifications from an Observable
 
 A toolbox of useful Operators for working with Observables
 
-- [ ] [Delay](https://reactivex.io/documentation/operators/delay.html) — shift the emissions from an Observable forward in time by a particular amount
+- [x] [Delay](https://reactivex.io/documentation/operators/delay.html) — shift the emissions from an Observable forward in time by a particular amount
 - [x] [Do](https://reactivex.io/documentation/operators/do.html) — register an action to take upon a variety of Observable lifecycle events
   - `tap`
 - [ ] [Materialize/Dematerialize](https://reactivex.io/documentation/operators/materialize-dematerialize.html) — represent both the items emitted and the notifications sent as emitted items, or reverse this process
@@ -193,10 +195,10 @@ Operators that operate on the entire sequence of items emitted by an Observable
 
 - [ ] [Average](https://reactivex.io/documentation/operators/average.html) — calculates the average of numbers emitted by an Observable and emits this average
 - [ ] [Concat](https://reactivex.io/documentation/operators/concat.html) — emit the emissions from two or more Observables without interleaving them
-- [ ] [Count](https://reactivex.io/documentation/operators/count.html) — count the number of items emitted by the source Observable and emit only this value
-- [ ] [Max](https://reactivex.io/documentation/operators/max.html) — determine, and emit, the maximum-valued item emitted by an Observable
-- [ ] [Min](https://reactivex.io/documentation/operators/min.html) — determine, and emit, the minimum-valued item emitted by an Observable
-- [ ] [Reduce](https://reactivex.io/documentation/operators/reduce.html) — apply a function to each item emitted by an Observable, sequentially, and emit the final value
+- [x] [Count](https://reactivex.io/documentation/operators/count.html) — count the number of items emitted by the source Observable and emit only this value
+- [x] [Max](https://reactivex.io/documentation/operators/max.html) — determine, and emit, the maximum-valued item emitted by an Observable
+- [x] [Min](https://reactivex.io/documentation/operators/min.html) — determine, and emit, the minimum-valued item emitted by an Observable
+- [x] [Reduce](https://reactivex.io/documentation/operators/reduce.html) — apply a function to each item emitted by an Observable, sequentially, and emit the final value
 - [ ] [Sum](https://reactivex.io/documentation/operators/sum.html) — calculate the sum of numbers emitted by an Observable and emit this sum
 
 ### Connectable Observable Operators

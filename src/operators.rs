@@ -1,10 +1,15 @@
 pub mod amb;
+pub mod count;
+pub mod delay;
 pub mod distinct_until_changed;
 pub mod flat_map;
 pub mod map;
+pub mod max;
 pub mod merge;
+pub mod min;
 pub mod observe_on;
 pub mod on_error_resume_next;
+pub mod reduce;
 pub mod retry;
 pub mod retry_when;
 pub mod skip;
@@ -21,12 +26,17 @@ pub mod tap;
 
 pub mod operators {
   pub use crate::operators::amb::*;
+  pub use crate::operators::count::*;
+  pub use crate::operators::delay::*;
   pub use crate::operators::distinct_until_changed::*;
   pub use crate::operators::flat_map::*;
   pub use crate::operators::map::*;
+  pub use crate::operators::max::*;
   pub use crate::operators::merge::*;
+  pub use crate::operators::min::*;
   pub use crate::operators::observe_on::*;
   pub use crate::operators::on_error_resume_next::*;
+  pub use crate::operators::reduce::*;
   pub use crate::operators::retry::*;
   pub use crate::operators::retry_when::*;
   pub use crate::operators::skip::*;
