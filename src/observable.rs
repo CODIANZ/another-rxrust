@@ -135,6 +135,10 @@ where
     operators::SkipLastOp::new(count).execute(self.clone())
   }
 
+  pub fn ignore_elements(&self) -> Observable<'a, Item> {
+    operators::IgnoreElementsOp::new().execute(self.clone())
+  }
+
   pub fn take_until<TriggerValue>(
     &self,
     trigger: Observable<'a, TriggerValue>,
