@@ -239,6 +239,10 @@ where
   pub fn ref_count(&self) -> ref_count::RefCountOp<'a, Item> {
     operators::RefCountOp::new(self.clone())
   }
+
+  pub fn default_if_empty(&self, target: Item) -> Observable<'a, Item> {
+    operators::DefaultIfEmpty::new(target).execute(self.clone())
+  }
 }
 
 impl<'a, Item> Observable<'a, Item>
