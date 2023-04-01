@@ -5,6 +5,7 @@ pub mod count;
 pub mod default_if_empty;
 pub mod delay;
 pub mod distinct_until_changed;
+pub mod filter;
 pub mod first;
 pub mod flat_map;
 pub mod last;
@@ -42,6 +43,7 @@ pub mod operators {
   pub use crate::operators::default_if_empty::*;
   pub use crate::operators::delay::*;
   pub use crate::operators::distinct_until_changed::*;
+  pub use crate::operators::filter::*;
   pub use crate::operators::first::*;
   pub use crate::operators::flat_map::*;
   pub use crate::operators::last::*;

@@ -169,6 +169,13 @@ where
     operators::SkipWhileOp::new(f).execute(self.clone())
   }
 
+  pub fn filter<F>(&self, f: F) -> Observable<'a, Item>
+  where
+    F: Fn(Item) -> bool + Send + Sync + 'a,
+  {
+    operators::FilterOp::new(f).execute(self.clone())
+  }
+
   pub fn sample<TriggerValue>(&self, trigger: Observable<'a, TriggerValue>) -> Observable<'a, Item>
   where
     TriggerValue: Clone + Send + Sync,

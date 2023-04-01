@@ -126,7 +126,7 @@ Operators that selectively emit items from a source Observable.
 - [x] [Distinct](https://reactivex.io/documentation/operators/distinct.html) — suppress duplicate items emitted by an Observable
   - distinct_until_changed
 - [ ] [ElementAt](https://reactivex.io/documentation/operators/elementat.html) — emit only item n emitted by an Observable
-- [ ] [Filter](https://reactivex.io/documentation/operators/filter.html) — emit only those items from an Observable that pass a predicate test
+- [x] [Filter](https://reactivex.io/documentation/operators/filter.html) — emit only those items from an Observable that pass a predicate test
 - [x] [First](https://reactivex.io/documentation/operators/first.html) — emit only the first item, or the first item that meets a condition, from an Observable
 - [ ] [IgnoreElements](https://reactivex.io/documentation/operators/ignoreelements.html) — do not emit any items from an Observable but mirror its termination notification
 - [x] [Last](https://reactivex.io/documentation/operators/last.html) — emit only the last item emitted by an Observable
