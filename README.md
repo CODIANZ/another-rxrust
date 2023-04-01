@@ -1,15 +1,13 @@
 # another-rxrust
 
-A different implementation than `rxRust` for easier use of `ReactiveX` in `Rust`.
+## why new implementation?
 
-## Why not `rxRust`?
+`rxRust` is a `Rust` language implementation of `ReactiveX`, but it is not suitable for complex combinations of `observable`.
+For those who use `ReactiveX` in other languages such as `rxjs(TypeScript)` or `rxcpp`, `rxRust` is a very difficult library.
 
-`rxRust` is a great `Rust` implementation of `ReactiveX`. However, when `rxRust` combines `observable` in a slightly complicated way, `rust` peculiar difficulties are exposed.
+Therefore, I created `another-rxrust`, thinking that I needed a library that allows `observable` to be connected in the same way as other platforms, and that `ReactiveX` can be enjoyed in `Rust`.
 
-Therefore, I implemented `ReactiveX` in a different way than `rxRust`, and created `another-rxrust` that can be easily described even if the following `observable` is combined in a complicated manner.
-
-This implementation is not a panacea. `Rust` sacrifices memory efficiency, speed, and much more.
-If you want performance, I think you should use `rxRust`.
+In addition, `ReactiveX` may not be the best solution if the purpose is to parallelize heavy processing and speed it up. However, `Reactive X` is one answer for complex combinations of non-blocking I/O and error handling.
 
 ```rust
 use crate::prelude::*;
