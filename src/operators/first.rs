@@ -6,7 +6,7 @@ pub struct FirstOp<Item>
 where
   Item: Clone + Send + Sync,
 {
-  take_op: operators::TakeLast<Item>,
+  take_op: operators::TakeOp<Item>,
 }
 
 impl<'a, Item> FirstOp<Item>
@@ -15,7 +15,7 @@ where
 {
   pub fn new() -> FirstOp<Item> {
     FirstOp {
-      take_op: operators::TakeLast::new(1),
+      take_op: operators::TakeOp::new(1),
     }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {

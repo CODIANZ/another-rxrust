@@ -112,7 +112,7 @@ where
   }
 
   pub fn take(&self, count: usize) -> Observable<'a, Item> {
-    operators::TakeLast::new(count).execute(self.clone())
+    operators::TakeOp::new(count).execute(self.clone())
   }
 
   pub fn take_last(&self, count: usize) -> Observable<'a, Item> {
@@ -181,6 +181,10 @@ where
     TriggerValue: Clone + Send + Sync,
   {
     operators::SampleOp::new(trigger).execute(self.clone())
+  }
+
+  pub fn element_at(&self, count: usize) -> Observable<'a, Item> {
+    operators::ElementAtOp::new(count).execute(self.clone())
   }
 
   pub fn tap<Next, Error, Complete>(

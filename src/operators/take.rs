@@ -6,7 +6,7 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct TakeLast<Item>
+pub struct TakeOp<Item>
 where
   Item: Clone + Send + Sync,
 {
@@ -14,12 +14,12 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> TakeLast<Item>
+impl<'a, Item> TakeOp<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(count: usize) -> TakeLast<Item> {
-    TakeLast {
+  pub fn new(count: usize) -> TakeOp<Item> {
+    TakeOp {
       count,
       _item: PhantomData,
     }
