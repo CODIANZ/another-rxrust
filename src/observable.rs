@@ -111,6 +111,18 @@ where
     operators::SubscribeOnOp::new(scheduler_ctor).execute(self.clone())
   }
 
+  pub fn debounce<Scheduler, SchedulerCreator>(
+    &self,
+    dur: Duration,
+    scheduler_ctor: SchedulerCreator,
+  ) -> Observable<'a, Item>
+  where
+    Scheduler: IScheduler<'a> + Clone + Send + Sync + 'a,
+    SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
+  {
+    operators::DebounceOp::new(dur, scheduler_ctor).execute(self.clone())
+  }
+
   pub fn take(&self, count: usize) -> Observable<'a, Item> {
     operators::TakeOp::new(count).execute(self.clone())
   }
@@ -133,6 +145,10 @@ where
 
   pub fn skip_last(&self, count: usize) -> Observable<'a, Item> {
     operators::SkipLastOp::new(count).execute(self.clone())
+  }
+
+  pub fn ignore_elements(&self) -> Observable<'a, Item> {
+    operators::IgnoreElementsOp::new().execute(self.clone())
   }
 
   pub fn take_until<TriggerValue>(
