@@ -64,6 +64,15 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn switch_on_next(&self, target: Observable<'a, Item>) -> Observable<'a, Item> {
+    SwitchOnNextOp::new(target).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

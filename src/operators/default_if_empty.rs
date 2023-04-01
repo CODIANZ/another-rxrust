@@ -50,6 +50,15 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn default_if_empty(&self, target: Item) -> Observable<'a, Item> {
+    DefaultIfEmpty::new(target).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

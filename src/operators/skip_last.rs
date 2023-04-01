@@ -59,6 +59,15 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn skip_last(&self, count: usize) -> Observable<'a, Item> {
+    SkipLastOp::new(count).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

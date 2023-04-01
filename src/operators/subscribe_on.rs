@@ -78,6 +78,22 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn subscribe_on<Scheduler, SchedulerCreator>(
+    &self,
+    scheduler_ctor: SchedulerCreator,
+  ) -> Observable<'a, Item>
+  where
+    Scheduler: IScheduler<'a> + Clone + Send + Sync + 'a,
+    SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
+  {
+    SubscribeOnOp::new(scheduler_ctor).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

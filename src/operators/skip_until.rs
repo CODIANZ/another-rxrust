@@ -66,6 +66,21 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn skip_until<TriggerValue>(
+    &self,
+    trigger: Observable<'a, TriggerValue>,
+  ) -> Observable<'a, Item>
+  where
+    TriggerValue: Clone + Send + Sync,
+  {
+    SkipUntilOp::new(trigger).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

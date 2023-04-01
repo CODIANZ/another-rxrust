@@ -141,10 +141,6 @@ Specialty Observables that have more precisely-controlled subscription dynamics
 - [x] [Default](https://reactivex.io/documentation/scheduler.html) - scheduler to run on the current thread.
 - [x] [NewThread](https://reactivex.io/documentation/scheduler.html) - scheduler that creates a new thread and executes it there.
 
-### Others
-
-- [x] [pipe](https://reactivex.io/documentation/implement-operator.html) - for custom operators.
-
 ## Utilities
 
 - subscribe macros

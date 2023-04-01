@@ -56,6 +56,15 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn merge(&self, observables: &[Observable<'a, Item>]) -> Observable<'a, Item> {
+    MergeOp::new(observables).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

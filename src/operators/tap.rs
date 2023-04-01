@@ -55,6 +55,25 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn tap<Next, Error, Complete>(
+    &self,
+    next: Next,
+    error: Error,
+    complete: Complete,
+  ) -> Observable<'a, Item>
+  where
+    Next: Fn(Item) + Send + Sync + 'a,
+    Error: Fn(RxError) + Send + Sync + 'a,
+    Complete: Fn() + Send + Sync + 'a,
+  {
+    TapOp::new(next, error, complete).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

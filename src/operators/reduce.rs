@@ -58,6 +58,18 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn reduce<F>(&self, f: F) -> Observable<'a, Item>
+  where
+    F: Fn((Item, Item)) -> Item + Send + Sync + 'a,
+  {
+    ReduceOp::new(f).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

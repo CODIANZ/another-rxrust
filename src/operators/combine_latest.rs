@@ -55,6 +55,23 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn combine_latest<Out, F>(
+    &self,
+    observables: &[Observable<'a, Item>],
+    f: F,
+  ) -> Observable<'a, Out>
+  where
+    Out: Clone + Send + Sync,
+    F: Fn(Vec<Item>) -> Out + Send + Sync + 'a,
+  {
+    CombineLatestOp::new(observables, f).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
