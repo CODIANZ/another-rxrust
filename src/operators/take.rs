@@ -5,7 +5,8 @@ use std::{
   sync::{Arc, RwLock},
 };
 
-pub struct TakeOp<Item>
+#[derive(Clone)]
+pub struct TakeLast<Item>
 where
   Item: Clone + Send + Sync,
 {
@@ -13,12 +14,12 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> TakeOp<Item>
+impl<'a, Item> TakeLast<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(count: usize) -> TakeOp<Item> {
-    TakeOp {
+  pub fn new(count: usize) -> TakeLast<Item> {
+    TakeLast {
       count,
       _item: PhantomData,
     }

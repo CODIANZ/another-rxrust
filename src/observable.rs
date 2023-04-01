@@ -112,7 +112,7 @@ where
   }
 
   pub fn take(&self, count: usize) -> Observable<'a, Item> {
-    operators::TakeOp::new(count).execute(self.clone())
+    operators::TakeLast::new(count).execute(self.clone())
   }
 
   pub fn take_last(&self, count: usize) -> Observable<'a, Item> {
@@ -120,11 +120,11 @@ where
   }
 
   pub fn first(&self) -> Observable<'a, Item> {
-    self.take(1)
+    operators::FirstOp::new().execute(self.clone())
   }
 
   pub fn last(&self) -> Observable<'a, Item> {
-    self.take_last(1)
+    operators::LastOp::new().execute(self.clone())
   }
 
   pub fn skip(&self, count: usize) -> Observable<'a, Item> {
