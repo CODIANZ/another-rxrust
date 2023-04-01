@@ -5,6 +5,7 @@ use std::{
   sync::{Arc, RwLock},
 };
 
+#[derive(Clone)]
 pub struct MinOp<Item> {
   _item: PhantomData<Item>,
 }

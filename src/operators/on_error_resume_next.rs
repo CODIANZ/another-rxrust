@@ -1,6 +1,7 @@
 use crate::internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController};
 use crate::prelude::*;
 
+#[derive(Clone)]
 pub struct OnErrorResumeNextOp<'a, Item>
 where
   Item: Clone + Send + Sync,

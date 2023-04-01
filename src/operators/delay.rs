@@ -2,6 +2,7 @@ use crate::internals::stream_controller::*;
 use crate::prelude::*;
 use std::{marker::PhantomData, thread, time::Duration};
 
+#[derive(Clone)]
 pub struct DelayOp<Item>
 where
   Item: Clone + Send + Sync,

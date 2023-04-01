@@ -1,8 +1,8 @@
-use std::sync::{Arc, RwLock};
-
 use crate::internals::{function_wrapper::*, stream_controller::*};
 use crate::prelude::*;
+use std::sync::{Arc, RwLock};
 
+#[derive(Clone)]
 pub struct ReduceOp<'a, Item>
 where
   Item: Clone + Send + Sync,

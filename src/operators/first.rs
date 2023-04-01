@@ -1,6 +1,7 @@
 use crate::internals::stream_controller::*;
 use crate::prelude::*;
 
+#[derive(Clone)]
 pub struct FirstOp<Item>
 where
   Item: Clone + Send + Sync,

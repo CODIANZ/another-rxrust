@@ -1,6 +1,7 @@
 use crate::internals::{function_wrapper::*, stream_controller::*};
 use crate::prelude::*;
 
+#[derive(Clone)]
 pub struct TakeWhileOp<'a, Item>
 where
   Item: Clone + Send + Sync,

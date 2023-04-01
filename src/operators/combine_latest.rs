@@ -2,6 +2,7 @@ use crate::internals::function_wrapper::FunctionWrapper;
 use crate::internals::stream_controller::*;
 use crate::prelude::*;
 
+#[derive(Clone)]
 pub struct CombineLatestOp<'a, Item, Out>
 where
   Item: Clone + Send + Sync,

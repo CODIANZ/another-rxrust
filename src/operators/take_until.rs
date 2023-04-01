@@ -2,6 +2,7 @@ use crate::internals::stream_controller::*;
 use crate::prelude::*;
 use std::marker::PhantomData;
 
+#[derive(Clone)]
 pub struct TakeUntilOp<'a, Item, TrigerValue>
 where
   Item: Clone + Send + Sync,

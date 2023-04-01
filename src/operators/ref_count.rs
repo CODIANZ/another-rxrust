@@ -2,6 +2,7 @@ use crate::prelude::*;
 use std::sync::{Arc, RwLock};
 use subject::Subject;
 
+#[derive(Clone)]
 pub struct RefCountOp<'a, Item>
 where
   Item: Clone + Send + Sync,

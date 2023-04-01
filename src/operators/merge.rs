@@ -1,6 +1,7 @@
 use crate::internals::stream_controller::*;
 use crate::prelude::*;
 
+#[derive(Clone)]
 pub struct MergeOp<'a, Item>
 where
   Item: Clone + Send + Sync,

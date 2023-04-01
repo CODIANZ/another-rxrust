@@ -2,6 +2,7 @@ use crate::internals::stream_controller::*;
 use crate::prelude::*;
 use std::sync::{Arc, RwLock};
 
+#[derive(Clone)]
 pub struct DefaultIfEmpty<Item>
 where
   Item: Clone + Send + Sync,

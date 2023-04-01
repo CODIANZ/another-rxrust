@@ -4,6 +4,7 @@ use crate::internals::function_wrapper::*;
 use crate::internals::stream_controller::*;
 use crate::prelude::*;
 
+#[derive(Clone)]
 pub struct RetryWhenOp<'a, Item>
 where
   Item: Clone + Send + Sync,

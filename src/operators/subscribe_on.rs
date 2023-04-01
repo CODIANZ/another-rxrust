@@ -3,6 +3,7 @@ use crate::prelude::*;
 use scheduler::IScheduler;
 use std::marker::PhantomData;
 
+#[derive(Clone)]
 pub struct SubscribeOnOp<'a, Scheduler, Item>
 where
   Scheduler: IScheduler<'a> + Clone + Send + Sync,
