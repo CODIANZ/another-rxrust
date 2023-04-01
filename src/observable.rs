@@ -202,6 +202,10 @@ where
     operators::AmbOp::new(observables).execute(self.clone())
   }
 
+  pub fn zip(&self, observables: &[Observable<'a, Item>]) -> Observable<'a, Vec<Item>> {
+    operators::ZipOp::new(observables).execute(self.clone())
+  }
+
   pub fn pipe<F, Out>(&self, f: F) -> Observable<'a, Out>
   where
     Out: Clone + Send + Sync,

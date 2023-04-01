@@ -28,6 +28,7 @@ pub mod take_last;
 pub mod take_until;
 pub mod take_while;
 pub mod tap;
+pub mod zip;
 
 pub mod operators {
   pub use crate::operators::amb::*;
@@ -60,4 +61,5 @@ pub mod operators {
   pub use crate::operators::take_until::*;
   pub use crate::operators::take_while::*;
   pub use crate::operators::tap::*;
+  pub use crate::operators::zip::*;
 }
