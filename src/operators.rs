@@ -2,6 +2,7 @@ pub mod amb;
 pub mod combine_latest;
 pub mod contains;
 pub mod count;
+pub mod debounce;
 pub mod default_if_empty;
 pub mod delay;
 pub mod distinct_until_changed;
@@ -42,6 +43,7 @@ pub mod operators {
   pub use crate::operators::combine_latest::*;
   pub use crate::operators::contains::*;
   pub use crate::operators::count::*;
+  pub use crate::operators::debounce::*;
   pub use crate::operators::default_if_empty::*;
   pub use crate::operators::delay::*;
   pub use crate::operators::distinct_until_changed::*;
