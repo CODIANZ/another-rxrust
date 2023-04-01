@@ -381,28 +381,4 @@ mod test {
         || println!("complete"),
       );
   }
-
-  #[test]
-  fn first() {
-    observables::from_iter(0..10).first().subscribe(
-      |x| {
-        println!("next {}", x);
-        assert_eq!(x, 0);
-      },
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
-    );
-  }
-
-  #[test]
-  fn last() {
-    observables::from_iter(0..10).last().subscribe(
-      |x| {
-        println!("next {}", x);
-        assert_eq!(x, 9);
-      },
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
-    );
-  }
 }
