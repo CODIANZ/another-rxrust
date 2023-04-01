@@ -130,7 +130,7 @@ Operators that selectively emit items from a source Observable.
 - [x] [First](https://reactivex.io/documentation/operators/first.html) — emit only the first item, or the first item that meets a condition, from an Observable
 - [ ] [IgnoreElements](https://reactivex.io/documentation/operators/ignoreelements.html) — do not emit any items from an Observable but mirror its termination notification
 - [x] [Last](https://reactivex.io/documentation/operators/last.html) — emit only the last item emitted by an Observable
-- [ ] [Sample](https://reactivex.io/documentation/operators/sample.html) — emit the most recent item emitted by an Observable within periodic time intervals
+- [x] [Sample](https://reactivex.io/documentation/operators/sample.html) — emit the most recent item emitted by an Observable within periodic time intervals
 - [x] [Skip](https://reactivex.io/documentation/operators/skip.html) — suppress the first n items emitted by an Observable
 - [x] [SkipLast](https://reactivex.io/documentation/operators/skiplast.html) — suppress the last n items emitted by an Observable
 - [x] [Take](https://reactivex.io/documentation/operators/take.html) — emit only the first n items emitted by an Observable

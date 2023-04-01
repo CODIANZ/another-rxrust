@@ -169,6 +169,13 @@ where
     operators::SkipWhileOp::new(f).execute(self.clone())
   }
 
+  pub fn sample<TriggerValue>(&self, trigger: Observable<'a, TriggerValue>) -> Observable<'a, Item>
+  where
+    TriggerValue: Clone + Send + Sync,
+  {
+    operators::SampleOp::new(trigger).execute(self.clone())
+  }
+
   pub fn tap<Next, Error, Complete>(
     &self,
     next: Next,
