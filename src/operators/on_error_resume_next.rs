@@ -63,6 +63,18 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn on_error_resume_next<F>(&self, f: F) -> Observable<'a, Item>
+  where
+    F: Fn(RxError) -> Observable<'a, Item> + Send + Sync + 'a,
+  {
+    OnErrorResumeNextOp::new(f).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod tset {
   use crate::prelude::*;

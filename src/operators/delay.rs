@@ -44,6 +44,15 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn delay(&self, dur: Duration) -> Observable<'a, Item> {
+    DelayOp::new(dur).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

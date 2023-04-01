@@ -42,6 +42,15 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn first(&self) -> Observable<'a, Item> {
+    operators::FirstOp::new().execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

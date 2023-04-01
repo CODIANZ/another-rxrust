@@ -55,6 +55,18 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn skip_while<F>(&self, f: F) -> Observable<'a, Item>
+  where
+    F: Fn(Item) -> bool + Send + Sync + 'a,
+  {
+    SkipWhileOp::new(f).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

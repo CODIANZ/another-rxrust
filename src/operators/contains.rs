@@ -45,6 +45,15 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync + PartialEq,
+{
+  pub fn contains(&self, target: Item) -> Observable<'a, bool> {
+    ContainsOp::new(target).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

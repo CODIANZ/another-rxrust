@@ -44,6 +44,15 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn count(&self) -> Observable<'a, usize> {
+    CountOp::new().execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

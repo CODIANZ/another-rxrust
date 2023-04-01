@@ -60,6 +60,15 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn retry(&self, max_retry: usize) -> Observable<'a, Item> {
+    RetryOp::new(max_retry).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

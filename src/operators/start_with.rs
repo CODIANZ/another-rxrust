@@ -55,6 +55,18 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn start_with<Iter>(&self, iter: Iter) -> Observable<'a, Item>
+  where
+    Iter: Iterator<Item = Item> + Clone + Send + Sync + 'a,
+  {
+    StartWithOp::new(iter).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

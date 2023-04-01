@@ -34,6 +34,15 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn ignore_elements(&self) -> Observable<'a, Item> {
+    IgnoreElementsOp::new().execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::{prelude::*, tests::common::generate_error};

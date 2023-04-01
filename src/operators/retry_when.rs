@@ -64,6 +64,18 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn retry_when<F>(&self, f: F) -> Observable<'a, Item>
+  where
+    F: Fn(RxError) -> bool + Send + Sync + 'a,
+  {
+    RetryWhenOp::new(f).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

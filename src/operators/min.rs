@@ -52,6 +52,15 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync + PartialOrd,
+{
+  pub fn min(&self) -> Observable<'a, Item> {
+    MinOp::new().execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

@@ -63,6 +63,19 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn flat_map<Out, F>(&self, f: F) -> Observable<'a, Out>
+  where
+    F: Fn(Item) -> Observable<'a, Out> + Send + Sync + 'a,
+    Out: Clone + Send + Sync,
+  {
+    FlatMapOp::new(f).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

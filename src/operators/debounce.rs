@@ -86,6 +86,23 @@ where
   }
 }
 
+impl<'a, Item> Observable<'a, Item>
+where
+  Item: Clone + Send + Sync,
+{
+  pub fn debounce<Scheduler, SchedulerCreator>(
+    &self,
+    dur: Duration,
+    scheduler_ctor: SchedulerCreator,
+  ) -> Observable<'a, Item>
+  where
+    Scheduler: IScheduler<'a> + Clone + Send + Sync + 'a,
+    SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
+  {
+    DebounceOp::new(dur, scheduler_ctor).execute(self.clone())
+  }
+}
+
 #[cfg(test)]
 mod test {
   use crate::prelude::*;

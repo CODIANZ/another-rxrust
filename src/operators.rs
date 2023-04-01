@@ -1,4 +1,5 @@
 pub mod amb;
+pub mod buffer_with_count;
 pub mod combine_latest;
 pub mod contains;
 pub mod count;
@@ -40,6 +41,7 @@ pub mod zip;
 
 pub mod operators {
   pub use crate::operators::amb::*;
+  pub use crate::operators::buffer_with_count::*;
   pub use crate::operators::combine_latest::*;
   pub use crate::operators::contains::*;
   pub use crate::operators::count::*;
