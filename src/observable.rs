@@ -243,6 +243,10 @@ where
   pub fn default_if_empty(&self, target: Item) -> Observable<'a, Item> {
     operators::DefaultIfEmpty::new(target).execute(self.clone())
   }
+
+  pub fn switch_on_next(&self, target: Observable<'a, Item>) -> Observable<'a, Item> {
+    operators::SwitchOnNextOp::new(target).execute(self.clone())
+  }
 }
 
 impl<'a, Item> Observable<'a, Item>

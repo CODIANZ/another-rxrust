@@ -145,7 +145,8 @@ Operators that work with multiple source Observables to create a single Observab
 - [ ] [Join](https://reactivex.io/documentation/operators/join.html) — combine items emitted by two Observables whenever an item from one Observable is emitted during a time window defined according to an item emitted by the other Observable
 - [x] [Merge](https://reactivex.io/documentation/operators/merge.html) — combine multiple Observables into one by merging their emissions
 - [x] [StartWith](https://reactivex.io/documentation/operators/startwith.html) — emit a specified sequence of items before beginning to emit the items from the source Observable
-- [ ] [Switch](https://reactivex.io/documentation/operators/switch.html) — convert an Observable that emits Observables into a single Observable that emits the items emitted by the most-recently-emitted of those Observables
+- [x] [Switch](https://reactivex.io/documentation/operators/switch.html) — convert an Observable that emits Observables into a single Observable that emits the items emitted by the most-recently-emitted of those Observables
+  - `switch_on_next`
 - [ ] [Zip](https://reactivex.io/documentation/operators/zip.html) — combine the emissions of multiple Observables together via a specified function and emit single items for each combination based on the results of this function
 
 ### Error Handling Operators
