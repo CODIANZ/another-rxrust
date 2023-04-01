@@ -206,6 +206,18 @@ where
     operators::ZipOp::new(observables).execute(self.clone())
   }
 
+  pub fn combine_latest<Out, F>(
+    &self,
+    observables: &[Observable<'a, Item>],
+    f: F,
+  ) -> Observable<'a, Out>
+  where
+    Out: Clone + Send + Sync,
+    F: Fn(Vec<Item>) -> Out + Send + Sync + 'a,
+  {
+    operators::CombineLatestOp::new(observables, f).execute(self.clone())
+  }
+
   pub fn pipe<F, Out>(&self, f: F) -> Observable<'a, Out>
   where
     Out: Clone + Send + Sync,

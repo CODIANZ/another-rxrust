@@ -141,7 +141,7 @@ Operators that selectively emit items from a source Observable.
 Operators that work with multiple source Observables to create a single Observable
 
 - [ ] [And/Then/When](https://reactivex.io/documentation/operators/and-then-when.html) — combine sets of items emitted by two or more Observables by means of Pattern and Plan intermediaries
-- [ ] [CombineLatest](https://reactivex.io/documentation/operators/combinelatest.html) — when an item is emitted by either of two Observables, combine the latest item emitted by each Observable via a specified function and emit items based on the results of this function
+- [x] [CombineLatest](https://reactivex.io/documentation/operators/combinelatest.html) — when an item is emitted by either of two Observables, combine the latest item emitted by each Observable via a specified function and emit items based on the results of this function
 - [ ] [Join](https://reactivex.io/documentation/operators/join.html) — combine items emitted by two Observables whenever an item from one Observable is emitted during a time window defined according to an item emitted by the other Observable
 - [x] [Merge](https://reactivex.io/documentation/operators/merge.html) — combine multiple Observables into one by merging their emissions
 - [x] [StartWith](https://reactivex.io/documentation/operators/startwith.html) — emit a specified sequence of items before beginning to emit the items from the source Observable
