@@ -129,7 +129,7 @@ Specialty Observables that have more precisely-controlled subscription dynamics
 
 ### Subjects
 
-- [ ] [AsyncSubject](https://reactivex.io/documentation/subject.html) - emit the last value on completion
+- [x] [AsyncSubject](https://reactivex.io/documentation/subject.html) - emit the last value on completion
 - [x] [BehaviorSubject](https://reactivex.io/documentation/subject.html) - emit the current value to new subscribers
 - [x] [PublishSubject](https://reactivex.io/documentation/subject.html) - emit all subsequently observed items to the subscriber
   - `subjects::Subject`
