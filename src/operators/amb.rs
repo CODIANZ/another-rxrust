@@ -1,8 +1,8 @@
-use std::sync::{Arc, RwLock};
-
 use crate::internals::stream_controller::*;
 use crate::prelude::*;
+use std::sync::{Arc, RwLock};
 
+#[derive(Clone)]
 pub struct AmbOp<'a, Item>
 where
   Item: Clone + Send + Sync,

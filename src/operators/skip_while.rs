@@ -2,6 +2,7 @@ use crate::internals::{function_wrapper::*, stream_controller::*};
 use crate::prelude::*;
 use std::sync::{Arc, RwLock};
 
+#[derive(Clone)]
 pub struct SkipWhileOp<'a, Item>
 where
   Item: Clone + Send + Sync,

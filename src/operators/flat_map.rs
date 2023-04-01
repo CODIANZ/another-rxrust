@@ -1,6 +1,7 @@
 use crate::internals::{function_wrapper::*, stream_controller::*};
 use crate::prelude::*;
 
+#[derive(Clone)]
 pub struct FlatMapOp<'a, In, Out>
 where
   In: Clone + Send + Sync,

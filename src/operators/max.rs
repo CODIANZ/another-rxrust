@@ -5,6 +5,7 @@ use std::{
   sync::{Arc, RwLock},
 };
 
+#[derive(Clone)]
 pub struct MaxOp<Item> {
   _item: PhantomData<Item>,
 }

@@ -1,6 +1,7 @@
 use crate::internals::{function_wrapper::*, stream_controller::*};
 use crate::prelude::*;
 
+#[derive(Clone)]
 pub struct MapOp<'a, In, Out>
 where
   In: Clone + Send + Sync,

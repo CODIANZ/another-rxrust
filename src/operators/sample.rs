@@ -1,9 +1,10 @@
 use crate::internals::stream_controller::*;
 use crate::prelude::*;
 use std::marker::PhantomData;
+use std::sync::{Arc, RwLock};
 
 #[derive(Clone)]
-pub struct TakeUntilOp<'a, Item, TrigerValue>
+pub struct SampleOp<'a, Item, TrigerValue>
 where
   Item: Clone + Send + Sync,
   TrigerValue: Clone + Send + Sync,
@@ -12,16 +13,16 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item, TrigerValue> TakeUntilOp<'a, Item, TrigerValue>
+impl<'a, Item, TrigerValue> SampleOp<'a, Item, TrigerValue>
 where
   Item: Clone + Send + Sync,
   TrigerValue: Clone + Send + Sync,
 {
-  pub fn new(trigger: Observable<'a, TrigerValue>) -> TakeUntilOp<'a, Item, TrigerValue>
+  pub fn new(trigger: Observable<'a, TrigerValue>) -> SampleOp<'a, Item, TrigerValue>
   where
     TrigerValue: Clone + Send + Sync,
   {
-    TakeUntilOp {
+    SampleOp {
       trigger,
       _item: PhantomData,
     }
@@ -29,24 +30,37 @@ where
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let trigger = self.trigger.clone();
     Observable::<Item>::create(move |s| {
+      let value = Arc::new(RwLock::new(None::<Item>));
+
       let sctl = StreamController::new(s);
 
+      let value_trigger_next = Arc::clone(&value);
       let sctl_trigger_next = sctl.clone();
+
       trigger.inner_subscribe(sctl.new_observer(
         move |_, _| {
-          sctl_trigger_next.sink_complete_force();
+          let value = {
+            let mut v = value_trigger_next.write().unwrap();
+            let vv = v.clone();
+            *v = None;
+            vv
+          };
+          if let Some(v) = value {
+            sctl_trigger_next.sink_next(v);
+          }
         },
         |_, _| {},
         |_| {},
       ));
 
-      let sctl_next = sctl.clone();
+      let value_next = Arc::clone(&value);
+
       let sctl_error = sctl.clone();
       let sctl_complete = sctl.clone();
 
       source.inner_subscribe(sctl.new_observer(
         move |_, x| {
-          sctl_next.sink_next(x);
+          *value_next.write().unwrap() = Some(x);
         },
         move |_, e| {
           sctl_error.sink_error(e);
@@ -60,27 +74,24 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
   fn basic() {
-    let o = Observable::create(|s| {
-      for n in 0..10 {
-        thread::sleep(time::Duration::from_millis(100));
-        s.next(n);
-      }
-      s.complete();
-    });
-
-    o.take_until(observables::timer(
-      time::Duration::from_millis(500),
+    let sbj = subjects::Subject::new();
+    observables::interval(
+      time::Duration::from_millis(100),
       schedulers::new_thread_scheduler(),
-    ))
-    .subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
-    );
+    )
+    .sample(sbj.observable())
+    .take(3)
+    .subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
+
+    (0..3).for_each(|_| {
+      thread::sleep(time::Duration::from_millis(500));
+      sbj.next(());
+    });
+    sbj.complete();
+    thread::sleep(time::Duration::from_millis(500));
   }
 }

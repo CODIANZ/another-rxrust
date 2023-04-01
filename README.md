@@ -1,15 +1,13 @@
 # another-rxrust
 
-A different implementation than `rxRust` for easier use of `ReactiveX` in `Rust`.
+## why new implementation?
 
-## Why not `rxRust`?
+`rxRust` is a `Rust` language implementation of `ReactiveX`, but it is not suitable for complex combinations of `observable`.
+For those who use `ReactiveX` in other languages such as `rxjs(TypeScript)` or `rxcpp`, `rxRust` is a very difficult library.
 
-`rxRust` is a great `Rust` implementation of `ReactiveX`. However, when `rxRust` combines `observable` in a slightly complicated way, `rust` peculiar difficulties are exposed.
+Therefore, I created `another-rxrust`, thinking that I needed a library that allows `observable` to be connected in the same way as other platforms, and that `ReactiveX` can be enjoyed in `Rust`.
 
-Therefore, I implemented `ReactiveX` in a different way than `rxRust`, and created `another-rxrust` that can be easily described even if the following `observable` is combined in a complicated manner.
-
-This implementation is not a panacea. `Rust` sacrifices memory efficiency, speed, and much more.
-If you want performance, I think you should use `rxRust`.
+In addition, `ReactiveX` may not be the best solution if the purpose is to parallelize heavy processing and speed it up. However, `Reactive X` is one answer for complex combinations of non-blocking I/O and error handling.
 
 ```rust
 use crate::prelude::*;
@@ -125,12 +123,12 @@ Operators that selectively emit items from a source Observable.
 - [ ] [Debounce](https://reactivex.io/documentation/operators/debounce.html) — only emit an item from an Observable if a particular timespan has passed without it emitting another item
 - [x] [Distinct](https://reactivex.io/documentation/operators/distinct.html) — suppress duplicate items emitted by an Observable
   - distinct_until_changed
-- [ ] [ElementAt](https://reactivex.io/documentation/operators/elementat.html) — emit only item n emitted by an Observable
-- [ ] [Filter](https://reactivex.io/documentation/operators/filter.html) — emit only those items from an Observable that pass a predicate test
+- [x] [ElementAt](https://reactivex.io/documentation/operators/elementat.html) — emit only item n emitted by an Observable
+- [x] [Filter](https://reactivex.io/documentation/operators/filter.html) — emit only those items from an Observable that pass a predicate test
 - [x] [First](https://reactivex.io/documentation/operators/first.html) — emit only the first item, or the first item that meets a condition, from an Observable
 - [ ] [IgnoreElements](https://reactivex.io/documentation/operators/ignoreelements.html) — do not emit any items from an Observable but mirror its termination notification
 - [x] [Last](https://reactivex.io/documentation/operators/last.html) — emit only the last item emitted by an Observable
-- [ ] [Sample](https://reactivex.io/documentation/operators/sample.html) — emit the most recent item emitted by an Observable within periodic time intervals
+- [x] [Sample](https://reactivex.io/documentation/operators/sample.html) — emit the most recent item emitted by an Observable within periodic time intervals
 - [x] [Skip](https://reactivex.io/documentation/operators/skip.html) — suppress the first n items emitted by an Observable
 - [x] [SkipLast](https://reactivex.io/documentation/operators/skiplast.html) — suppress the last n items emitted by an Observable
 - [x] [Take](https://reactivex.io/documentation/operators/take.html) — emit only the first n items emitted by an Observable
@@ -141,12 +139,13 @@ Operators that selectively emit items from a source Observable.
 Operators that work with multiple source Observables to create a single Observable
 
 - [ ] [And/Then/When](https://reactivex.io/documentation/operators/and-then-when.html) — combine sets of items emitted by two or more Observables by means of Pattern and Plan intermediaries
-- [ ] [CombineLatest](https://reactivex.io/documentation/operators/combinelatest.html) — when an item is emitted by either of two Observables, combine the latest item emitted by each Observable via a specified function and emit items based on the results of this function
+- [x] [CombineLatest](https://reactivex.io/documentation/operators/combinelatest.html) — when an item is emitted by either of two Observables, combine the latest item emitted by each Observable via a specified function and emit items based on the results of this function
 - [ ] [Join](https://reactivex.io/documentation/operators/join.html) — combine items emitted by two Observables whenever an item from one Observable is emitted during a time window defined according to an item emitted by the other Observable
 - [x] [Merge](https://reactivex.io/documentation/operators/merge.html) — combine multiple Observables into one by merging their emissions
 - [x] [StartWith](https://reactivex.io/documentation/operators/startwith.html) — emit a specified sequence of items before beginning to emit the items from the source Observable
-- [ ] [Switch](https://reactivex.io/documentation/operators/switch.html) — convert an Observable that emits Observables into a single Observable that emits the items emitted by the most-recently-emitted of those Observables
-- [ ] [Zip](https://reactivex.io/documentation/operators/zip.html) — combine the emissions of multiple Observables together via a specified function and emit single items for each combination based on the results of this function
+- [x] [Switch](https://reactivex.io/documentation/operators/switch.html) — convert an Observable that emits Observables into a single Observable that emits the items emitted by the most-recently-emitted of those Observables
+  - `switch_on_next`
+- [x] [Zip](https://reactivex.io/documentation/operators/zip.html) — combine the emissions of multiple Observables together via a specified function and emit single items for each combination based on the results of this function
 
 ### Error Handling Operators
 
@@ -181,8 +180,8 @@ Operators that evaluate one or more Observables or items emitted by Observables
 
 - [ ] [All](https://reactivex.io/documentation/operators/all.html) — determine whether all items emitted by an Observable meet some criteria
 - [x] [Amb](https://reactivex.io/documentation/operators/amb.html) — given two or more source Observables, emit all of the items from only the first of these Observables to emit an item
-- [ ] [Contains](https://reactivex.io/documentation/operators/contains.html) — determine whether an Observable emits a particular item or not
-- [ ] [DefaultIfEmpty](https://reactivex.io/documentation/operators/defaultifempty.html) — emit items from the source Observable, or a default item if the source Observable emits nothing
+- [x] [Contains](https://reactivex.io/documentation/operators/contains.html) — determine whether an Observable emits a particular item or not
+- [x] [DefaultIfEmpty](https://reactivex.io/documentation/operators/defaultifempty.html) — emit items from the source Observable, or a default item if the source Observable emits nothing
 - [ ] [SequenceEqual](https://reactivex.io/documentation/operators/sequenceequal.html) — determine whether two Observables emit the same sequence of items
 - [x] [SkipUntil](https://reactivex.io/documentation/operators/skipuntil.html) — discard items emitted by an Observable until a second Observable emits an item
 - [x] [SkipWhile](https://reactivex.io/documentation/operators/skipwhile.html) — discard items emitted by an Observable until a specified condition becomes false

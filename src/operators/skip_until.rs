@@ -5,6 +5,7 @@ use std::{
   sync::{Arc, RwLock},
 };
 
+#[derive(Clone)]
 pub struct SkipUntilOp<'a, Item, TrigerValue>
 where
   Item: Clone + Send + Sync,

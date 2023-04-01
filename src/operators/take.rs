@@ -5,6 +5,7 @@ use std::{
   sync::{Arc, RwLock},
 };
 
+#[derive(Clone)]
 pub struct TakeOp<Item>
 where
   Item: Clone + Send + Sync,

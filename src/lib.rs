@@ -3,6 +3,9 @@
 
 #![doc = include_str!("../README.md")]
 
+#[macro_use]
+mod macros;
+
 pub mod internals;
 pub mod observable;
 pub mod observables;
@@ -23,9 +26,6 @@ pub mod prelude {
   pub use crate::subjects::*;
   pub use crate::utils::*;
 }
-
-#[macro_use]
-pub mod macros;
 
 #[cfg(test)]
 pub mod tests;

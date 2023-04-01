@@ -120,11 +120,11 @@ where
   }
 
   pub fn first(&self) -> Observable<'a, Item> {
-    self.take(1)
+    operators::FirstOp::new().execute(self.clone())
   }
 
   pub fn last(&self) -> Observable<'a, Item> {
-    self.take_last(1)
+    operators::LastOp::new().execute(self.clone())
   }
 
   pub fn skip(&self, count: usize) -> Observable<'a, Item> {
@@ -169,6 +169,24 @@ where
     operators::SkipWhileOp::new(f).execute(self.clone())
   }
 
+  pub fn filter<F>(&self, f: F) -> Observable<'a, Item>
+  where
+    F: Fn(Item) -> bool + Send + Sync + 'a,
+  {
+    operators::FilterOp::new(f).execute(self.clone())
+  }
+
+  pub fn sample<TriggerValue>(&self, trigger: Observable<'a, TriggerValue>) -> Observable<'a, Item>
+  where
+    TriggerValue: Clone + Send + Sync,
+  {
+    operators::SampleOp::new(trigger).execute(self.clone())
+  }
+
+  pub fn element_at(&self, count: usize) -> Observable<'a, Item> {
+    operators::ElementAtOp::new(count).execute(self.clone())
+  }
+
   pub fn tap<Next, Error, Complete>(
     &self,
     next: Next,
@@ -200,6 +218,22 @@ where
 
   pub fn amb(&self, observables: &[Observable<'a, Item>]) -> Observable<'a, Item> {
     operators::AmbOp::new(observables).execute(self.clone())
+  }
+
+  pub fn zip(&self, observables: &[Observable<'a, Item>]) -> Observable<'a, Vec<Item>> {
+    operators::ZipOp::new(observables).execute(self.clone())
+  }
+
+  pub fn combine_latest<Out, F>(
+    &self,
+    observables: &[Observable<'a, Item>],
+    f: F,
+  ) -> Observable<'a, Out>
+  where
+    Out: Clone + Send + Sync,
+    F: Fn(Vec<Item>) -> Out + Send + Sync + 'a,
+  {
+    operators::CombineLatestOp::new(observables, f).execute(self.clone())
   }
 
   pub fn pipe<F, Out>(&self, f: F) -> Observable<'a, Out>
@@ -239,6 +273,14 @@ where
   pub fn ref_count(&self) -> ref_count::RefCountOp<'a, Item> {
     operators::RefCountOp::new(self.clone())
   }
+
+  pub fn default_if_empty(&self, target: Item) -> Observable<'a, Item> {
+    operators::DefaultIfEmpty::new(target).execute(self.clone())
+  }
+
+  pub fn switch_on_next(&self, target: Observable<'a, Item>) -> Observable<'a, Item> {
+    operators::SwitchOnNextOp::new(target).execute(self.clone())
+  }
 }
 
 impl<'a, Item> Observable<'a, Item>
@@ -247,6 +289,9 @@ where
 {
   pub fn distinct_until_changed(&self) -> Observable<'a, Item> {
     operators::DistinctUntilChangedOp::new().execute(self.clone())
+  }
+  pub fn contains(&self, target: Item) -> Observable<'a, bool> {
+    operators::ContainsOp::new(target).execute(self.clone())
   }
 }
 
@@ -353,29 +398,5 @@ mod test {
         |e| println!("error {:}", error_to_string(&e)),
         || println!("complete"),
       );
-  }
-
-  #[test]
-  fn first() {
-    observables::from_iter(0..10).first().subscribe(
-      |x| {
-        println!("next {}", x);
-        assert_eq!(x, 0);
-      },
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
-    );
-  }
-
-  #[test]
-  fn last() {
-    observables::from_iter(0..10).last().subscribe(
-      |x| {
-        println!("next {}", x);
-        assert_eq!(x, 9);
-      },
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
-    );
   }
 }

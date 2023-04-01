@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use subject::Subject;
 
+#[derive(Clone)]
 pub struct PublishOp<'a, Item>
 where
   Item: Clone + Send + Sync,

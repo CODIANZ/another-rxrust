@@ -6,6 +6,7 @@ use std::{
   sync::{Arc, RwLock},
 };
 
+#[derive(Clone)]
 pub struct SkipLastOp<Item>
 where
   Item: Clone + Send + Sync,

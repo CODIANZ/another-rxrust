@@ -2,22 +2,22 @@ use crate::internals::{function_wrapper::*, stream_controller::*};
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct TakeWhileOp<'a, Item>
+pub struct FilterOp<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
   predicate_f: FunctionWrapper<'a, Item, bool>,
 }
 
-impl<'a, Item> TakeWhileOp<'a, Item>
+impl<'a, Item> FilterOp<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new<F>(f: F) -> TakeWhileOp<'a, Item>
+  pub fn new<F>(f: F) -> FilterOp<'a, Item>
   where
     F: Fn(Item) -> bool + Send + Sync + 'a,
   {
-    TakeWhileOp {
+    FilterOp {
       predicate_f: FunctionWrapper::new(f),
     }
   }
@@ -33,11 +33,9 @@ where
       let sctl_complete = sctl.clone();
 
       source.inner_subscribe(sctl.new_observer(
-        move |serial, x: Item| {
+        move |_, x: Item| {
           if f.call(x.clone()) {
             sctl_next.sink_next(x);
-          } else {
-            sctl_next.sink_complete(&serial)
           }
         },
         move |_, e| {
@@ -52,7 +50,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
 
   #[test]
   fn basic() {
@@ -63,10 +60,14 @@ mod test {
       s.complete();
     });
 
-    o.take_while(|x| x < 5).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
-    );
+    o.filter(|x| 3 <= x && x <= 5)
+      .tap(
+        |x| {
+          assert!(3 <= x && x <= 5);
+        },
+        junk_error!(),
+        junk_complete!(),
+      )
+      .subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
   }
 }
