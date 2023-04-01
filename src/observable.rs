@@ -44,7 +44,7 @@ where
     }
   }
 
-  pub(crate) fn inner_subscribe(&self, observer: Observer<'a, Item>) -> Subscription {
+  pub(crate) fn inner_subscribe(&self, observer: Observer<'a, Item>) -> Subscription<'a> {
     let unsub_observer = observer.clone();
     self.source.call(observer.clone());
     Subscription::new(move || {
@@ -57,7 +57,7 @@ where
     next: Next,
     error: Error,
     complete: Complete,
-  ) -> Subscription
+  ) -> Subscription<'a>
   where
     Next: Fn(Item) + Send + Sync + 'a,
     Error: Fn(RxError) + Send + Sync + 'a,
@@ -234,6 +234,10 @@ where
 
   pub fn publish(&self) -> publish::PublishOp<'a, Item> {
     operators::PublishOp::new(self.clone())
+  }
+
+  pub fn ref_count(&self) -> ref_count::RefCountOp<'a, Item> {
+    operators::RefCountOp::new(self.clone())
   }
 }
 

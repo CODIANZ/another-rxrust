@@ -11,6 +11,7 @@ pub mod operators;
 pub mod rx_error;
 pub mod schedulers;
 pub mod subjects;
+pub mod utils;
 
 pub mod prelude {
   pub use crate::observable::*;
@@ -20,6 +21,7 @@ pub mod prelude {
   pub use crate::rx_error::*;
   pub use crate::schedulers::*;
   pub use crate::subjects::*;
+  pub use crate::utils::*;
 }
 
 #[macro_use]
