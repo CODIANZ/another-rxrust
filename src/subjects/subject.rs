@@ -28,22 +28,27 @@ where
     }
   }
 
+  pub fn fetch_observers(&self) -> Vec<Observer<'a, Item>> {
+    let binding = self.observers.read().unwrap();
+    let x = binding.iter().map(|x| x.1.clone());
+    Vec::from_iter(x)
+  }
+
   pub fn next(&self, item: Item) {
-    self.observers.read().unwrap().iter().for_each(|x| {
-      x.1.next(item.clone());
-    });
+    self
+      .fetch_observers()
+      .into_iter()
+      .for_each(move |x| x.next(item.clone()));
   }
   pub fn error(&self, err: RxError) {
-    self.observers.read().unwrap().iter().for_each(|x| {
-      x.1.error(err.clone());
-    });
+    let obs = self.fetch_observers();
     self.observers.write().unwrap().clear();
+    obs.into_iter().for_each(move |x| x.error(err.clone()));
   }
   pub fn complete(&self) {
-    self.observers.read().unwrap().iter().for_each(|x| {
-      x.1.complete();
-    });
+    let obs = self.fetch_observers();
     self.observers.write().unwrap().clear();
+    obs.into_iter().for_each(|x| x.complete());
   }
 
   pub fn observable(&self) -> Observable<'a, Item> {
