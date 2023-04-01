@@ -1,4 +1,5 @@
 pub mod amb;
+pub mod contains;
 pub mod count;
 pub mod delay;
 pub mod distinct_until_changed;
@@ -28,6 +29,7 @@ pub mod tap;
 
 pub mod operators {
   pub use crate::operators::amb::*;
+  pub use crate::operators::contains::*;
   pub use crate::operators::count::*;
   pub use crate::operators::delay::*;
   pub use crate::operators::distinct_until_changed::*;

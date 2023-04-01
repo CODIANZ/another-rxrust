@@ -248,6 +248,9 @@ where
   pub fn distinct_until_changed(&self) -> Observable<'a, Item> {
     operators::DistinctUntilChangedOp::new().execute(self.clone())
   }
+  pub fn contains(&self, target: Item) -> Observable<'a, bool> {
+    operators::ContainsOp::new(target).execute(self.clone())
+  }
 }
 
 impl<'a, Item> Observable<'a, Item>
