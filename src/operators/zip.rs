@@ -25,6 +25,8 @@ where
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Vec<Item>> {
     let observables = self.observables.clone();
     Observable::<Vec<Item>>::create(move |s| {
+      let sctl = StreamController::new(s);
+
       let results = Arc::new(RwLock::new({
         let mut r = HashMap::<usize, VecDeque<Item>>::new();
         for n in 0..(observables.len() + 1) {
@@ -33,7 +35,7 @@ where
         r
       }));
 
-      let s_f = s.clone();
+      let sctl_f = sctl.clone();
       let results_f = Arc::clone(&results);
       let register = move |id: &usize, item: Item| {
         results_f
@@ -58,11 +60,12 @@ where
           }
         };
         while let Some(items) = get() {
-          s_f.next(items);
+          if !sctl_f.is_subscribed() {
+            break;
+          }
+          sctl_f.sink_next(items);
         }
       };
-
-      let sctl = StreamController::new(s);
 
       {
         let mut id = 1usize;
