@@ -24,11 +24,7 @@ where
     self.sbj.observable()
   }
 
-  pub fn ref_count(&self) -> usize {
-    self.sbj.ref_count()
-  }
-
-  pub fn connect(&self) -> Subscription {
+  pub fn connect(&self) -> Subscription<'a> {
     let sbj_next = self.sbj.clone();
     let sbj_error = self.sbj.clone();
     let sbj_complete = self.sbj.clone();
@@ -63,8 +59,6 @@ mod test {
 
     println!("start #1");
     let sbsc1 = obs.subscribe(print_next_fmt!("#1 {}"), print_error!(), print_complete!());
-    println!("ref_count {}", o.ref_count());
-    assert_eq!(o.ref_count(), 1);
 
     println!("connect");
     let breaker = o.connect();
@@ -72,20 +66,47 @@ mod test {
 
     println!("start #1");
     let sbsc2 = obs.subscribe(print_next_fmt!("#2 {}"), print_error!(), print_complete!());
-    println!("ref_count {}", o.ref_count());
-    assert_eq!(o.ref_count(), 2);
 
     thread::sleep(time::Duration::from_millis(500));
 
     println!("end #1");
     sbsc1.unsubscribe();
-    println!("ref_count {}", o.ref_count());
-    assert_eq!(o.ref_count(), 1);
     thread::sleep(time::Duration::from_millis(500));
 
+    println!("end #2");
     sbsc2.unsubscribe();
-    println!("ref_count {}", o.ref_count());
-    assert_eq!(o.ref_count(), 0);
+    thread::sleep(time::Duration::from_millis(500));
+
+    println!("braker");
+    breaker.unsubscribe();
+    thread::sleep(time::Duration::from_millis(500));
+  }
+
+  #[test]
+  fn first_connect() {
+    let o = observables::interval(time::Duration::from_millis(100), new_thread_scheduler())
+      .tap(print_next_fmt!("tap {}"), print_error!(), print_complete!())
+      .publish();
+    let obs = o.observable();
+
+    println!("connect");
+    let breaker = o.connect();
+    thread::sleep(time::Duration::from_millis(500));
+
+    println!("start #1");
+    let sbsc1 = obs.subscribe(print_next_fmt!("#1 {}"), print_error!(), print_complete!());
+
+    println!("start #1");
+    let sbsc2 = obs.subscribe(print_next_fmt!("#2 {}"), print_error!(), print_complete!());
+
+    thread::sleep(time::Duration::from_millis(500));
+
+    println!("end #1");
+    sbsc1.unsubscribe();
+    thread::sleep(time::Duration::from_millis(500));
+
+    println!("end #2");
+    sbsc2.unsubscribe();
     thread::sleep(time::Duration::from_millis(500));
 
     println!("braker");
