@@ -147,7 +147,6 @@ Specialty Observables that have more precisely-controlled subscription dynamics
 ### utils
 
 - `ready_set_go` - Composing Observables and Functions
-- `set_time_out` - Like `setTimeout` in javascript
 
 ### subscribe macros
 
