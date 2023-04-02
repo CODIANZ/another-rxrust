@@ -85,7 +85,7 @@ A toolbox of useful Operators for working with Observables
 - [x] [Subscribe](https://reactivex.io/documentation/operators/subscribe.html) — operate upon the emissions and notifications from an Observable
 - [x] [SubscribeOn](https://reactivex.io/documentation/operators/subscribeon.html) — specify the scheduler an Observable should use when it is subscribed to
 - [x] [TimeInterval](https://reactivex.io/documentation/operators/timeinterval.html) — convert an Observable that emits items into one that emits indications of the amount of time elapsed between those emissions
-- [ ] [Timeout](https://reactivex.io/documentation/operators/timeout.html) — mirror the source Observable, but issue an error notification if a particular period of time elapses without any emitted items
+- [x] [Timeout](https://reactivex.io/documentation/operators/timeout.html) — mirror the source Observable, but issue an error notification if a particular period of time elapses without any emitted items
 - [x] [Timestamp](https://reactivex.io/documentation/operators/timestamp.html) — attach a timestamp to each item emitted by an Observable
 - [x] [Using](https://reactivex.io/documentation/operators/using.html) — create a disposable resource that has the same lifespan as the Observable
   - `utils::Using`
