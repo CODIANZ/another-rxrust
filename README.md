@@ -152,15 +152,15 @@ fn main() {
   thread::sleep(time::Duration::from_millis(1000));
 }
 // [console-results]
-// next - [10, 20, 0]
-// next - [11, 21, 1]
-// next - [12, 22, 2]
-// next - [13, 23, 3]
-// next - [14, 24, 4]
-// next - [15, 25, 5]
-// next - [16, 26, 6]
-// next - [17, 27, 7]
-// next - [18, 28, 8]
-// next - [19, 29, 9]
+// next - [0, 10, 20]
+// next - [1, 11, 21]
+// next - [2, 12, 22]
+// next - [3, 13, 23]
+// next - [4, 14, 24]
+// next - [5, 15, 25]
+// next - [6, 16, 26]
+// next - [7, 17, 27]
+// next - [8, 18, 28]
+// next - [9, 19, 29]
 // complete
 ```
