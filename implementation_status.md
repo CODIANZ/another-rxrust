@@ -84,9 +84,9 @@ A toolbox of useful Operators for working with Observables
 - [ ] [Serialize](https://reactivex.io/documentation/operators/serialize.html) — force an Observable to make serialized calls and to be well-behaved
 - [x] [Subscribe](https://reactivex.io/documentation/operators/subscribe.html) — operate upon the emissions and notifications from an Observable
 - [x] [SubscribeOn](https://reactivex.io/documentation/operators/subscribeon.html) — specify the scheduler an Observable should use when it is subscribed to
-- [ ] [TimeInterval](https://reactivex.io/documentation/operators/timeinterval.html) — convert an Observable that emits items into one that emits indications of the amount of time elapsed between those emissions
-- [ ] [Timeout](https://reactivex.io/documentation/operators/timeout.html) — mirror the source Observable, but issue an error notification if a particular period of time elapses without any emitted items
-- [ ] [Timestamp](https://reactivex.io/documentation/operators/timestamp.html) — attach a timestamp to each item emitted by an Observable
+- [x] [TimeInterval](https://reactivex.io/documentation/operators/timeinterval.html) — convert an Observable that emits items into one that emits indications of the amount of time elapsed between those emissions
+- [x] [Timeout](https://reactivex.io/documentation/operators/timeout.html) — mirror the source Observable, but issue an error notification if a particular period of time elapses without any emitted items
+- [x] [Timestamp](https://reactivex.io/documentation/operators/timestamp.html) — attach a timestamp to each item emitted by an Observable
 - [x] [Using](https://reactivex.io/documentation/operators/using.html) — create a disposable resource that has the same lifespan as the Observable
   - `utils::Using`
 
@@ -144,12 +144,17 @@ Specialty Observables that have more precisely-controlled subscription dynamics
 
 ## Utilities
 
-- subscribe macros
-  - `junk_next!()`
-  - `junk_error!()`
-  - `junk_complete!()`
-  - `print_next!()`
-  - `print_error!()`
-  - `print_complete!()`
-  - `print_next_fmt!()`
-  - `panic_error!()`
+### utils
+
+- `ready_set_go` - Composing Observables and Functions
+
+### subscribe macros
+
+- `junk_next!()` - discard the next
+- `junk_error!()` - discard the error
+- `junk_complete!()` - discard the complete
+- `print_next!()` - print the next
+- `print_error!()` - print the error
+- `print_complete!()` - print the complete
+- `print_next_fmt!()` - print the next with format
+- `panic_error!()` - panic if error

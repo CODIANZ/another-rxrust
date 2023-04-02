@@ -1,7 +1,7 @@
 use crate::internals::stream_controller::*;
 use crate::prelude::*;
 use std::{
-  collections::{HashMap, VecDeque},
+  collections::VecDeque,
   sync::{Arc, RwLock},
 };
 
@@ -28,10 +28,10 @@ where
       let sctl = StreamController::new(s);
 
       let results = Arc::new(RwLock::new({
-        let mut r = HashMap::<usize, VecDeque<Item>>::new();
-        for n in 0..(observables.len() + 1) {
-          r.insert(n, VecDeque::<Item>::new());
-        }
+        let mut r = Vec::<VecDeque<Item>>::new();
+        (0..(observables.len() + 1)).for_each(|_| {
+          r.push(VecDeque::<Item>::new());
+        });
         r
       }));
 
@@ -41,18 +41,18 @@ where
         results_f
           .write()
           .unwrap()
-          .get_mut(id)
+          .get_mut(id.clone())
           .unwrap()
           .push_back(item);
 
         let re = Arc::clone(&results_f);
         let get = move || {
           let mut re = re.write().unwrap();
-          let filled = re.iter().filter(|x| x.1.len() > 0).count();
+          let filled = re.iter().filter(|x| x.len() > 0).count();
           if filled == re.len() {
             let mut v = Vec::new();
             for items in re.iter_mut() {
-              v.push(items.1.pop_front().unwrap());
+              v.push(items.pop_front().unwrap());
             }
             Some(v)
           } else {
