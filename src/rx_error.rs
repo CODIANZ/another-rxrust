@@ -21,7 +21,7 @@ impl RxError {
     E: std::fmt::Debug + Send + Sync + 'static,
   {
     RxError {
-      error: Arc::new(Box::new(result.expect_err("result must be Error!!"))),
+      error: Arc::new(Box::new(result.expect_err("Result must be Result::Err!"))),
     }
   }
 
@@ -44,6 +44,7 @@ impl RxError {
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
+  use anyhow::anyhow;
 
   #[test]
   fn str_ref() {
@@ -70,5 +71,22 @@ mod test {
     println!("{:?}", e.any_ref());
     println!("{:?}", e.any_ref().downcast_ref::<std::io::Error>());
     println!("{:?}", e.cast_ref::<std::io::Error>());
+  }
+
+  #[test]
+  #[should_panic]
+  fn will_be_panic() {
+    let error = Ok::<_, ()>(123);
+    let e = RxError::from_result(error);
+    println!("{:?}", e.any_ref());
+    println!("{:?}", e.cast_ref::<anyhow::Error>());
+  }
+
+  #[test]
+  fn anyhow_error() {
+    let error = Err::<i32, _>(anyhow!("anyhow error"));
+    let e = RxError::from_result(error);
+    println!("{:?}", e.any_ref());
+    println!("{:?}", e.cast_ref::<anyhow::Error>());
   }
 }
