@@ -45,8 +45,7 @@ another-rxrust = {}
 use crate::prelude::*;
 use std::{thread, time};
 
-#[test]
-fn basic() {
+fn main() {
   // observable creator function
   fn ob() -> Observable<'static, i32> {
     Observable::create(|s| {
