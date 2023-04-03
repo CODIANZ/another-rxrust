@@ -15,7 +15,9 @@ In addition, `ReactiveX` may not be the best solution if the purpose is to paral
 - Value to emit should be `Clone + Send + Sync` only.
 - Use `move` to emit values ​​as much as possible.
 - Functions should be `Fn() + Send + Sync` only.
-- Errors are type-erased using `std::any`. (thus requiring a `'static` lifetime)
+- Errors are type-erased using `std::any`.
+  - Thus requiring a `'static` lifetime.
+  - You can use `anyhow`.
 - Prioritize flexibility over memory efficiency and execution speed.
 
 ## Implementation status
@@ -60,17 +62,19 @@ fn basic() {
       1 => observables::empty(),
       2 => observables::just(x),
       3 => ob().map(move |y| (y + x)),
-      4 => observables::error(RxError::from_error("anyhow error")),
+      4 => observables::error(RxError::from_error("some error")),
       _ => observables::never(),
     })
     .map(|x| format!("{}", x))
-    .on_error_resume_next(|e| ob().map(move |x| format!("resume {:} {}", e.any_ref(), x)))
+    .on_error_resume_next(|e| {
+      ob().map(move |x| format!("resume {:?} {}", e.cast_ref::<&str>(), x))
+    })
     .subscribe(
       |x| {
         println!("next {}", x);
       },
       |e| {
-        println!("error {:?}", e.error);
+        println!("error {:?}", e.any_ref());
       },
       || {
         println!("complete");
@@ -83,8 +87,8 @@ fn basic() {
 // next 2
 // next 103
 // next 203
-// next resume any error 100
-// next resume any error 200
+// next resume "some error" 100
+// next resume "some error" 200
 // complete
 ```
 

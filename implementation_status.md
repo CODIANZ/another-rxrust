@@ -12,6 +12,7 @@ Operators that originate new Observables.
   - Throw - `error`
 - [x] [From](https://reactivex.io/documentation/operators/from.html) — convert some other object or data structure into an Observable
   - `from_iter`
+  - `from_result`
 - [x] [Interval](https://reactivex.io/documentation/operators/interval.html) — create an Observable that emits a sequence of integers spaced by a particular time interval
 - [x] [Just](https://reactivex.io/documentation/operators/just.html) — convert an object or a set of objects into an Observable that emits that or those objects
 - [x] [Range](https://reactivex.io/documentation/operators/range.html) — create an Observable that emits a range of sequential integers
