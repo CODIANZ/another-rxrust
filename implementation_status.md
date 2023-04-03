@@ -27,7 +27,7 @@ Operators that transform items that are emitted by an Observable.
 - [x] [Buffer](https://reactivex.io/documentation/operators/buffer.html) — periodically gather items from an Observable into bundles and emit these bundles rather than emitting the items one at a time
   - `buffer_with_count`
 - [x] [FlatMap](https://reactivex.io/documentation/operators/flatmap.html) — transform the items emitted by an Observable into Observables, then flatten the emissions from those into a single Observable
-- [ ] [GroupBy](https://reactivex.io/documentation/operators/groupby.html) — divide an Observable into a set of Observables that each emit a different group of items from the original Observable, organized by key
+- [x] [GroupBy](https://reactivex.io/documentation/operators/groupby.html) — divide an Observable into a set of Observables that each emit a different group of items from the original Observable, organized by key
 - [x] [Map](https://reactivex.io/documentation/operators/map.html) — transform the items emitted by an Observable by applying a function to each item
 - [x] [Scan](https://reactivex.io/documentation/operators/scan.html) — apply a function to each item emitted by an Observable, sequentially, and emit each successive value
 - [x] [Window](https://reactivex.io/documentation/operators/window.html) — periodically subdivide items from an Observable into Observable windows and emit these windows rather than emitting the items one at a time

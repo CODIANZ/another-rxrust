@@ -11,6 +11,7 @@ pub mod element_at;
 pub mod filter;
 pub mod first;
 pub mod flat_map;
+pub mod group_by;
 pub mod ignore_elements;
 pub mod last;
 pub mod map;
@@ -58,6 +59,7 @@ pub mod operators {
   pub use crate::operators::filter::*;
   pub use crate::operators::first::*;
   pub use crate::operators::flat_map::*;
+  pub use crate::operators::group_by::*;
   pub use crate::operators::ignore_elements::*;
   pub use crate::operators::last::*;
   pub use crate::operators::map::*;
