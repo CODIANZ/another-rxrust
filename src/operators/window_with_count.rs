@@ -6,7 +6,7 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct WindowWithCount<Item>
+pub struct WindowWithCountOp<Item>
 where
   Item: Clone + Send + Sync,
 {
@@ -14,12 +14,12 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> WindowWithCount<Item>
+impl<'a, Item> WindowWithCountOp<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(count: usize) -> WindowWithCount<Item> {
-    WindowWithCount {
+  pub fn new(count: usize) -> WindowWithCountOp<Item> {
+    WindowWithCountOp {
       count,
       _item: PhantomData,
     }
@@ -75,7 +75,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn window_with_count(&self, count: usize) -> Observable<'a, Observable<'a, Item>> {
-    WindowWithCount::new(count).execute(self.clone())
+    WindowWithCountOp::new(count).execute(self.clone())
   }
 }
 
@@ -96,6 +96,33 @@ mod test {
           x.subscribe(
             move |y| println!("next ({}) - {}", nn, y),
             move |e| println!("error ({}) - {:?}", nn, e.any_ref()),
+            move || println!("complete ({})", nn),
+          );
+        },
+        print_error!(),
+        print_complete!(),
+      );
+  }
+
+  #[test]
+  fn error() {
+    let n = Arc::new(RwLock::new(0));
+    observables::from_iter(0..10)
+      .flat_map(|x| {
+        if x == 7 {
+          observables::error(RxError::from_error("it's 7!!"))
+        } else {
+          observables::just(x)
+        }
+      })
+      .window_with_count(3)
+      .subscribe(
+        move |x| {
+          let nn = *n.read().unwrap();
+          *n.write().unwrap() += 1;
+          x.subscribe(
+            move |y| println!("next ({}) - {}", nn, y),
+            move |e| println!("error ({}) - {:?}", nn, e.cast_ref::<&str>()),
             move || println!("complete ({})", nn),
           );
         },
