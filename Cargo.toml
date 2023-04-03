@@ -11,12 +11,5 @@ repository = "https://github.com/CODIANZ/another-rxrust"
 keywords = ["reactivex", "rx", "rxrust", "asynchronous"]
 version = "0.0.32"
 
-
-[dependencies]
-anyhow = { version = "1", optional = true }
-
-[features]
-anyhow = ["dep:anyhow"]
-
 [dev-dependencies]
 anyhow = { version = "1", features = ["backtrace"] }
