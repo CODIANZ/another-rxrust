@@ -7,19 +7,19 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct TimeIntervalOp<Item>
+pub struct TimeInterval<Item>
 where
   Item: Clone + Send + Sync,
 {
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> TimeIntervalOp<Item>
+impl<'a, Item> TimeInterval<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new() -> TimeIntervalOp<Item> {
-    TimeIntervalOp { _item: PhantomData }
+  pub fn new() -> TimeInterval<Item> {
+    TimeInterval { _item: PhantomData }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Duration> {
     Observable::create(move |s| {
@@ -58,7 +58,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn time_interval(&self) -> Observable<'a, Duration> {
-    TimeIntervalOp::new().execute(self.clone())
+    TimeInterval::new().execute(self.clone())
   }
 }
 

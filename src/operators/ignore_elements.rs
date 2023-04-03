@@ -3,19 +3,19 @@ use crate::prelude::*;
 use std::marker::PhantomData;
 
 #[derive(Clone)]
-pub struct IgnoreElementsOp<Item>
+pub struct IgnoreElements<Item>
 where
   Item: Clone + Send + Sync,
 {
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> IgnoreElementsOp<Item>
+impl<'a, Item> IgnoreElements<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new() -> IgnoreElementsOp<Item> {
-    IgnoreElementsOp { _item: PhantomData }
+  pub fn new() -> IgnoreElements<Item> {
+    IgnoreElements { _item: PhantomData }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     Observable::<Item>::create(move |s| {
@@ -39,7 +39,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn ignore_elements(&self) -> Observable<'a, Item> {
-    IgnoreElementsOp::new().execute(self.clone())
+    IgnoreElements::new().execute(self.clone())
   }
 }
 

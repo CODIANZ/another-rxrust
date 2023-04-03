@@ -3,7 +3,7 @@ use crate::prelude::*;
 use std::marker::PhantomData;
 
 #[derive(Clone)]
-pub struct RetryOp<Item>
+pub struct Retry<Item>
 where
   Item: Clone + Send + Sync,
 {
@@ -11,12 +11,12 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> RetryOp<Item>
+impl<'a, Item> Retry<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(count: usize) -> RetryOp<Item> {
-    RetryOp {
+  pub fn new(count: usize) -> Retry<Item> {
+    Retry {
       count,
       _item: PhantomData,
     }
@@ -65,7 +65,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn retry(&self, max_retry: usize) -> Observable<'a, Item> {
-    RetryOp::new(max_retry).execute(self.clone())
+    Retry::new(max_retry).execute(self.clone())
   }
 }
 

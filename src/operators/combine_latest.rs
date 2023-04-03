@@ -3,26 +3,26 @@ use crate::internals::stream_controller::*;
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct CombineLatestOp<'a, Item, Out>
+pub struct CombineLatest<'a, Item, Out>
 where
   Item: Clone + Send + Sync,
   Out: Clone + Send + Sync,
 {
-  zip_op: operators::ZipOp<'a, Item>,
+  zip_op: operators::Zip<'a, Item>,
   combine_f: FunctionWrapper<'a, Vec<Item>, Out>,
 }
 
-impl<'a, Item, Out> CombineLatestOp<'a, Item, Out>
+impl<'a, Item, Out> CombineLatest<'a, Item, Out>
 where
   Item: Clone + Send + Sync,
   Out: Clone + Send + Sync,
 {
-  pub fn new<F>(observables: &[Observable<'a, Item>], f: F) -> CombineLatestOp<'a, Item, Out>
+  pub fn new<F>(observables: &[Observable<'a, Item>], f: F) -> CombineLatest<'a, Item, Out>
   where
     F: Fn(Vec<Item>) -> Out + Send + Sync + 'a,
   {
-    CombineLatestOp {
-      zip_op: operators::ZipOp::new(observables),
+    CombineLatest {
+      zip_op: operators::Zip::new(observables),
       combine_f: FunctionWrapper::new(f),
     }
   }
@@ -68,7 +68,7 @@ where
     Out: Clone + Send + Sync,
     F: Fn(Vec<Item>) -> Out + Send + Sync + 'a,
   {
-    CombineLatestOp::new(observables, f).execute(self.clone())
+    CombineLatest::new(observables, f).execute(self.clone())
   }
 }
 

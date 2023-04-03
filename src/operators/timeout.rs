@@ -6,7 +6,7 @@ use std::sync::{Arc, RwLock};
 use std::time::Duration;
 
 #[derive(Clone)]
-pub struct TimeoutOp<'a, Scheduler, Item>
+pub struct Timeout<'a, Scheduler, Item>
 where
   Scheduler: IScheduler<'a> + Clone + Send + Sync,
   Item: Clone + Send + Sync,
@@ -16,7 +16,7 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Scheduler, Item> TimeoutOp<'a, Scheduler, Item>
+impl<'a, Scheduler, Item> Timeout<'a, Scheduler, Item>
 where
   Scheduler: IScheduler<'a> + Clone + Send + Sync,
   Item: Clone + Send + Sync,
@@ -24,11 +24,11 @@ where
   pub fn new<SchedulerCreator>(
     dur: Duration,
     scheduler_ctor: SchedulerCreator,
-  ) -> TimeoutOp<'a, Scheduler, Item>
+  ) -> Timeout<'a, Scheduler, Item>
   where
     SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
   {
-    TimeoutOp {
+    Timeout {
       dur,
       scheduler_ctor: FunctionWrapper::new(move |_| scheduler_ctor()),
       _item: PhantomData,
@@ -98,7 +98,7 @@ where
     Scheduler: IScheduler<'a> + Clone + Send + Sync + 'a,
     SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
   {
-    TimeoutOp::new(dur, scheduler_ctor).execute(self.clone())
+    Timeout::new(dur, scheduler_ctor).execute(self.clone())
   }
 }
 

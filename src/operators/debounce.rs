@@ -5,7 +5,7 @@ use std::sync::{Arc, RwLock};
 use std::{marker::PhantomData, thread, time::Duration};
 
 #[derive(Clone)]
-pub struct DebounceOp<'a, Scheduler, Item>
+pub struct Debounce<'a, Scheduler, Item>
 where
   Scheduler: IScheduler<'a> + Clone + Send + Sync,
   Item: Clone + Send + Sync,
@@ -16,7 +16,7 @@ where
   _lifetime: PhantomData<&'a ()>,
 }
 
-impl<'a, Scheduler, Item> DebounceOp<'a, Scheduler, Item>
+impl<'a, Scheduler, Item> Debounce<'a, Scheduler, Item>
 where
   Scheduler: IScheduler<'a> + Clone + Send + Sync,
   Item: Clone + Send + Sync,
@@ -24,11 +24,11 @@ where
   pub fn new<SchedulerCreator>(
     dur: Duration,
     scheduler_ctor: SchedulerCreator,
-  ) -> DebounceOp<'a, Scheduler, Item>
+  ) -> Debounce<'a, Scheduler, Item>
   where
     SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
   {
-    DebounceOp {
+    Debounce {
       dur,
       scheduler_ctor: FunctionWrapper::new(move |_| scheduler_ctor()),
       _item: PhantomData,
@@ -99,7 +99,7 @@ where
     Scheduler: IScheduler<'a> + Clone + Send + Sync + 'a,
     SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
   {
-    DebounceOp::new(dur, scheduler_ctor).execute(self.clone())
+    Debounce::new(dur, scheduler_ctor).execute(self.clone())
   }
 }
 

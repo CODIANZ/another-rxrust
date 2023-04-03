@@ -2,22 +2,22 @@ use crate::internals::{function_wrapper::FunctionWrapper, stream_controller::Str
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct OnErrorResumeNextOp<'a, Item>
+pub struct OnErrorResumeNext<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
   resume_f: FunctionWrapper<'a, RxError, Observable<'a, Item>>,
 }
 
-impl<'a, Item> OnErrorResumeNextOp<'a, Item>
+impl<'a, Item> OnErrorResumeNext<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new<F>(f: F) -> OnErrorResumeNextOp<'a, Item>
+  pub fn new<F>(f: F) -> OnErrorResumeNext<'a, Item>
   where
     F: Fn(RxError) -> Observable<'a, Item> + Send + Sync + 'a,
   {
-    OnErrorResumeNextOp {
+    OnErrorResumeNext {
       resume_f: FunctionWrapper::new(f),
     }
   }
@@ -71,7 +71,7 @@ where
   where
     F: Fn(RxError) -> Observable<'a, Item> + Send + Sync + 'a,
   {
-    OnErrorResumeNextOp::new(f).execute(self.clone())
+    OnErrorResumeNext::new(f).execute(self.clone())
   }
 }
 

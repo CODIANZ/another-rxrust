@@ -5,7 +5,7 @@ use crate::internals::stream_controller::*;
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct RetryWhenOp<'a, Item>
+pub struct RetryWhen<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
@@ -13,15 +13,15 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> RetryWhenOp<'a, Item>
+impl<'a, Item> RetryWhen<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new<F>(f: F) -> RetryWhenOp<'a, Item>
+  pub fn new<F>(f: F) -> RetryWhen<'a, Item>
   where
     F: Fn(RxError) -> bool + Send + Sync + 'a,
   {
-    RetryWhenOp {
+    RetryWhen {
       predicate_f: FunctionWrapper::new(f),
       _item: PhantomData,
     }
@@ -72,7 +72,7 @@ where
   where
     F: Fn(RxError) -> bool + Send + Sync + 'a,
   {
-    RetryWhenOp::new(f).execute(self.clone())
+    RetryWhen::new(f).execute(self.clone())
   }
 }
 

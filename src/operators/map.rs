@@ -2,7 +2,7 @@ use crate::internals::{function_wrapper::*, stream_controller::*};
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct MapOp<'a, In, Out>
+pub struct Map<'a, In, Out>
 where
   In: Clone + Send + Sync,
   Out: Clone + Send + Sync,
@@ -10,16 +10,16 @@ where
   map_f: FunctionWrapper<'a, In, Out>,
 }
 
-impl<'a, In, Out> MapOp<'a, In, Out>
+impl<'a, In, Out> Map<'a, In, Out>
 where
   In: Clone + Send + Sync,
   Out: Clone + Send + Sync,
 {
-  pub fn new<F>(f: F) -> MapOp<'a, In, Out>
+  pub fn new<F>(f: F) -> Map<'a, In, Out>
   where
     F: Fn(In) -> Out + Send + Sync + 'a,
   {
-    MapOp {
+    Map {
       map_f: FunctionWrapper::new(f),
     }
   }
@@ -56,7 +56,7 @@ where
     F: Fn(Item) -> Out + Send + Sync + 'a,
     Out: Clone + Send + Sync,
   {
-    MapOp::new(f).execute(self.clone())
+    Map::new(f).execute(self.clone())
   }
 }
 

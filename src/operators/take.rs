@@ -6,7 +6,7 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct TakeOp<Item>
+pub struct Take<Item>
 where
   Item: Clone + Send + Sync,
 {
@@ -14,12 +14,12 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> TakeOp<Item>
+impl<'a, Item> Take<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(count: usize) -> TakeOp<Item> {
-    TakeOp {
+  pub fn new(count: usize) -> Take<Item> {
+    Take {
       count,
       _item: PhantomData,
     }
@@ -66,7 +66,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn take(&self, count: usize) -> Observable<'a, Item> {
-    TakeOp::new(count).execute(self.clone())
+    Take::new(count).execute(self.clone())
   }
 }
 

@@ -6,16 +6,16 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct MaxOp<Item> {
+pub struct Max<Item> {
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> MaxOp<Item>
+impl<'a, Item> Max<Item>
 where
   Item: Clone + Send + Sync + PartialOrd,
 {
-  pub fn new() -> MaxOp<Item> {
-    MaxOp { _item: PhantomData }
+  pub fn new() -> Max<Item> {
+    Max { _item: PhantomData }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     Observable::<Item>::create(move |s| {
@@ -57,7 +57,7 @@ where
   Item: Clone + Send + Sync + PartialOrd,
 {
   pub fn max(&self) -> Observable<'a, Item> {
-    MaxOp::new().execute(self.clone())
+    Max::new().execute(self.clone())
   }
 }
 

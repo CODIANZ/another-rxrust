@@ -3,22 +3,22 @@ use crate::prelude::*;
 use std::sync::{Arc, RwLock};
 
 #[derive(Clone)]
-pub struct SkipWhileOp<'a, Item>
+pub struct SkipWhile<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
   predicate_f: FunctionWrapper<'a, Item, bool>,
 }
 
-impl<'a, Item> SkipWhileOp<'a, Item>
+impl<'a, Item> SkipWhile<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new<F>(f: F) -> SkipWhileOp<'a, Item>
+  pub fn new<F>(f: F) -> SkipWhile<'a, Item>
   where
     F: Fn(Item) -> bool + Send + Sync + 'a,
   {
-    SkipWhileOp {
+    SkipWhile {
       predicate_f: FunctionWrapper::new(f),
     }
   }
@@ -63,7 +63,7 @@ where
   where
     F: Fn(Item) -> bool + Send + Sync + 'a,
   {
-    SkipWhileOp::new(f).execute(self.clone())
+    SkipWhile::new(f).execute(self.clone())
   }
 }
 

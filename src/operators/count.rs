@@ -6,16 +6,16 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct CountOp<Item> {
+pub struct Count<Item> {
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> CountOp<Item>
+impl<'a, Item> Count<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new() -> CountOp<Item> {
-    CountOp { _item: PhantomData }
+  pub fn new() -> Count<Item> {
+    Count { _item: PhantomData }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, usize> {
     Observable::<usize>::create(move |s| {
@@ -49,7 +49,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn count(&self) -> Observable<'a, usize> {
-    CountOp::new().execute(self.clone())
+    Count::new().execute(self.clone())
   }
 }
 

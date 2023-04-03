@@ -6,19 +6,19 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct ZipOp<'a, Item>
+pub struct Zip<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
   observables: Vec<Observable<'a, Item>>,
 }
 
-impl<'a, Item> ZipOp<'a, Item>
+impl<'a, Item> Zip<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(observables: &[Observable<'a, Item>]) -> ZipOp<'a, Item> {
-    ZipOp {
+  pub fn new(observables: &[Observable<'a, Item>]) -> Zip<'a, Item> {
+    Zip {
       observables: observables.to_vec(),
     }
   }
@@ -114,7 +114,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn zip(&self, observables: &[Observable<'a, Item>]) -> Observable<'a, Vec<Item>> {
-    ZipOp::new(observables).execute(self.clone())
+    Zip::new(observables).execute(self.clone())
   }
 }
 

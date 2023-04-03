@@ -2,7 +2,7 @@ use crate::internals::{function_wrapper::*, stream_controller::*};
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct FlatMapOp<'a, In, Out>
+pub struct FlatMap<'a, In, Out>
 where
   In: Clone + Send + Sync,
   Out: Clone + Send + Sync,
@@ -10,16 +10,16 @@ where
   flatmap_f: FunctionWrapper<'a, In, Observable<'a, Out>>,
 }
 
-impl<'a, In, Out> FlatMapOp<'a, In, Out>
+impl<'a, In, Out> FlatMap<'a, In, Out>
 where
   In: Clone + Send + Sync + 'a,
   Out: Clone + Send + Sync + 'a,
 {
-  pub fn new<F>(f: F) -> FlatMapOp<'a, In, Out>
+  pub fn new<F>(f: F) -> FlatMap<'a, In, Out>
   where
     F: Fn(In) -> Observable<'a, Out> + Send + Sync + 'a,
   {
-    FlatMapOp {
+    FlatMap {
       flatmap_f: FunctionWrapper::new(f),
     }
   }
@@ -72,7 +72,7 @@ where
     F: Fn(Item) -> Observable<'a, Out> + Send + Sync + 'a,
     Out: Clone + Send + Sync,
   {
-    FlatMapOp::new(f).execute(self.clone())
+    FlatMap::new(f).execute(self.clone())
   }
 }
 

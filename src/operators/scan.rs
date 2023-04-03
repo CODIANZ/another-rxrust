@@ -3,22 +3,22 @@ use crate::prelude::*;
 use std::sync::{Arc, RwLock};
 
 #[derive(Clone)]
-pub struct Reduce<'a, Item>
+pub struct Scan<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
   reduce_f: FunctionWrapper<'a, (Item, Item), Item>,
 }
 
-impl<'a, Item> Reduce<'a, Item>
+impl<'a, Item> Scan<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new<F>(f: F) -> Reduce<'a, Item>
+  pub fn new<F>(f: F) -> Scan<'a, Item>
   where
     F: Fn((Item, Item)) -> Item + Send + Sync + 'a,
   {
-    Reduce {
+    Scan {
       reduce_f: FunctionWrapper::new(f),
     }
   }
@@ -30,6 +30,7 @@ where
       let result = Arc::new(RwLock::new(None::<Item>));
 
       let sctl = StreamController::new(s);
+      let sctl_next = sctl.clone();
       let sctl_error = sctl.clone();
       let sctl_complete = sctl.clone();
 
@@ -37,20 +38,22 @@ where
 
       source.inner_subscribe(sctl.new_observer(
         move |_, x| {
-          let mut r = result_next.write().unwrap();
-          if let Some(xx) = &*r {
-            *r = Some(f.call((xx.clone(), x)));
-          } else {
-            *r = Some(x);
+          {
+            let mut r = result_next.write().unwrap();
+            if let Some(xx) = &*r {
+              *r = Some(f.call((xx.clone(), x)));
+            } else {
+              *r = Some(x);
+            }
+          }
+          if let Some(x) = &*result_next.read().unwrap() {
+            sctl_next.sink_next(x.clone());
           }
         },
         move |_, e| {
           sctl_error.sink_error(e);
         },
         move |serial| {
-          if let Some(x) = &*result.read().unwrap() {
-            sctl_complete.sink_next(x.clone());
-          }
           sctl_complete.sink_complete(&serial);
         },
       ));
@@ -62,11 +65,11 @@ impl<'a, Item> Observable<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn reduce<F>(&self, f: F) -> Observable<'a, Item>
+  pub fn scan<F>(&self, f: F) -> Observable<'a, Item>
   where
     F: Fn((Item, Item)) -> Item + Send + Sync + 'a,
   {
-    Reduce::new(f).execute(self.clone())
+    Scan::new(f).execute(self.clone())
   }
 }
 
@@ -77,7 +80,7 @@ mod test {
 
   #[test]
   fn basic() {
-    observables::range(1, 10).reduce(|(a, b)| a + b).subscribe(
+    observables::range(1, 10).scan(|(a, b)| a + b).subscribe(
       |x| println!("next {}", x),
       |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
@@ -87,7 +90,7 @@ mod test {
   #[test]
   fn string() {
     observables::from_iter(["a".to_owned(), "b".to_owned(), "c".to_owned()].into_iter())
-      .reduce(|(a, b)| format!("{} - {}", a, b))
+      .scan(|(a, b)| format!("{} - {}", a, b))
       .subscribe(
         |x| println!("next {}", x),
         |e| println!("error {:}", error_to_string(&e)),
@@ -97,7 +100,7 @@ mod test {
 
   #[test]
   fn single() {
-    observables::just(1).reduce(|(a, b)| a + b).subscribe(
+    observables::just(1).scan(|(a, b)| a + b).subscribe(
       |x| println!("next {}", x),
       |e| println!("error {:}", error_to_string(&e)),
       || println!("complete"),
@@ -106,13 +109,11 @@ mod test {
 
   #[test]
   fn empty() {
-    observables::empty::<i32>()
-      .reduce(|(a, b)| a + b)
-      .subscribe(
-        |x| println!("next {}", x),
-        |e| println!("error {:}", error_to_string(&e)),
-        || println!("complete"),
-      );
+    observables::empty::<i32>().scan(|(a, b)| a + b).subscribe(
+      |x| println!("next {}", x),
+      |e| println!("error {:}", error_to_string(&e)),
+      || println!("complete"),
+    );
   }
 
   #[test]
@@ -121,7 +122,7 @@ mod test {
       s.next(1);
       s.error(generate_error())
     })
-    .reduce(|(a, b)| a + b)
+    .scan(|(a, b)| a + b)
     .subscribe(
       |x| println!("next {}", x),
       |e| println!("error {:}", error_to_string(&e)),

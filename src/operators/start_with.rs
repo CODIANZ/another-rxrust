@@ -3,7 +3,7 @@ use crate::prelude::*;
 use std::marker::PhantomData;
 
 #[derive(Clone)]
-pub struct StartWithOp<'a, Item, Iter>
+pub struct StartWith<'a, Item, Iter>
 where
   Item: Clone + Send + Sync,
   Iter: Iterator<Item = Item> + Clone + Send + Sync + 'a,
@@ -13,13 +13,13 @@ where
   _lifetime: PhantomData<&'a ()>,
 }
 
-impl<'a, Item, Iter> StartWithOp<'a, Item, Iter>
+impl<'a, Item, Iter> StartWith<'a, Item, Iter>
 where
   Item: Clone + Send + Sync,
   Iter: Iterator<Item = Item> + Clone + Send + Sync + 'a,
 {
-  pub fn new(it: Iter) -> StartWithOp<'a, Item, Iter> {
-    StartWithOp {
+  pub fn new(it: Iter) -> StartWith<'a, Item, Iter> {
+    StartWith {
       it,
       _item: PhantomData,
       _lifetime: PhantomData,
@@ -63,7 +63,7 @@ where
   where
     Iter: Iterator<Item = Item> + Clone + Send + Sync + 'a,
   {
-    StartWithOp::new(iter).execute(self.clone())
+    StartWith::new(iter).execute(self.clone())
   }
 }
 

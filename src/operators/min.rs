@@ -6,16 +6,16 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct MinOp<Item> {
+pub struct Min<Item> {
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> MinOp<Item>
+impl<'a, Item> Min<Item>
 where
   Item: Clone + Send + Sync + PartialOrd,
 {
-  pub fn new() -> MinOp<Item> {
-    MinOp { _item: PhantomData }
+  pub fn new() -> Min<Item> {
+    Min { _item: PhantomData }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     Observable::<Item>::create(move |s| {
@@ -57,7 +57,7 @@ where
   Item: Clone + Send + Sync + PartialOrd,
 {
   pub fn min(&self) -> Observable<'a, Item> {
-    MinOp::new().execute(self.clone())
+    Min::new().execute(self.clone())
   }
 }
 

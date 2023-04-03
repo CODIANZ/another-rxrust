@@ -4,7 +4,7 @@ use scheduler::IScheduler;
 use std::marker::PhantomData;
 
 #[derive(Clone)]
-pub struct SubscribeOnOp<'a, Scheduler, Item>
+pub struct SubscribeOn<'a, Scheduler, Item>
 where
   Scheduler: IScheduler<'a> + Clone + Send + Sync,
   Item: Clone + Send + Sync,
@@ -14,18 +14,16 @@ where
   _lifetime: PhantomData<&'a ()>,
 }
 
-impl<'a, Scheduler, Item> SubscribeOnOp<'a, Scheduler, Item>
+impl<'a, Scheduler, Item> SubscribeOn<'a, Scheduler, Item>
 where
   Scheduler: IScheduler<'a> + Clone + Send + Sync,
   Item: Clone + Send + Sync,
 {
-  pub fn new<SchedulerCreator>(
-    scheduler_ctor: SchedulerCreator,
-  ) -> SubscribeOnOp<'a, Scheduler, Item>
+  pub fn new<SchedulerCreator>(scheduler_ctor: SchedulerCreator) -> SubscribeOn<'a, Scheduler, Item>
   where
     SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
   {
-    SubscribeOnOp {
+    SubscribeOn {
       scheduler_ctor: FunctionWrapper::new(move |_| scheduler_ctor()),
       _item: PhantomData,
       _lifetime: PhantomData,
@@ -90,7 +88,7 @@ where
     Scheduler: IScheduler<'a> + Clone + Send + Sync + 'a,
     SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
   {
-    SubscribeOnOp::new(scheduler_ctor).execute(self.clone())
+    SubscribeOn::new(scheduler_ctor).execute(self.clone())
   }
 }
 
