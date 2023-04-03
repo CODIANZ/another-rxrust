@@ -2,19 +2,19 @@ use crate::internals::stream_controller::*;
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct ContainsOp<Item>
+pub struct Contains<Item>
 where
   Item: Clone + Send + Sync + PartialEq,
 {
   target: Item,
 }
 
-impl<'a, Item> ContainsOp<Item>
+impl<'a, Item> Contains<Item>
 where
   Item: Clone + Send + Sync + PartialEq,
 {
-  pub fn new(target: Item) -> ContainsOp<Item> {
-    ContainsOp { target }
+  pub fn new(target: Item) -> Contains<Item> {
+    Contains { target }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, bool> {
     let target = self.target.clone();
@@ -50,7 +50,7 @@ where
   Item: Clone + Send + Sync + PartialEq,
 {
   pub fn contains(&self, target: Item) -> Observable<'a, bool> {
-    ContainsOp::new(target).execute(self.clone())
+    Contains::new(target).execute(self.clone())
   }
 }
 

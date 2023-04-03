@@ -7,7 +7,7 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct TakeLastOp<Item>
+pub struct TakeLast<Item>
 where
   Item: Clone + Send + Sync,
 {
@@ -15,12 +15,12 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> TakeLastOp<Item>
+impl<'a, Item> TakeLast<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(count: usize) -> TakeLastOp<Item> {
-    TakeLastOp {
+  pub fn new(count: usize) -> TakeLast<Item> {
+    TakeLast {
       count,
       _item: PhantomData,
     }
@@ -66,7 +66,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn take_last(&self, count: usize) -> Observable<'a, Item> {
-    TakeLastOp::new(count).execute(self.clone())
+    TakeLast::new(count).execute(self.clone())
   }
 }
 

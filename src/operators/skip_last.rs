@@ -7,7 +7,7 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct SkipLastOp<Item>
+pub struct SkipLast<Item>
 where
   Item: Clone + Send + Sync,
 {
@@ -15,12 +15,12 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> SkipLastOp<Item>
+impl<'a, Item> SkipLast<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(count: usize) -> SkipLastOp<Item> {
-    SkipLastOp {
+  pub fn new(count: usize) -> SkipLast<Item> {
+    SkipLast {
       count,
       _item: PhantomData,
     }
@@ -64,7 +64,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn skip_last(&self, count: usize) -> Observable<'a, Item> {
-    SkipLastOp::new(count).execute(self.clone())
+    SkipLast::new(count).execute(self.clone())
   }
 }
 

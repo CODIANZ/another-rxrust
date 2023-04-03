@@ -2,20 +2,20 @@ use crate::internals::stream_controller::*;
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct ElementAtOp<Item>
+pub struct ElementAt<Item>
 where
   Item: Clone + Send + Sync,
 {
-  take_op: operators::TakeOp<Item>,
+  take_op: operators::Take<Item>,
 }
 
-impl<'a, Item> ElementAtOp<Item>
+impl<'a, Item> ElementAt<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(count: usize) -> ElementAtOp<Item> {
-    ElementAtOp {
-      take_op: operators::TakeOp::<Item>::new(count),
+  pub fn new(count: usize) -> ElementAt<Item> {
+    ElementAt {
+      take_op: operators::Take::<Item>::new(count),
     }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
@@ -50,7 +50,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn element_at(&self, count: usize) -> Observable<'a, Item> {
-    operators::ElementAtOp::new(count).execute(self.clone())
+    ElementAt::new(count).execute(self.clone())
   }
 }
 

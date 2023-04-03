@@ -6,7 +6,7 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct SkipUntilOp<'a, Item, TrigerValue>
+pub struct SkipUntil<'a, Item, TrigerValue>
 where
   Item: Clone + Send + Sync,
   TrigerValue: Clone + Send + Sync,
@@ -15,16 +15,16 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item, TrigerValue> SkipUntilOp<'a, Item, TrigerValue>
+impl<'a, Item, TrigerValue> SkipUntil<'a, Item, TrigerValue>
 where
   Item: Clone + Send + Sync,
   TrigerValue: Clone + Send + Sync,
 {
-  pub fn new(trigger: Observable<'a, TrigerValue>) -> SkipUntilOp<'a, Item, TrigerValue>
+  pub fn new(trigger: Observable<'a, TrigerValue>) -> SkipUntil<'a, Item, TrigerValue>
   where
     TrigerValue: Clone + Send + Sync,
   {
-    SkipUntilOp {
+    SkipUntil {
       trigger,
       _item: PhantomData,
     }
@@ -77,7 +77,7 @@ where
   where
     TriggerValue: Clone + Send + Sync,
   {
-    SkipUntilOp::new(trigger).execute(self.clone())
+    SkipUntil::new(trigger).execute(self.clone())
   }
 }
 

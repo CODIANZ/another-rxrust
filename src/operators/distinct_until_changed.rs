@@ -6,19 +6,19 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct DistinctUntilChangedOp<Item>
+pub struct DistinctUntilChanged<Item>
 where
   Item: Clone + Send + Sync + PartialEq,
 {
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> DistinctUntilChangedOp<Item>
+impl<'a, Item> DistinctUntilChanged<Item>
 where
   Item: Clone + Send + Sync + PartialEq,
 {
-  pub fn new() -> DistinctUntilChangedOp<Item> {
-    DistinctUntilChangedOp { _item: PhantomData }
+  pub fn new() -> DistinctUntilChanged<Item> {
+    DistinctUntilChanged { _item: PhantomData }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     Observable::<Item>::create(move |s| {
@@ -62,7 +62,7 @@ where
   Item: Clone + Send + Sync + PartialEq,
 {
   pub fn distinct_until_changed(&self) -> Observable<'a, Item> {
-    DistinctUntilChangedOp::new().execute(self.clone())
+    DistinctUntilChanged::new().execute(self.clone())
   }
 }
 

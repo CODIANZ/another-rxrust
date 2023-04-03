@@ -2,19 +2,19 @@ use crate::internals::stream_controller::*;
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct MergeOp<'a, Item>
+pub struct Merge<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
   observables: Vec<Observable<'a, Item>>,
 }
 
-impl<'a, Item> MergeOp<'a, Item>
+impl<'a, Item> Merge<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(observables: &[Observable<'a, Item>]) -> MergeOp<'a, Item> {
-    MergeOp {
+  pub fn new(observables: &[Observable<'a, Item>]) -> Merge<'a, Item> {
+    Merge {
       observables: observables.to_vec(),
     }
   }
@@ -61,7 +61,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn merge(&self, observables: &[Observable<'a, Item>]) -> Observable<'a, Item> {
-    MergeOp::new(observables).execute(self.clone())
+    Merge::new(observables).execute(self.clone())
   }
 }
 

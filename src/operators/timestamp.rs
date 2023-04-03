@@ -3,19 +3,19 @@ use crate::prelude::*;
 use std::{marker::PhantomData, time::SystemTime};
 
 #[derive(Clone)]
-pub struct TimestampOp<Item>
+pub struct Timestamp<Item>
 where
   Item: Clone + Send + Sync,
 {
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> TimestampOp<Item>
+impl<'a, Item> Timestamp<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new() -> TimestampOp<Item> {
-    TimestampOp { _item: PhantomData }
+  pub fn new() -> Timestamp<Item> {
+    Timestamp { _item: PhantomData }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, (SystemTime, Item)> {
     Observable::create(move |s| {
@@ -44,7 +44,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn timestamp(&self) -> Observable<'a, (SystemTime, Item)> {
-    TimestampOp::new().execute(self.clone())
+    Timestamp::new().execute(self.clone())
   }
 }
 

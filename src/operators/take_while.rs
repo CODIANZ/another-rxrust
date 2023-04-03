@@ -2,22 +2,22 @@ use crate::internals::{function_wrapper::*, stream_controller::*};
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct TakeWhileOp<'a, Item>
+pub struct TakeWhile<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
   predicate_f: FunctionWrapper<'a, Item, bool>,
 }
 
-impl<'a, Item> TakeWhileOp<'a, Item>
+impl<'a, Item> TakeWhile<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new<F>(f: F) -> TakeWhileOp<'a, Item>
+  pub fn new<F>(f: F) -> TakeWhile<'a, Item>
   where
     F: Fn(Item) -> bool + Send + Sync + 'a,
   {
-    TakeWhileOp {
+    TakeWhile {
       predicate_f: FunctionWrapper::new(f),
     }
   }
@@ -57,7 +57,7 @@ where
   where
     F: Fn(Item) -> bool + Send + Sync + 'a,
   {
-    TakeWhileOp::new(f).execute(self.clone())
+    TakeWhile::new(f).execute(self.clone())
   }
 }
 

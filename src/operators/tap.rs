@@ -2,24 +2,24 @@ use crate::internals::stream_controller::*;
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct TapOp<'a, Item>
+pub struct Tap<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
   tap_observer: Observer<'a, Item>,
 }
 
-impl<'a, Item> TapOp<'a, Item>
+impl<'a, Item> Tap<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new<Next, Error, Complete>(next: Next, error: Error, complete: Complete) -> TapOp<'a, Item>
+  pub fn new<Next, Error, Complete>(next: Next, error: Error, complete: Complete) -> Tap<'a, Item>
   where
     Next: Fn(Item) + Send + Sync + 'a,
     Error: Fn(RxError) + Send + Sync + 'a,
     Complete: Fn() + Send + Sync + 'a,
   {
-    TapOp {
+    Tap {
       tap_observer: Observer::new(next, error, complete),
     }
   }
@@ -70,7 +70,7 @@ where
     Error: Fn(RxError) + Send + Sync + 'a,
     Complete: Fn() + Send + Sync + 'a,
   {
-    TapOp::new(next, error, complete).execute(self.clone())
+    Tap::new(next, error, complete).execute(self.clone())
   }
 }
 

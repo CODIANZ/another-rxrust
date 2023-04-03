@@ -3,19 +3,19 @@ use crate::prelude::*;
 use std::sync::{Arc, RwLock};
 
 #[derive(Clone)]
-pub struct AmbOp<'a, Item>
+pub struct Amb<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
   observables: Vec<Observable<'a, Item>>,
 }
 
-impl<'a, Item> AmbOp<'a, Item>
+impl<'a, Item> Amb<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(observables: &[Observable<'a, Item>]) -> AmbOp<'a, Item> {
-    AmbOp {
+  pub fn new(observables: &[Observable<'a, Item>]) -> Amb<'a, Item> {
+    Amb {
       observables: observables.to_vec(),
     }
   }
@@ -110,7 +110,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn amb(&self, observables: &[Observable<'a, Item>]) -> Observable<'a, Item> {
-    AmbOp::new(observables).execute(self.clone())
+    Amb::new(observables).execute(self.clone())
   }
 }
 

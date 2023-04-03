@@ -3,7 +3,7 @@ use crate::prelude::*;
 use std::{marker::PhantomData, thread, time::Duration};
 
 #[derive(Clone)]
-pub struct DelayOp<Item>
+pub struct Delay<Item>
 where
   Item: Clone + Send + Sync,
 {
@@ -11,12 +11,12 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> DelayOp<Item>
+impl<'a, Item> Delay<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(dur: Duration) -> DelayOp<Item> {
-    DelayOp {
+  pub fn new(dur: Duration) -> Delay<Item> {
+    Delay {
       dur,
       _item: PhantomData,
     }
@@ -49,7 +49,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn delay(&self, dur: Duration) -> Observable<'a, Item> {
-    DelayOp::new(dur).execute(self.clone())
+    Delay::new(dur).execute(self.clone())
   }
 }
 

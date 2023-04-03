@@ -6,7 +6,7 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct WindowWithCountOp<Item>
+pub struct WindowWithCount<Item>
 where
   Item: Clone + Send + Sync,
 {
@@ -14,12 +14,12 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> WindowWithCountOp<Item>
+impl<'a, Item> WindowWithCount<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(count: usize) -> WindowWithCountOp<Item> {
-    WindowWithCountOp {
+  pub fn new(count: usize) -> WindowWithCount<Item> {
+    WindowWithCount {
       count,
       _item: PhantomData,
     }
@@ -75,7 +75,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn window_with_count(&self, count: usize) -> Observable<'a, Observable<'a, Item>> {
-    WindowWithCountOp::new(count).execute(self.clone())
+    WindowWithCount::new(count).execute(self.clone())
   }
 }
 

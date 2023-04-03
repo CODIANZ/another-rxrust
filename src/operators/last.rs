@@ -2,20 +2,20 @@ use crate::internals::stream_controller::*;
 use crate::prelude::*;
 
 #[derive(Clone)]
-pub struct LastOp<Item>
+pub struct Last<Item>
 where
   Item: Clone + Send + Sync,
 {
-  take_last_op: operators::TakeLastOp<Item>,
+  take_last_op: operators::TakeLast<Item>,
 }
 
-impl<'a, Item> LastOp<Item>
+impl<'a, Item> Last<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new() -> LastOp<Item> {
-    LastOp {
-      take_last_op: operators::TakeLastOp::new(1),
+  pub fn new() -> Last<Item> {
+    Last {
+      take_last_op: operators::TakeLast::new(1),
     }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
@@ -49,7 +49,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn last(&self) -> Observable<'a, Item> {
-    LastOp::new().execute(self.clone())
+    Last::new().execute(self.clone())
   }
 }
 

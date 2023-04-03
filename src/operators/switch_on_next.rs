@@ -3,19 +3,19 @@ use crate::prelude::*;
 use std::sync::{Arc, RwLock};
 
 #[derive(Clone)]
-pub struct SwitchOnNextOp<'a, Item>
+pub struct SwitchOnNext<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
   target: Observable<'a, Item>,
 }
 
-impl<'a, Item> SwitchOnNextOp<'a, Item>
+impl<'a, Item> SwitchOnNext<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(target: Observable<'a, Item>) -> SwitchOnNextOp<'a, Item> {
-    SwitchOnNextOp { target }
+  pub fn new(target: Observable<'a, Item>) -> SwitchOnNext<'a, Item> {
+    SwitchOnNext { target }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let target = self.target.clone();
@@ -69,7 +69,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn switch_on_next(&self, target: Observable<'a, Item>) -> Observable<'a, Item> {
-    SwitchOnNextOp::new(target).execute(self.clone())
+    SwitchOnNext::new(target).execute(self.clone())
   }
 }
 

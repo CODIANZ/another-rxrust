@@ -3,22 +3,22 @@ use crate::prelude::*;
 use std::sync::{Arc, RwLock};
 
 #[derive(Clone)]
-pub struct ScanOp<'a, Item>
+pub struct Scan<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
   reduce_f: FunctionWrapper<'a, (Item, Item), Item>,
 }
 
-impl<'a, Item> ScanOp<'a, Item>
+impl<'a, Item> Scan<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new<F>(f: F) -> ScanOp<'a, Item>
+  pub fn new<F>(f: F) -> Scan<'a, Item>
   where
     F: Fn((Item, Item)) -> Item + Send + Sync + 'a,
   {
-    ScanOp {
+    Scan {
       reduce_f: FunctionWrapper::new(f),
     }
   }
@@ -69,7 +69,7 @@ where
   where
     F: Fn((Item, Item)) -> Item + Send + Sync + 'a,
   {
-    ScanOp::new(f).execute(self.clone())
+    Scan::new(f).execute(self.clone())
   }
 }
 

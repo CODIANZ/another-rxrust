@@ -3,22 +3,22 @@ use crate::prelude::*;
 use std::sync::{Arc, RwLock};
 
 #[derive(Clone)]
-pub struct ReduceOp<'a, Item>
+pub struct Reduce<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
   reduce_f: FunctionWrapper<'a, (Item, Item), Item>,
 }
 
-impl<'a, Item> ReduceOp<'a, Item>
+impl<'a, Item> Reduce<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new<F>(f: F) -> ReduceOp<'a, Item>
+  pub fn new<F>(f: F) -> Reduce<'a, Item>
   where
     F: Fn((Item, Item)) -> Item + Send + Sync + 'a,
   {
-    ReduceOp {
+    Reduce {
       reduce_f: FunctionWrapper::new(f),
     }
   }
@@ -66,7 +66,7 @@ where
   where
     F: Fn((Item, Item)) -> Item + Send + Sync + 'a,
   {
-    ReduceOp::new(f).execute(self.clone())
+    Reduce::new(f).execute(self.clone())
   }
 }
 

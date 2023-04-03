@@ -6,7 +6,7 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct BufferWithCountOp<Item>
+pub struct BufferWithCount<Item>
 where
   Item: Clone + Send + Sync,
 {
@@ -14,13 +14,13 @@ where
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> BufferWithCountOp<Item>
+impl<'a, Item> BufferWithCount<Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(count: usize) -> BufferWithCountOp<Item> {
+  pub fn new(count: usize) -> BufferWithCount<Item> {
     assert!(count > 0);
-    BufferWithCountOp {
+    BufferWithCount {
       count,
       _item: PhantomData,
     }
@@ -78,7 +78,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn buffer_with_count(&self, count: usize) -> Observable<'a, Vec<Item>> {
-    BufferWithCountOp::new(count).execute(self.clone())
+    BufferWithCount::new(count).execute(self.clone())
   }
 }
 

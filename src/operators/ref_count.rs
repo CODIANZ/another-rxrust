@@ -3,7 +3,7 @@ use std::sync::{Arc, RwLock};
 use subject::Subject;
 
 #[derive(Clone)]
-pub struct RefCountOp<'a, Item>
+pub struct RefCount<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
@@ -12,12 +12,12 @@ where
   subscription: Arc<RwLock<Option<Subscription<'a>>>>,
 }
 
-impl<'a, Item> RefCountOp<'a, Item>
+impl<'a, Item> RefCount<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(source: Observable<'a, Item>) -> RefCountOp<'a, Item> {
-    let _self = RefCountOp {
+  pub fn new(source: Observable<'a, Item>) -> RefCount<'a, Item> {
+    let _self = RefCount {
       subject: Subject::<Item>::new(),
       source,
       subscription: Arc::new(RwLock::new(None)),
@@ -78,8 +78,8 @@ impl<'a, Item> Observable<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn ref_count(&self) -> ref_count::RefCountOp<'a, Item> {
-    RefCountOp::new(self.clone())
+  pub fn ref_count(&self) -> ref_count::RefCount<'a, Item> {
+    RefCount::new(self.clone())
   }
 }
 

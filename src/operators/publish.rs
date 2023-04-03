@@ -2,7 +2,7 @@ use crate::prelude::*;
 use subject::Subject;
 
 #[derive(Clone)]
-pub struct PublishOp<'a, Item>
+pub struct Publish<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
@@ -10,12 +10,12 @@ where
   source: Observable<'a, Item>,
 }
 
-impl<'a, Item> PublishOp<'a, Item>
+impl<'a, Item> Publish<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(source: Observable<'a, Item>) -> PublishOp<'a, Item> {
-    PublishOp {
+  pub fn new(source: Observable<'a, Item>) -> Publish<'a, Item> {
+    Publish {
       sbj: Subject::<Item>::new(),
       source,
     }
@@ -48,8 +48,8 @@ impl<'a, Item> Observable<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn publish(&self) -> publish::PublishOp<'a, Item> {
-    PublishOp::new(self.clone())
+  pub fn publish(&self) -> publish::Publish<'a, Item> {
+    Publish::new(self.clone())
   }
 }
 
