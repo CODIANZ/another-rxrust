@@ -2,23 +2,12 @@ use crate::prelude::RxError;
 use std::fmt::Display;
 use std::sync::{Arc, RwLock};
 
-#[cfg(feature = "anyhow")]
 pub fn generate_error() -> RxError {
-  RxError::new(anyhow::anyhow!("anyhow error"))
+  RxError::from_error("sample error")
 }
 
-#[cfg(feature = "anyhow")]
-pub fn error_to_string(e: &RxError) -> String {
-  format!("{:}", e.error)
-}
-
-#[cfg(not(feature = "anyhow"))]
-pub fn generate_error() -> RxError {
-  RxError::new(Box::new("any error".to_owned()))
-}
-#[cfg(not(feature = "anyhow"))]
-pub fn error_to_string(e: &RxError) -> &String {
-  e.error.downcast_ref::<String>().unwrap()
+pub fn error_to_string(e: &RxError) -> &str {
+  e.cast_ref::<&str>()
 }
 
 pub struct DestructChecker {

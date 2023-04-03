@@ -15,44 +15,29 @@ In addition, `ReactiveX` may not be the best solution if the purpose is to paral
 - Value to emit should be `Clone + Send + Sync` only.
 - Use `move` to emit values ​​as much as possible.
 - Functions should be `Fn() + Send + Sync` only.
-- Default errors use `std::any`. If `features=["anyhow"]` use `anyhow::Error`.
+- Errors are type-erased using `std::any`.
+  - Thus requiring a `'static` lifetime.
+  - You can use `anyhow`.
 - Prioritize flexibility over memory efficiency and execution speed.
 
 ## Implementation status
 
 See [implementation status](implementation_status.md).
 
-## Usage
+## Installation
 
-### default
+```sh
+cargo add  another-rxrust
+```
+
+or
 
 ```toml
 [dependencies]
 another-rxrust = {}
 ```
 
-### use `anyhow::Error`
-
-```toml
-[dependencies]
-another-rxrust = {features=["anyhow"]}
-```
-
 ## Samples
-
-### create error instance
-
-#### std::any
-
-```rust
-RxError::new(Box::new("any error".to_owned()))
-```
-
-#### anyhow
-
-```rust
-RxError::new(anyhow::anyhow!("anyhow error"))
-```
 
 ### basic
 
@@ -77,17 +62,19 @@ fn basic() {
       1 => observables::empty(),
       2 => observables::just(x),
       3 => ob().map(move |y| (y + x)),
-      4 => observables::error(RxError::new(anyhow::anyhow!("anyhow error"))),
+      4 => observables::error(RxError::from_error("some error")),
       _ => observables::never(),
     })
     .map(|x| format!("{}", x))
-    .on_error_resume_next(|e| ob().map(move |x| format!("resume {:} {}", error_to_string(&e), x)))
+    .on_error_resume_next(|e| {
+      ob().map(move |x| format!("resume {:?} {}", e.cast_ref::<&str>(), x))
+    })
     .subscribe(
       |x| {
         println!("next {}", x);
       },
       |e| {
-        println!("error {:?}", e.error);
+        println!("error {:?}", e.any_ref());
       },
       || {
         println!("complete");
@@ -100,8 +87,8 @@ fn basic() {
 // next 2
 // next 103
 // next 203
-// next resume any error 100
-// next resume any error 200
+// next resume "some error" 100
+// next resume "some error" 200
 // complete
 ```
 

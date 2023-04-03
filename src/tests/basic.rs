@@ -20,17 +20,19 @@ mod test {
         1 => observables::empty(),
         2 => observables::just(x),
         3 => ob().map(move |y| (y + x)),
-        4 => observables::error(generate_error()),
+        4 => observables::error(RxError::from_error("some error")),
         _ => observables::never(),
       })
       .map(|x| format!("{}", x))
-      .on_error_resume_next(|e| ob().map(move |x| format!("resume {:} {}", error_to_string(&e), x)))
+      .on_error_resume_next(|e| {
+        ob().map(move |x| format!("resume {:?} {}", e.cast_ref::<&str>(), x))
+      })
       .subscribe(
         |x| {
           println!("next {}", x);
         },
         |e| {
-          println!("error {}", error_to_string(&e));
+          println!("error {:?}", e.any_ref());
         },
         || {
           println!("complete");
