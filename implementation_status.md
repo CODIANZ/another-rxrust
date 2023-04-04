@@ -111,7 +111,7 @@ Operators that evaluate one or more Observables or items emitted by Observables
 Operators that operate on the entire sequence of items emitted by an Observable
 
 - [ ] [Average](https://reactivex.io/documentation/operators/average.html) — calculates the average of numbers emitted by an Observable and emits this average
-- [ ] [Concat](https://reactivex.io/documentation/operators/concat.html) — emit the emissions from two or more Observables without interleaving them
+- [x] [Concat](https://reactivex.io/documentation/operators/concat.html) — emit the emissions from two or more Observables without interleaving them
 - [x] [Count](https://reactivex.io/documentation/operators/count.html) — count the number of items emitted by the source Observable and emit only this value
 - [x] [Max](https://reactivex.io/documentation/operators/max.html) — determine, and emit, the maximum-valued item emitted by an Observable
 - [x] [Min](https://reactivex.io/documentation/operators/min.html) — determine, and emit, the minimum-valued item emitted by an Observable
