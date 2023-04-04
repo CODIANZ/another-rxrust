@@ -33,9 +33,9 @@ mod test {
         })
       })
       .subscribe(
-        print_next_fmt!("{}"),
-        print_error!(),
-        print_complete!(),
+        |x| println!("{}", x),
+        |e| println!("{:?}", e.downcast_ref::<&str>()),
+        || println!("complete"),
       );
 
     thread::sleep(time::Duration::from_millis(500));
