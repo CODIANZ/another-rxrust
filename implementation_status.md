@@ -129,7 +129,8 @@ Specialty Observables that have more precisely-controlled subscription dynamics
 
 ### Operators to Convert Observables
 
-- [ ] [To](https://reactivex.io/documentation/operators/to.html) — convert an Observable into another object or data structure
+- [x] [To](https://reactivex.io/documentation/operators/to.html) — convert an Observable into another object or data structure
+  - `to_vec`
 
 ### Subjects
 

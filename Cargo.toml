@@ -13,3 +13,4 @@ version = "0.0.35"
 
 [dev-dependencies]
 anyhow = { version = "1", features = ["backtrace"] }
+tokio = { version = "1.27", features = ["full"] }

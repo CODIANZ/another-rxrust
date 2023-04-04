@@ -44,6 +44,7 @@ pub mod tap;
 pub mod time_interval;
 pub mod timeout;
 pub mod timestamp;
+pub mod to_vec;
 pub mod window_with_count;
 pub mod zip;
 
@@ -94,6 +95,7 @@ pub mod operators {
   pub use crate::operators::time_interval::*;
   pub use crate::operators::timeout::*;
   pub use crate::operators::timestamp::*;
+  pub use crate::operators::to_vec::*;
   pub use crate::operators::window_with_count::*;
   pub use crate::operators::zip::*;
 }
