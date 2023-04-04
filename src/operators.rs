@@ -36,6 +36,8 @@ pub mod skip_until;
 pub mod skip_while;
 pub mod start_with;
 pub mod subscribe_on;
+pub mod sum;
+pub mod sum_and_count;
 pub mod switch_on_next;
 pub mod take;
 pub mod take_last;
@@ -88,6 +90,8 @@ pub mod operators {
   pub use crate::operators::skip_while::*;
   pub use crate::operators::start_with::*;
   pub use crate::operators::subscribe_on::*;
+  pub use crate::operators::sum::*;
+  pub use crate::operators::sum_and_count::*;
   pub use crate::operators::switch_on_next::*;
   pub use crate::operators::take::*;
   pub use crate::operators::take_last::*;
