@@ -27,6 +27,7 @@ pub mod retry;
 pub mod retry_when;
 pub mod sample;
 pub mod scan;
+pub mod sequence_equal;
 pub mod skip;
 pub mod skip_last;
 pub mod skip_until;
@@ -75,6 +76,7 @@ pub mod operators {
   pub use crate::operators::retry_when::*;
   pub use crate::operators::sample::*;
   pub use crate::operators::scan::*;
+  pub use crate::operators::sequence_equal::*;
   pub use crate::operators::skip::*;
   pub use crate::operators::skip_last::*;
   pub use crate::operators::skip_until::*;
