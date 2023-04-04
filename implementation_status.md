@@ -96,11 +96,11 @@ A toolbox of useful Operators for working with Observables
 
 Operators that evaluate one or more Observables or items emitted by Observables
 
-- [ ] [All](https://reactivex.io/documentation/operators/all.html) — determine whether all items emitted by an Observable meet some criteria
+- [x] [All](https://reactivex.io/documentation/operators/all.html) — determine whether all items emitted by an Observable meet some criteria
 - [x] [Amb](https://reactivex.io/documentation/operators/amb.html) — given two or more source Observables, emit all of the items from only the first of these Observables to emit an item
 - [x] [Contains](https://reactivex.io/documentation/operators/contains.html) — determine whether an Observable emits a particular item or not
 - [x] [DefaultIfEmpty](https://reactivex.io/documentation/operators/defaultifempty.html) — emit items from the source Observable, or a default item if the source Observable emits nothing
-- [ ] [SequenceEqual](https://reactivex.io/documentation/operators/sequenceequal.html) — determine whether two Observables emit the same sequence of items
+- [x] [SequenceEqual](https://reactivex.io/documentation/operators/sequenceequal.html) — determine whether two Observables emit the same sequence of items
 - [x] [SkipUntil](https://reactivex.io/documentation/operators/skipuntil.html) — discard items emitted by an Observable until a second Observable emits an item
 - [x] [SkipWhile](https://reactivex.io/documentation/operators/skipwhile.html) — discard items emitted by an Observable until a specified condition becomes false
 - [x] [TakeUntil](https://reactivex.io/documentation/operators/takeuntil.html) — discard items emitted by an Observable after a second Observable emits an item or terminates
@@ -111,12 +111,14 @@ Operators that evaluate one or more Observables or items emitted by Observables
 Operators that operate on the entire sequence of items emitted by an Observable
 
 - [ ] [Average](https://reactivex.io/documentation/operators/average.html) — calculates the average of numbers emitted by an Observable and emits this average
-- [ ] [Concat](https://reactivex.io/documentation/operators/concat.html) — emit the emissions from two or more Observables without interleaving them
+- [x] [Concat](https://reactivex.io/documentation/operators/concat.html) — emit the emissions from two or more Observables without interleaving them
 - [x] [Count](https://reactivex.io/documentation/operators/count.html) — count the number of items emitted by the source Observable and emit only this value
 - [x] [Max](https://reactivex.io/documentation/operators/max.html) — determine, and emit, the maximum-valued item emitted by an Observable
 - [x] [Min](https://reactivex.io/documentation/operators/min.html) — determine, and emit, the minimum-valued item emitted by an Observable
 - [x] [Reduce](https://reactivex.io/documentation/operators/reduce.html) — apply a function to each item emitted by an Observable, sequentially, and emit the final value
-- [ ] [Sum](https://reactivex.io/documentation/operators/sum.html) — calculate the sum of numbers emitted by an Observable and emit this sum
+- [x] [Sum](https://reactivex.io/documentation/operators/sum.html) — calculate the sum of numbers emitted by an Observable and emit this sum
+  - `sum`
+  - `sum_and_count`
 
 ### Connectable Observable Operators
 
@@ -129,7 +131,8 @@ Specialty Observables that have more precisely-controlled subscription dynamics
 
 ### Operators to Convert Observables
 
-- [ ] [To](https://reactivex.io/documentation/operators/to.html) — convert an Observable into another object or data structure
+- [x] [To](https://reactivex.io/documentation/operators/to.html) — convert an Observable into another object or data structure
+  - `to_vec`
 
 ### Subjects
 

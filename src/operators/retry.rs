@@ -16,10 +16,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn new(count: usize) -> Retry<Item> {
-    Retry {
-      count,
-      _item: PhantomData,
-    }
+    Retry { count, _item: PhantomData }
   }
 
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
@@ -45,7 +42,12 @@ where
           move |serial, e| {
             if max_retry == 0 || n < max_retry {
               sctl_error.upstream_abort_observe(&serial);
-              do_subscribe(n + 1, max_retry, source_error.clone(), sctl_error.clone());
+              do_subscribe(
+                n + 1,
+                max_retry,
+                source_error.clone(),
+                sctl_error.clone(),
+              );
             } else {
               sctl_error.sink_error(e);
             }
@@ -72,7 +74,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::sync::{Arc, RwLock};
 
   #[test]
@@ -86,23 +87,23 @@ mod test {
       s.next(c * 100 + 1);
       *counter_ob.write().unwrap() += 1;
       if c < 5 {
-        s.error(generate_error());
+        s.error(RxError::from_error("ERR!"));
       } else {
         s.complete();
       }
     });
 
     o.retry(0).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error_as!(&str),
+      print_complete!(),
     );
 
     *counter.write().unwrap() = 0;
     o.retry(3).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error_as!(&str),
+      print_complete!(),
     );
   }
 }

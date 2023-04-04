@@ -7,7 +7,7 @@ For those who use `ReactiveX` in other languages such as `rxjs(TypeScript)` or `
 
 Therefore, I created `another-rxrust`, thinking that I needed a library that allows `observable` to be connected in the same way as other platforms, and that `ReactiveX` can be enjoyed in `Rust`.
 
-In addition, `ReactiveX` may not be the best solution if the purpose is to parallelize heavy processing and speed it up. However, `Reactive X` is one answer for complex combinations of non-blocking I/O and error handling.
+In addition, `ReactiveX` may not be the best solution if the purpose is to parallelize heavy processing and speed it up. However, `ReactiveX` is one answer for complex combinations of non-blocking I/O and error handling.
 
 ## Implementation policy
 
@@ -66,18 +66,18 @@ fn main() {
     })
     .map(|x| format!("{}", x))
     .on_error_resume_next(|e| {
-      ob().map(move |x| format!("resume {:?} {}", e.cast_ref::<&str>(), x))
+      ob().map(move |x| {
+        format!(
+          "resume {:?} {}",
+          e.downcast_ref::<&str>(),
+          x
+        )
+      })
     })
     .subscribe(
-      |x| {
-        println!("next {}", x);
-      },
-      |e| {
-        println!("error {:?}", e.any_ref());
-      },
-      || {
-        println!("complete");
-      },
+      |x| println!("{}", x),
+      |e| println!("{:?}", e.downcast_ref::<&str>()),
+      || println!("complete"),
     );
 
   thread::sleep(time::Duration::from_millis(500));

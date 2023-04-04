@@ -18,11 +18,12 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn new(observables: &[Observable<'a, Item>]) -> Zip<'a, Item> {
-    Zip {
-      observables: observables.to_vec(),
-    }
+    Zip { observables: observables.to_vec() }
   }
-  pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Vec<Item>> {
+  pub fn execute(
+    &self,
+    source: Observable<'a, Item>,
+  ) -> Observable<'a, Vec<Item>> {
     let observables = self.observables.clone();
     Observable::<Vec<Item>>::create(move |s| {
       let sctl = StreamController::new(s);
@@ -113,7 +114,10 @@ impl<'a, Item> Observable<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn zip(&self, observables: &[Observable<'a, Item>]) -> Observable<'a, Vec<Item>> {
+  pub fn zip(
+    &self,
+    observables: &[Observable<'a, Item>],
+  ) -> Observable<'a, Vec<Item>> {
     Zip::new(observables).execute(self.clone())
   }
 }
@@ -128,10 +132,16 @@ mod test {
     observables::from_iter(0..10)
       .observe_on(schedulers::new_thread_scheduler())
       .zip(&[
-        observables::from_iter(10..20).observe_on(schedulers::new_thread_scheduler()),
-        observables::from_iter(20..30).observe_on(schedulers::new_thread_scheduler()),
+        observables::from_iter(10..20)
+          .observe_on(schedulers::new_thread_scheduler()),
+        observables::from_iter(20..30)
+          .observe_on(schedulers::new_thread_scheduler()),
       ])
-      .subscribe(print_next_fmt!("{:?}"), print_error!(), print_complete!());
+      .subscribe(
+        print_next_fmt!("{:?}"),
+        print_error!(),
+        print_complete!(),
+      );
     thread::sleep(time::Duration::from_millis(1000));
   }
 }

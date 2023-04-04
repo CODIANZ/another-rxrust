@@ -36,15 +36,16 @@ where
 #[cfg(test)]
 mod tset {
   use crate::prelude::*;
-  use crate::tests::common::*;
 
   #[test]
   fn basic() {
     let sbj = subjects::AsyncSubject::new();
 
-    sbj
-      .observable()
-      .subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
+    sbj.observable().subscribe(
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
+    );
 
     sbj.next(1);
     sbj.next(2);
@@ -56,12 +57,14 @@ mod tset {
   fn error() {
     let sbj = subjects::AsyncSubject::new();
 
-    sbj
-      .observable()
-      .subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
+    sbj.observable().subscribe(
+      print_next_fmt!("{}"),
+      print_error_as!(&str),
+      print_complete!(),
+    );
 
     sbj.next(1);
     sbj.next(2);
-    sbj.error(generate_error());
+    sbj.error(RxError::from_error("ERR!"));
   }
 }

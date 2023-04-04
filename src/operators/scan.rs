@@ -18,9 +18,7 @@ where
   where
     F: Fn((Item, Item)) -> Item + Send + Sync + 'a,
   {
-    Scan {
-      reduce_f: FunctionWrapper::new(f),
-    }
+    Scan { reduce_f: FunctionWrapper::new(f) }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let f = self.reduce_f.clone();
@@ -76,43 +74,44 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
 
   #[test]
   fn basic() {
     observables::range(1, 10).scan(|(a, b)| a + b).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 
   #[test]
   fn string() {
-    observables::from_iter(["a".to_owned(), "b".to_owned(), "c".to_owned()].into_iter())
-      .scan(|(a, b)| format!("{} - {}", a, b))
-      .subscribe(
-        |x| println!("next {}", x),
-        |e| println!("error {:}", error_to_string(&e)),
-        || println!("complete"),
-      );
+    observables::from_iter(
+      ["a".to_owned(), "b".to_owned(), "c".to_owned()].into_iter(),
+    )
+    .scan(|(a, b)| format!("{} - {}", a, b))
+    .subscribe(
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
+    );
   }
 
   #[test]
   fn single() {
     observables::just(1).scan(|(a, b)| a + b).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 
   #[test]
   fn empty() {
     observables::empty::<i32>().scan(|(a, b)| a + b).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 
@@ -120,13 +119,13 @@ mod test {
   fn error() {
     Observable::create(|s| {
       s.next(1);
-      s.error(generate_error())
+      s.error(RxError::from_error("ERR!"))
     })
     .scan(|(a, b)| a + b)
     .subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error_as!(&str),
+      print_complete!(),
     );
   }
 }

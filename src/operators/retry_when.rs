@@ -49,7 +49,11 @@ where
           move |serial, e| {
             if predicate.call(e.clone()) {
               sctl_error.upstream_abort_observe(&serial);
-              do_subscribe(predicate.clone(), source_error.clone(), sctl_error.clone());
+              do_subscribe(
+                predicate.clone(),
+                source_error.clone(),
+                sctl_error.clone(),
+              );
             } else {
               sctl_error.sink_error(e);
             }
@@ -79,7 +83,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::sync::{Arc, RwLock};
 
   #[test]
@@ -93,20 +96,23 @@ mod test {
       s.next(c * 100 + 1);
       *counter_ob.write().unwrap() += 1;
       if c < 5 {
-        s.error(generate_error());
+        s.error(RxError::from_error("ERR!"));
       } else {
         s.complete();
       }
     });
 
     o.retry_when(|e| {
-      println!("retry_when {:}", error_to_string(&e));
+      println!(
+        "retry_when {:?}",
+        e.downcast_ref::<&str>()
+      );
       *counter.read().unwrap() < 2
     })
     .subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error_as!(&str),
+      print_complete!(),
     );
   }
 }

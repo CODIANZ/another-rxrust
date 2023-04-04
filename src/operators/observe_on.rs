@@ -19,7 +19,9 @@ where
   Scheduler: IScheduler<'a> + Clone + Send + Sync,
   Item: Clone + Send + Sync,
 {
-  pub fn new<SchedulerCreator>(scheduler_ctor: SchedulerCreator) -> ObserveOn<'a, Scheduler, Item>
+  pub fn new<SchedulerCreator>(
+    scheduler_ctor: SchedulerCreator,
+  ) -> ObserveOn<'a, Scheduler, Item>
   where
     SchedulerCreator: Fn() -> Scheduler + Send + Sync + 'a,
   {
@@ -79,7 +81,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -93,9 +94,9 @@ mod test {
     });
 
     o.observe_on(schedulers::new_thread_scheduler()).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
     thread::sleep(time::Duration::from_millis(1000));
   }
@@ -113,13 +114,13 @@ mod test {
 
     o.subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", error_to_string(&e)),
+      |e| println!("#1 error {:?}", e),
       || println!("#1 complete"),
     );
 
     o.subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:}", error_to_string(&e)),
+      |e| println!("#2 error {:?}", e),
       || println!("#2 complete"),
     );
     thread::sleep(time::Duration::from_millis(1000));

@@ -1,6 +1,8 @@
+pub mod all;
 pub mod amb;
 pub mod buffer_with_count;
 pub mod combine_latest;
+pub mod concat;
 pub mod contains;
 pub mod count;
 pub mod debounce;
@@ -27,12 +29,15 @@ pub mod retry;
 pub mod retry_when;
 pub mod sample;
 pub mod scan;
+pub mod sequence_equal;
 pub mod skip;
 pub mod skip_last;
 pub mod skip_until;
 pub mod skip_while;
 pub mod start_with;
 pub mod subscribe_on;
+pub mod sum;
+pub mod sum_and_count;
 pub mod switch_on_next;
 pub mod take;
 pub mod take_last;
@@ -42,13 +47,16 @@ pub mod tap;
 pub mod time_interval;
 pub mod timeout;
 pub mod timestamp;
+pub mod to_vec;
 pub mod window_with_count;
 pub mod zip;
 
 pub mod operators {
+  pub use crate::operators::all::*;
   pub use crate::operators::amb::*;
   pub use crate::operators::buffer_with_count::*;
   pub use crate::operators::combine_latest::*;
+  pub use crate::operators::concat::*;
   pub use crate::operators::contains::*;
   pub use crate::operators::count::*;
   pub use crate::operators::debounce::*;
@@ -75,12 +83,15 @@ pub mod operators {
   pub use crate::operators::retry_when::*;
   pub use crate::operators::sample::*;
   pub use crate::operators::scan::*;
+  pub use crate::operators::sequence_equal::*;
   pub use crate::operators::skip::*;
   pub use crate::operators::skip_last::*;
   pub use crate::operators::skip_until::*;
   pub use crate::operators::skip_while::*;
   pub use crate::operators::start_with::*;
   pub use crate::operators::subscribe_on::*;
+  pub use crate::operators::sum::*;
+  pub use crate::operators::sum_and_count::*;
   pub use crate::operators::switch_on_next::*;
   pub use crate::operators::take::*;
   pub use crate::operators::take_last::*;
@@ -90,6 +101,7 @@ pub mod operators {
   pub use crate::operators::time_interval::*;
   pub use crate::operators::timeout::*;
   pub use crate::operators::timestamp::*;
+  pub use crate::operators::to_vec::*;
   pub use crate::operators::window_with_count::*;
   pub use crate::operators::zip::*;
 }

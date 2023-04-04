@@ -19,9 +19,7 @@ where
   where
     F: Fn(In) -> Observable<'a, Out> + Send + Sync + 'a,
   {
-    FlatMap {
-      flatmap_f: FunctionWrapper::new(f),
-    }
+    FlatMap { flatmap_f: FunctionWrapper::new(f) }
   }
   pub fn execute(&self, source: Observable<'a, In>) -> Observable<'a, Out> {
     let f = self.flatmap_f.clone();
@@ -79,7 +77,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -92,9 +89,9 @@ mod test {
     });
 
     o.flat_map(|x| observables::just(x * 2)).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 
@@ -118,9 +115,9 @@ mod test {
 
     let binding = o.flat_map(|x| observables::just(format!("str {}", x)));
     let sbsc = binding.subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
     thread::sleep(time::Duration::from_millis(500));
     sbsc.unsubscribe();
@@ -149,9 +146,9 @@ mod test {
 
     let binding = o().flat_map(move |_x| o());
     let sbsc = binding.subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
     thread::sleep(time::Duration::from_millis(500));
     sbsc.unsubscribe();

@@ -29,7 +29,11 @@ mod test {
           time::Duration::from_millis(10),
           schedulers::new_thread_scheduler(),
         )
-        .subscribe(print_next_fmt!("{}"), print_error!(), print_complete!()),
+        .subscribe(
+          print_next_fmt!("{}"),
+          print_error!(),
+          print_complete!(),
+        ),
       );
       thread::sleep(time::Duration::from_millis(500));
     }

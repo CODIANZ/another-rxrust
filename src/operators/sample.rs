@@ -18,14 +18,13 @@ where
   Item: Clone + Send + Sync,
   TrigerValue: Clone + Send + Sync,
 {
-  pub fn new(trigger: Observable<'a, TrigerValue>) -> Sample<'a, Item, TrigerValue>
+  pub fn new(
+    trigger: Observable<'a, TrigerValue>,
+  ) -> Sample<'a, Item, TrigerValue>
   where
     TrigerValue: Clone + Send + Sync,
   {
-    Sample {
-      trigger,
-      _item: PhantomData,
-    }
+    Sample { trigger, _item: PhantomData }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let trigger = self.trigger.clone();
@@ -75,7 +74,10 @@ impl<'a, Item> Observable<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn sample<TriggerValue>(&self, trigger: Observable<'a, TriggerValue>) -> Observable<'a, Item>
+  pub fn sample<TriggerValue>(
+    &self,
+    trigger: Observable<'a, TriggerValue>,
+  ) -> Observable<'a, Item>
   where
     TriggerValue: Clone + Send + Sync,
   {
@@ -97,7 +99,11 @@ mod test {
     )
     .sample(sbj.observable())
     .take(3)
-    .subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
+    .subscribe(
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
+    );
 
     (0..3).for_each(|_| {
       thread::sleep(time::Duration::from_millis(500));

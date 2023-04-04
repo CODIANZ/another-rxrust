@@ -119,7 +119,11 @@ mod test {
       schedulers::new_thread_scheduler(),
     )
     .take(5)
-    .subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
+    .subscribe(
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
+    );
 
     thread::sleep(time::Duration::from_millis(1000));
   }

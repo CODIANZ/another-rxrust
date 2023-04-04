@@ -73,7 +73,6 @@ where
 #[cfg(test)]
 mod tset {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -82,7 +81,7 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", error_to_string(&e)),
+      |e| println!("#1 error {:?}", e),
       || println!("#1 complete"),
     );
 
@@ -93,7 +92,7 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:}", error_to_string(&e)),
+      |e| println!("#2 error {:?}", e),
       || println!("#2 complete"),
     );
   }
@@ -105,7 +104,7 @@ mod tset {
     let binding = sbj.observable();
     let sbsc1 = binding.subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", error_to_string(&e)),
+      |e| println!("#1 error {:?}", e),
       || println!("#1 complete"),
     );
 
@@ -115,7 +114,7 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:}", error_to_string(&e)),
+      |e| println!("#2 error {:?}", e),
       || println!("#2 complete"),
     );
 
@@ -129,11 +128,11 @@ mod tset {
     sbj.next(8);
     sbj.next(9);
 
-    sbj.error(generate_error());
+    sbj.error(RxError::from_error("ERR!"));
 
     sbj.observable().subscribe(
       |x| println!("#3 next {}", x),
-      |e| println!("#3 error {:}", error_to_string(&e)),
+      |e| println!("#3 error {:?}", e.downcast_ref::<&str>()),
       || println!("#3 complete"),
     );
   }
@@ -154,7 +153,7 @@ mod tset {
     let binding = sbj.observable();
     let sbsc1 = binding.subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:}", error_to_string(&e)),
+      |e| println!("#1 error {:?}", e),
       || println!("#1 complete"),
     );
 
@@ -162,7 +161,7 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:}", error_to_string(&e)),
+      |e| println!("#2 error {:?}", e),
       || println!("#2 complete"),
     );
 

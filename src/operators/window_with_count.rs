@@ -19,17 +19,19 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn new(count: usize) -> WindowWithCount<Item> {
-    WindowWithCount {
-      count,
-      _item: PhantomData,
-    }
+    WindowWithCount { count, _item: PhantomData }
   }
-  pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Observable<'a, Item>> {
+  pub fn execute(
+    &self,
+    source: Observable<'a, Item>,
+  ) -> Observable<'a, Observable<'a, Item>> {
     let count = self.count;
 
     Observable::create(move |s| {
       let n = Arc::new(RwLock::new(0));
-      let sbj = Arc::new(RwLock::new(subjects::Subject::<Item>::new()));
+      let sbj = Arc::new(RwLock::new(
+        subjects::Subject::<Item>::new(),
+      ));
 
       let sctl = StreamController::new(s);
       let sctl_next = sctl.clone();
@@ -74,7 +76,10 @@ impl<'a, Item> Observable<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn window_with_count(&self, count: usize) -> Observable<'a, Observable<'a, Item>> {
+  pub fn window_with_count(
+    &self,
+    count: usize,
+  ) -> Observable<'a, Observable<'a, Item>> {
     WindowWithCount::new(count).execute(self.clone())
   }
 }
@@ -95,7 +100,7 @@ mod test {
           *n.write().unwrap() += 1;
           x.subscribe(
             move |y| println!("next ({}) - {}", nn, y),
-            move |e| println!("error ({}) - {:?}", nn, e.any_ref()),
+            move |e| println!("error ({}) - {:?}", nn, e),
             move || println!("complete ({})", nn),
           );
         },
@@ -122,7 +127,7 @@ mod test {
           *n.write().unwrap() += 1;
           x.subscribe(
             move |y| println!("next ({}) - {}", nn, y),
-            move |e| println!("error ({}) - {:?}", nn, e.cast_ref::<&str>()),
+            move |e| println!("error ({}) - {:?}", nn, e),
             move || println!("complete ({})", nn),
           );
         },

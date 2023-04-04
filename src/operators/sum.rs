@@ -2,48 +2,47 @@ use crate::internals::stream_controller::*;
 use crate::prelude::*;
 use std::{
   marker::PhantomData,
+  ops::Add,
   sync::{Arc, RwLock},
 };
 
 #[derive(Clone)]
-pub struct Max<Item> {
+pub struct Sum<Item> {
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item> Max<Item>
+impl<'a, Item> Sum<Item>
 where
-  Item: Clone + Send + Sync + PartialOrd,
+  Item: Clone + Send + Sync + Add<Output = Item>,
 {
-  pub fn new() -> Max<Item> {
-    Max { _item: PhantomData }
+  pub fn new() -> Sum<Item> {
+    Sum { _item: PhantomData }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     Observable::<Item>::create(move |s| {
-      let result = Arc::new(RwLock::new(None::<Item>));
+      let sum = Arc::new(RwLock::new(None::<Item>));
 
       let sctl = StreamController::new(s);
       let sctl_error = sctl.clone();
       let sctl_complete = sctl.clone();
 
-      let result_next = Arc::clone(&result);
+      let sum_next = Arc::clone(&sum);
 
       source.inner_subscribe(sctl.new_observer(
         move |_, x| {
-          let mut r = result_next.write().unwrap();
-          if let Some(xx) = &*r {
-            if x > *xx {
-              *r = Some(x);
-            }
+          let mut sum = sum_next.write().unwrap();
+          if let Some(latest) = &*sum {
+            *sum = Some(latest.clone() + x);
           } else {
-            *r = Some(x);
+            *sum = Some(x);
           }
         },
         move |_, e| {
           sctl_error.sink_error(e);
         },
         move |serial| {
-          if let Some(x) = &*result.read().unwrap() {
-            sctl_complete.sink_next(x.clone());
+          if let Some(latest) = &*sum.read().unwrap() {
+            sctl_complete.sink_next(latest.clone());
           }
           sctl_complete.sink_complete(&serial);
         },
@@ -54,10 +53,10 @@ where
 
 impl<'a, Item> Observable<'a, Item>
 where
-  Item: Clone + Send + Sync + PartialOrd,
+  Item: Clone + Send + Sync + Add<Output = Item>,
 {
-  pub fn max(&self) -> Observable<'a, Item> {
-    Max::new().execute(self.clone())
+  pub fn sum(&self) -> Observable<'a, Item> {
+    Sum::new().execute(self.clone())
   }
 }
 
@@ -67,18 +66,16 @@ mod test {
 
   #[test]
   fn basic() {
-    observables::from_iter([5, 6, 2, 7].into_iter())
-      .max()
-      .subscribe(
-        print_next_fmt!("{}"),
-        print_error!(),
-        print_complete!(),
-      );
+    observables::from_iter(1..10).sum().subscribe(
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
+    );
   }
 
   #[test]
   fn empty() {
-    observables::empty::<i32>().max().subscribe(
+    observables::empty::<i32>().sum().subscribe(
       print_next_fmt!("{}"),
       print_error!(),
       print_complete!(),
@@ -91,7 +88,7 @@ mod test {
       s.next(1);
       s.error(RxError::from_error("ERR!"))
     })
-    .max()
+    .sum()
     .subscribe(
       print_next_fmt!("{}"),
       print_error_as!(&str),

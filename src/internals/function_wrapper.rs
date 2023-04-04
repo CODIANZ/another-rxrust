@@ -30,9 +30,9 @@ where
     Out: Clone + Send + Sync + 'a,
   {
     FunctionWrapper {
-      inner: Arc::new(RwLock::new(Some(FunctionWrapperInner {
-        func: Arc::new(Box::new(func)),
-      }))),
+      inner: Arc::new(RwLock::new(Some(
+        FunctionWrapperInner { func: Arc::new(Box::new(func)) },
+      ))),
     }
   }
   pub fn clear(&self) {
@@ -110,7 +110,10 @@ mod tset {
   #[test]
   fn call_and_clear_if_available() {
     let f = FunctionWrapper::new(|x| x * x);
-    assert_eq!(f.call_and_clear_if_available(10), Some(100));
+    assert_eq!(
+      f.call_and_clear_if_available(10),
+      Some(100)
+    );
     assert_eq!(f.empty(), true);
   }
 }

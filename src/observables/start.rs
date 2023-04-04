@@ -13,10 +13,8 @@ where
 
 #[cfg(test)]
 mod test {
-  use std::sync::{Arc, RwLock};
-
   use crate::prelude::*;
-  use crate::tests::common::*;
+  use std::sync::{Arc, RwLock};
 
   #[test]
   fn basic() {
@@ -28,15 +26,15 @@ mod test {
     };
 
     observables::start(f.clone()).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("{:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
 
     observables::start(f.clone()).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("{:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 }

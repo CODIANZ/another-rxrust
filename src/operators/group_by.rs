@@ -22,17 +22,21 @@ where
   where
     F: Fn(Item) -> Key + Send + Sync + 'a,
   {
-    GroupBy {
-      key_f: FunctionWrapper::new(f),
-    }
+    GroupBy { key_f: FunctionWrapper::new(f) }
   }
-  pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Observable<'a, Item>> {
+  pub fn execute(
+    &self,
+    source: Observable<'a, Item>,
+  ) -> Observable<'a, Observable<'a, Item>> {
     let f = self.key_f.clone();
 
     Observable::create(move |s| {
       let f = f.clone();
 
-      let sbjmap = Arc::new(RwLock::new(HashMap::<Key, subjects::Subject<Item>>::new()));
+      let sbjmap = Arc::new(RwLock::new(HashMap::<
+        Key,
+        subjects::Subject<Item>,
+      >::new()));
 
       let sctl = StreamController::new(s);
       let sctl_next = sctl.clone();
@@ -103,7 +107,7 @@ mod test {
         *n.write().unwrap() += 1;
         x.subscribe(
           move |y| println!("next ({}) - {}", nn, y),
-          move |e| println!("error ({}) - {:?}", nn, e.any_ref()),
+          move |e| println!("error ({}) - {:?}", nn, e),
           move || println!("complete ({})", nn),
         );
       },
@@ -130,7 +134,7 @@ mod test {
           *n.write().unwrap() += 1;
           x.subscribe(
             move |y| println!("next ({}) - {}", nn, y),
-            move |e| println!("error ({}) - {:?}", nn, e.cast_ref::<&str>()),
+            move |e| println!("error ({}) - {:?}", nn, e),
             move || println!("complete ({})", nn),
           );
         },

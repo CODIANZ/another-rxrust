@@ -20,12 +20,12 @@ where
 {
   pub fn new(count: usize) -> BufferWithCount<Item> {
     assert!(count > 0);
-    BufferWithCount {
-      count,
-      _item: PhantomData,
-    }
+    BufferWithCount { count, _item: PhantomData }
   }
-  pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Vec<Item>> {
+  pub fn execute(
+    &self,
+    source: Observable<'a, Item>,
+  ) -> Observable<'a, Vec<Item>> {
     let count = self.count;
     Observable::<Vec<Item>>::create(move |s| {
       let results = Arc::new(RwLock::new(Vec::new()));
@@ -91,7 +91,11 @@ mod test {
   fn basic() {
     observables::from_iter(0..10)
       .buffer_with_count(3)
-      .subscribe(print_next_fmt!("{:?}"), print_error!(), print_complete!());
+      .subscribe(
+        print_next_fmt!("{:?}"),
+        print_error!(),
+        print_complete!(),
+      );
     thread::sleep(time::Duration::from_millis(1000));
   }
 }

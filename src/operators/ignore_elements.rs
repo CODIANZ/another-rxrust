@@ -45,7 +45,7 @@ where
 
 #[cfg(test)]
 mod test {
-  use crate::{prelude::*, tests::common::generate_error};
+  use crate::prelude::*;
 
   #[test]
   fn basic() {
@@ -58,8 +58,12 @@ mod test {
 
   #[test]
   fn error() {
-    observables::error::<()>(generate_error())
+    observables::error::<()>(RxError::from_error("ERR!"))
       .ignore_elements()
-      .subscribe(print_next!(), print_error!(), print_complete!());
+      .subscribe(
+        print_next!(),
+        print_error_as!(&str),
+        print_complete!(),
+      );
   }
 }

@@ -1,14 +1,5 @@
-use crate::prelude::RxError;
 use std::fmt::Display;
 use std::sync::{Arc, RwLock};
-
-pub fn generate_error() -> RxError {
-  RxError::from_error("sample error")
-}
-
-pub fn error_to_string(e: &RxError) -> &str {
-  e.cast_ref::<&str>()
-}
 
 pub struct DestructChecker {
   memo: &'static str,
@@ -54,11 +45,17 @@ impl Clone for DestructChecker {
     self.memo = source.memo;
     self.n = *self.ref_count.read().unwrap();
     self.ref_count = source.ref_count.clone();
-    println!("clone_from {} #{} -> #{}", source.memo, source.n, self.n);
+    println!(
+      "clone_from {} #{} -> #{}",
+      source.memo, source.n, self.n
+    );
   }
 }
 impl Display for DestructChecker {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.write_fmt(format_args!("DestructChecker {} #{}", self.memo, self.n))
+    f.write_fmt(format_args!(
+      "DestructChecker {} #{}",
+      self.memo, self.n
+    ))
   }
 }

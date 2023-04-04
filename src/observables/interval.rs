@@ -31,7 +31,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -42,9 +41,9 @@ mod test {
     )
     .take(5)
     .subscribe(
-      |x| println!("next {}", x),
-      |e| println!("{:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
     println!("marker");
   }
@@ -57,9 +56,9 @@ mod test {
     )
     .take(5)
     .subscribe(
-      |x| println!("next {}", x),
-      |e| println!("{:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
     println!("marker");
     thread::sleep(time::Duration::from_millis(1500));

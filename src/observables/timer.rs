@@ -25,7 +25,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -35,9 +34,9 @@ mod test {
       schedulers::default_scheduler(),
     )
     .subscribe(
-      |_| println!("next"),
-      |e| println!("{:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next!(),
+      print_error!(),
+      print_complete!(),
     );
   }
 
@@ -48,9 +47,9 @@ mod test {
       schedulers::new_thread_scheduler(),
     )
     .subscribe(
-      |_| println!("next"),
-      |e| println!("{:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next!(),
+      print_error!(),
+      print_complete!(),
     );
     thread::sleep(time::Duration::from_millis(1500));
   }

@@ -17,7 +17,11 @@ impl<'a, T> Observer<'a, T>
 where
   T: Clone + Send + Sync,
 {
-  pub fn new<Next, Error, Complete>(next: Next, error: Error, complete: Complete) -> Observer<'a, T>
+  pub fn new<Next, Error, Complete>(
+    next: Next,
+    error: Error,
+    complete: Complete,
+  ) -> Observer<'a, T>
   where
     Next: Fn(T) + Send + Sync + 'a,
     Error: Fn(RxError) + Send + Sync + 'a,
@@ -55,26 +59,26 @@ where
   where
     F: Fn() -> () + Send + Sync + 'a,
   {
-    *self.fn_on_unsubscribe.write().unwrap() = Some(FunctionWrapper::new(move |_| f()));
+    *self.fn_on_unsubscribe.write().unwrap() =
+      Some(FunctionWrapper::new(move |_| f()));
   }
 }
 
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::thread;
 
   #[test]
   fn basic() {
     let ob = Observer::new(
-      |x| println!("next {}", x),
-      |e| println!("{:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error_as!(&str),
+      print_complete!(),
     );
     ob.next(1);
     ob.next(2);
-    ob.error(generate_error());
+    ob.error(RxError::from_error("ERR!"));
     ob.complete();
   }
 
@@ -83,21 +87,21 @@ mod test {
     let gain = 100;
     let ob = Observer::new(
       move |x| println!("next {}", x + gain),
-      |e| println!("{:}", error_to_string(&e)),
-      || println!("complete"),
+      print_error_as!(&str),
+      print_complete!(),
     );
     ob.next(1);
     ob.next(2);
-    ob.error(generate_error());
+    ob.error(RxError::from_error("ERR!"));
     ob.complete();
   }
 
   #[test]
   fn close() {
     let ob = Observer::new(
-      |x| println!("next {}", x),
-      |e| println!("{:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
     ob.next(1);
     ob.next(2);
@@ -107,9 +111,9 @@ mod test {
   #[test]
   fn clone_into_thread() {
     let ob = Observer::new(
-      |x| println!("next {}", x),
-      |e| println!("{:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
     let a = ob.clone();
     let b = ob.clone();

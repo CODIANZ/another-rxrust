@@ -15,14 +15,9 @@ pub fn range<'a>(initial: i64, count: i64) -> Observable<'a, i64> {
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
 
   #[test]
   fn basic() {
-    observables::range(5, 5).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("{:}", error_to_string(&e)),
-      || println!("complete"),
-    );
+    observables::range(5, 5).subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
   }
 }

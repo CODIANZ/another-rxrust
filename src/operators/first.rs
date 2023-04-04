@@ -14,9 +14,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn new() -> First<Item> {
-    First {
-      take_op: operators::Take::new(1),
-    }
+    First { take_op: operators::Take::new(1) }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let take_op = self.take_op.clone();

@@ -70,7 +70,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
 
   #[test]
   fn single() {
@@ -82,9 +81,9 @@ mod test {
     });
 
     o.start_with([1000].into_iter()).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 
@@ -98,9 +97,9 @@ mod test {
     });
 
     o.start_with(-5..0).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 }

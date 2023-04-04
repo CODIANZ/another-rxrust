@@ -15,9 +15,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn new(observables: &[Observable<'a, Item>]) -> Amb<'a, Item> {
-    Amb {
-      observables: observables.to_vec(),
-    }
+    Amb { observables: observables.to_vec() }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let observables = self.observables.clone();
@@ -109,7 +107,10 @@ impl<'a, Item> Observable<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn amb(&self, observables: &[Observable<'a, Item>]) -> Observable<'a, Item> {
+  pub fn amb(
+    &self,
+    observables: &[Observable<'a, Item>],
+  ) -> Observable<'a, Item> {
     Amb::new(observables).execute(self.clone())
   }
 }
@@ -117,7 +118,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -135,9 +135,9 @@ mod test {
     ob(5, "#1")
       .amb(&[ob(3, "#2"), ob(2, "#3"), ob(6, "#4")])
       .subscribe(
-        |x| println!("next {}", x),
-        |e| println!("error {:}", error_to_string(&e)),
-        || println!("complete"),
+        print_next_fmt!("{}"),
+        print_error!(),
+        print_complete!(),
       );
 
     thread::sleep(time::Duration::from_millis(1500));
