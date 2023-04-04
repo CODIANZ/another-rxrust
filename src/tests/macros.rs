@@ -56,4 +56,13 @@ mod test {
       print_complete!(),
     );
   }
+
+  #[test]
+  fn print_error_as() {
+    observables::error::<()>(RxError::from_error("ERR!")).subscribe(
+      print_next!(),
+      print_error_as!(&str),
+      print_complete!(),
+    );
+  }
 }

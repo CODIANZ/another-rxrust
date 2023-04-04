@@ -91,7 +91,7 @@ mod test {
           println!("{}", x);
           assert_eq!(x, false);
         },
-        print_error!(),
+        print_error_as!(&str),
         print_complete!(),
       );
   }

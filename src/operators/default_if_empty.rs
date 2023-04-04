@@ -95,7 +95,7 @@ mod test {
       .default_if_empty(5)
       .subscribe(
         |_| assert!(true, "don't come here"),
-        print_error!(),
+        print_error_as!(&str),
         print_complete!(),
       );
   }

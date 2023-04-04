@@ -95,14 +95,14 @@ mod test {
 
     o.retry(0).subscribe(
       print_next_fmt!("{}"),
-      print_error!(),
+      print_error_as!(&str),
       print_complete!(),
     );
 
     *counter.write().unwrap() = 0;
     o.retry(3).subscribe(
       print_next_fmt!("{}"),
-      print_error!(),
+      print_error_as!(&str),
       print_complete!(),
     );
   }

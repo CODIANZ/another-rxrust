@@ -132,7 +132,7 @@ mod tset {
 
     sbj.observable().subscribe(
       |x| println!("#3 next {}", x),
-      |e| println!("#3 error {:?}", e),
+      |e| println!("#3 error {:?}", e.downcast_ref::<&str>()),
       || println!("#3 complete"),
     );
   }

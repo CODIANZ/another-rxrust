@@ -73,7 +73,7 @@ mod test {
   fn basic() {
     let ob = Observer::new(
       print_next_fmt!("{}"),
-      print_error!(),
+      print_error_as!(&str),
       print_complete!(),
     );
     ob.next(1);
@@ -87,7 +87,7 @@ mod test {
     let gain = 100;
     let ob = Observer::new(
       move |x| println!("next {}", x + gain),
-      print_error!(),
+      print_error_as!(&str),
       print_complete!(),
     );
     ob.next(1);

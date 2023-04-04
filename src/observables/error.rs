@@ -17,7 +17,7 @@ mod test {
   fn basic() {
     observables::error::<String>(RxError::from_error("ERR!")).subscribe(
       print_next_fmt!("{}"),
-      print_error!(),
+      print_error_as!(&str),
       print_complete!(),
     );
   }

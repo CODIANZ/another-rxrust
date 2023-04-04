@@ -47,7 +47,7 @@ impl RxError {
 impl std::fmt::Debug for RxError {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.debug_struct("RxError")
-      .field("error", &format!("{:?}", self.error))
+      .field("error", &stringify!(self.error))
       .field("type_id", &self.error.type_id())
       .finish()
   }

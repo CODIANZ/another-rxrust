@@ -62,7 +62,7 @@ mod test {
       .ignore_elements()
       .subscribe(
         print_next!(),
-        print_error!(),
+        print_error_as!(&str),
         print_complete!(),
       );
   }

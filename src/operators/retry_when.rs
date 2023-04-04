@@ -103,12 +103,15 @@ mod test {
     });
 
     o.retry_when(|e| {
-      println!("retry_when {:?}", e);
+      println!(
+        "retry_when {:?}",
+        e.downcast_ref::<&str>()
+      );
       *counter.read().unwrap() < 2
     })
     .subscribe(
       print_next_fmt!("{}"),
-      print_error!(),
+      print_error_as!(&str),
       print_complete!(),
     );
   }

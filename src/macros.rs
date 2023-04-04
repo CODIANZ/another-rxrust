@@ -37,3 +37,8 @@ macro_rules! print_error (
 macro_rules! print_complete (
   () => ( || { println!("complete"); } )
 );
+
+#[macro_export]
+macro_rules! print_error_as (
+  ($t: ty) => ( |e| { println!("error - {:?}", e.downcast_ref::<$t>()); } )
+);

@@ -85,7 +85,7 @@ mod tset {
       .on_error_resume_next(|_e| observables::just(1))
       .subscribe(
         print_next_fmt!("{}"),
-        print_error!(),
+        print_error_as!(&str),
         print_complete!(),
       );
   }
