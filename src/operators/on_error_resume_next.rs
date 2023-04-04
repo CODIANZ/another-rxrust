@@ -1,4 +1,6 @@
-use crate::internals::{function_wrapper::FunctionWrapper, stream_controller::StreamController};
+use crate::internals::{
+  function_wrapper::FunctionWrapper, stream_controller::StreamController,
+};
 use crate::prelude::*;
 
 #[derive(Clone)]
@@ -17,9 +19,7 @@ where
   where
     F: Fn(RxError) -> Observable<'a, Item> + Send + Sync + 'a,
   {
-    OnErrorResumeNext {
-      resume_f: FunctionWrapper::new(f),
-    }
+    OnErrorResumeNext { resume_f: FunctionWrapper::new(f) }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let f = self.resume_f.clone();
@@ -78,22 +78,15 @@ where
 #[cfg(test)]
 mod tset {
   use crate::prelude::*;
-  use crate::tests::common::*;
 
   #[test]
   fn basic() {
-    observables::error(generate_error())
+    observables::error(RxError::from_error("ERR!"))
       .on_error_resume_next(|_e| observables::just(1))
       .subscribe(
-        move |x| {
-          println!("next {}", x);
-        },
-        |e| {
-          println!("error {:}", error_to_string(&e));
-        },
-        || {
-          println!("complete");
-        },
+        print_next_fmt!("{}"),
+        print_error!(),
+        print_complete!(),
       );
   }
 
@@ -102,15 +95,9 @@ mod tset {
     observables::just(1)
       .on_error_resume_next(|_e| observables::just(1))
       .subscribe(
-        move |x| {
-          println!("next {}", x);
-        },
-        |e| {
-          println!("error {:}", error_to_string(&e));
-        },
-        || {
-          println!("complete");
-        },
+        print_next_fmt!("{}"),
+        print_error!(),
+        print_complete!(),
       );
   }
 }

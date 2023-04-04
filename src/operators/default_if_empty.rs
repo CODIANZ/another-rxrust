@@ -62,7 +62,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
 
   #[test]
   fn basic() {
@@ -92,7 +91,7 @@ mod test {
 
   #[test]
   fn error() {
-    observables::error(generate_error())
+    observables::error(RxError::from_error("ERR!"))
       .default_if_empty(5)
       .subscribe(
         |_| assert!(true, "don't come here"),

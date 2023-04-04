@@ -92,18 +92,33 @@ mod test {
 
   #[test]
   fn basic() {
-    let o = observables::interval(time::Duration::from_millis(100), new_thread_scheduler())
-      .tap(print_next_fmt!("tap {}"), print_error!(), print_complete!())
-      .ref_count();
+    let o = observables::interval(
+      time::Duration::from_millis(100),
+      new_thread_scheduler(),
+    )
+    .tap(
+      print_next_fmt!("tap {}"),
+      print_error!(),
+      print_complete!(),
+    )
+    .ref_count();
     let obs = o.observable();
 
     println!("start #1");
-    let sbsc1 = obs.subscribe(print_next_fmt!("#1 {}"), print_error!(), print_complete!());
+    let sbsc1 = obs.subscribe(
+      print_next_fmt!("#1 {}"),
+      print_error!(),
+      print_complete!(),
+    );
 
     thread::sleep(time::Duration::from_millis(500));
 
     println!("start #1");
-    let sbsc2 = obs.subscribe(print_next_fmt!("#2 {}"), print_error!(), print_complete!());
+    let sbsc2 = obs.subscribe(
+      print_next_fmt!("#2 {}"),
+      print_error!(),
+      print_complete!(),
+    );
 
     thread::sleep(time::Duration::from_millis(500));
 

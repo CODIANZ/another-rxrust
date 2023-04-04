@@ -21,7 +21,10 @@ where
   pub fn new() -> TimeInterval<Item> {
     TimeInterval { _item: PhantomData }
   }
-  pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Duration> {
+  pub fn execute(
+    &self,
+    source: Observable<'a, Item>,
+  ) -> Observable<'a, Duration> {
     Observable::create(move |s| {
       let start_time = Arc::new(RwLock::new(None::<Instant>));
       let start_time_next = Arc::clone(&start_time);
@@ -75,7 +78,11 @@ mod test {
     )
     .time_interval()
     .take(10)
-    .subscribe(print_next_fmt!("{:?}"), print_error!(), print_complete!());
+    .subscribe(
+      print_next_fmt!("{:?}"),
+      print_error!(),
+      print_complete!(),
+    );
     thread::sleep(time::Duration::from_millis(1500));
   }
 }

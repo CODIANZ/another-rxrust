@@ -18,9 +18,7 @@ where
   where
     F: Fn(Item) -> bool + Send + Sync + 'a,
   {
-    SkipWhile {
-      predicate_f: FunctionWrapper::new(f),
-    }
+    SkipWhile { predicate_f: FunctionWrapper::new(f) }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let f = self.predicate_f.clone();
@@ -70,7 +68,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
 
   #[test]
   fn basic() {
@@ -82,9 +79,9 @@ mod test {
     });
 
     o.skip_while(|x| x > 5).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 }

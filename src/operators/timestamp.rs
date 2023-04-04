@@ -17,7 +17,10 @@ where
   pub fn new() -> Timestamp<Item> {
     Timestamp { _item: PhantomData }
   }
-  pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, (SystemTime, Item)> {
+  pub fn execute(
+    &self,
+    source: Observable<'a, Item>,
+  ) -> Observable<'a, (SystemTime, Item)> {
     Observable::create(move |s| {
       let sctl = StreamController::new(s);
       let sctl_next = sctl.clone();
@@ -61,7 +64,11 @@ mod test {
     )
     .timestamp()
     .take(10)
-    .subscribe(print_next_fmt!("{:?}"), print_error!(), print_complete!());
+    .subscribe(
+      print_next_fmt!("{:?}"),
+      print_error!(),
+      print_complete!(),
+    );
     thread::sleep(time::Duration::from_millis(1500));
   }
 }

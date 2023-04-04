@@ -21,7 +21,7 @@ mod test {
   #[test]
   fn basic() {
     observables::from_result(Ok::<_, ()>("abc")).subscribe(
-      print_next_fmt!("{:?}"),
+      print_next_fmt!("{}"),
       print_error!(),
       print_complete!(),
     );
@@ -30,7 +30,7 @@ mod test {
   #[test]
   fn error_str() {
     observables::from_result(Err::<(), _>("abc")).subscribe(
-      print_next_fmt!("{:?}"),
+      print_next!(),
       print_error!(),
       print_complete!(),
     );
@@ -42,8 +42,8 @@ mod test {
       std::io::ErrorKind::NotFound,
     )))
     .subscribe(
-      print_next_fmt!("{:?}"),
-      |e| println!("{:?}", e.cast_ref::<std::io::Error>()),
+      print_next!(),
+      print_error!(),
       print_complete!(),
     );
   }
@@ -51,8 +51,8 @@ mod test {
   #[test]
   fn error_anyhow() {
     observables::from_result(Err::<(), _>(anyhow!("anyhow error"))).subscribe(
-      print_next_fmt!("{:?}"),
-      |e| println!("{:?}", e.cast_ref::<anyhow::Error>()),
+      print_next!(),
+      print_error!(),
       print_complete!(),
     );
   }

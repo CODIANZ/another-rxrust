@@ -62,7 +62,15 @@ mod test {
   fn basic() {
     observables::from_iter(1..100)
       .element_at(86)
-      .tap(|x| assert_eq!(x, 86), junk_error!(), junk_complete!())
-      .subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
+      .tap(
+        |x| assert_eq!(x, 86),
+        junk_error!(),
+        junk_complete!(),
+      )
+      .subscribe(
+        print_next_fmt!("{}"),
+        print_error!(),
+        print_complete!(),
+      );
   }
 }

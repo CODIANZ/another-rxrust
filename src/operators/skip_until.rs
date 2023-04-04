@@ -20,14 +20,13 @@ where
   Item: Clone + Send + Sync,
   TrigerValue: Clone + Send + Sync,
 {
-  pub fn new(trigger: Observable<'a, TrigerValue>) -> SkipUntil<'a, Item, TrigerValue>
+  pub fn new(
+    trigger: Observable<'a, TrigerValue>,
+  ) -> SkipUntil<'a, Item, TrigerValue>
   where
     TrigerValue: Clone + Send + Sync,
   {
-    SkipUntil {
-      trigger,
-      _item: PhantomData,
-    }
+    SkipUntil { trigger, _item: PhantomData }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let trigger = self.trigger.clone();
@@ -84,7 +83,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -102,9 +100,9 @@ mod test {
       schedulers::new_thread_scheduler(),
     ))
     .subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 }

@@ -17,9 +17,7 @@ where
   where
     F: Fn(Item) -> bool + Send + Sync + 'a,
   {
-    Filter {
-      predicate_f: FunctionWrapper::new(f),
-    }
+    Filter { predicate_f: FunctionWrapper::new(f) }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let f = self.predicate_f.clone();
@@ -80,6 +78,10 @@ mod test {
         junk_error!(),
         junk_complete!(),
       )
-      .subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
+      .subscribe(
+        print_next_fmt!("{}"),
+        print_error!(),
+        print_complete!(),
+      );
   }
 }

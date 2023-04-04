@@ -15,7 +15,7 @@ macro_rules! junk_complete (
 
 #[macro_export]
 macro_rules! panic_error (
-  () => ( |e| { panic!("{:?}", e.any_ref()); } )
+  () => ( |e| { panic!("{:?}", e); } )
 );
 
 #[macro_export]
@@ -30,7 +30,7 @@ macro_rules! print_next_fmt (
 
 #[macro_export]
 macro_rules! print_error (
-  () => ( |e| { println!("error - {:?}", e.any_ref()); } )
+  () => ( |e| { println!("error - {:?}", e); } )
 );
 
 #[macro_export]

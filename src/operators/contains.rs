@@ -57,7 +57,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
 
   #[test]
   fn basic() {
@@ -85,14 +84,16 @@ mod test {
 
   #[test]
   fn error() {
-    observables::error(generate_error()).contains(5).subscribe(
-      |x| {
-        println!("{}", x);
-        assert_eq!(x, false);
-      },
-      print_error!(),
-      print_complete!(),
-    );
+    observables::error(RxError::from_error("ERR!"))
+      .contains(5)
+      .subscribe(
+        |x| {
+          println!("{}", x);
+          assert_eq!(x, false);
+        },
+        print_error!(),
+        print_complete!(),
+      );
   }
 
   #[test]

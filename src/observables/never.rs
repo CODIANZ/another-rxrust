@@ -10,14 +10,9 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
 
   #[test]
   fn basic() {
-    observables::never::<String>().subscribe(
-      |x| println!("next {}", x),
-      |e| println!("{:}", error_to_string(&e)),
-      || println!("complete"),
-    );
+    observables::never::<String>().subscribe(print_next!(), print_error!(), print_complete!());
   }
 }

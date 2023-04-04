@@ -1,6 +1,9 @@
 use crate::prelude::*;
 
-pub fn ready_set_go<'a, F, Item>(f: F, o: Observable<'a, Item>) -> Observable<'a, Item>
+pub fn ready_set_go<'a, F, Item>(
+  f: F,
+  o: Observable<'a, Item>,
+) -> Observable<'a, Item>
 where
   F: Fn() + Send + Sync + 'a,
   Item: Clone + Send + Sync,
@@ -13,7 +16,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::error_to_string;
 
   #[test]
   fn basic() {
@@ -28,9 +30,9 @@ mod test {
       s.observable(),
     )
     .subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 }

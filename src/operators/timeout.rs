@@ -66,9 +66,9 @@ where
                 .take(1)
                 .subscribe(
                   move |_| {
-                    sctl.sink_error(RxError::from_error(std::io::Error::from(
-                      std::io::ErrorKind::TimedOut,
-                    )));
+                    sctl.sink_error(RxError::from_error(
+                      std::io::Error::from(std::io::ErrorKind::TimedOut),
+                    ));
                   },
                   junk_error!(),
                   junk_complete!(),
@@ -119,13 +119,7 @@ mod test {
       )
       .subscribe(
         print_next_fmt!("{}"),
-        |e| {
-          if e.any_ref().is::<std::io::Error>() {
-            println!("error - {:?}", e.cast_ref::<std::io::Error>());
-          } else {
-            println!("error - {:?}", e.any_ref());
-          }
-        },
+        print_error!(),
         print_complete!(),
       );
 

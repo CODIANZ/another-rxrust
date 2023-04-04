@@ -1,7 +1,6 @@
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -25,18 +24,18 @@ mod test {
       })
       .map(|x| format!("{}", x))
       .on_error_resume_next(|e| {
-        ob().map(move |x| format!("resume {:?} {}", e.cast_ref::<&str>(), x))
+        ob().map(move |x| {
+          format!(
+            "resume {:?} {}",
+            e.downcast_ref::<&str>(),
+            x
+          )
+        })
       })
       .subscribe(
-        |x| {
-          println!("next {}", x);
-        },
-        |e| {
-          println!("error {:?}", e.any_ref());
-        },
-        || {
-          println!("complete");
-        },
+        print_next_fmt!("{}"),
+        print_error!(),
+        print_complete!(),
       );
 
     thread::sleep(time::Duration::from_millis(500));
@@ -48,9 +47,7 @@ mod test {
     struct OutsideVar {
       data: String,
     }
-    let x = OutsideVar {
-      data: "abc".to_owned(),
-    };
+    let x = OutsideVar { data: "abc".to_owned() };
 
     let xx = x.clone();
     let xxx = x.clone();
@@ -58,24 +55,16 @@ mod test {
     let jx = observables::just(x);
 
     jx.subscribe(
-      |x| {
-        println!("next {}", x.data);
-      },
-      |e| {
-        println!("error {:}", error_to_string(&e));
-      },
+      |x| println!("{}", x.data),
+      print_error!(),
       move || {
         println!("complete {}", xx.data);
       },
     );
 
     jx.subscribe(
-      |x| {
-        println!("next {}", x.data);
-      },
-      |e| {
-        println!("error {:}", error_to_string(&e));
-      },
+      |x| println!("{}", x.data),
+      print_error!(),
       move || {
         println!("complete {}", xxx.data);
       },

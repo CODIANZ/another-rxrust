@@ -20,10 +20,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn new(count: usize) -> SkipLast<Item> {
-    SkipLast {
-      count,
-      _item: PhantomData,
-    }
+    SkipLast { count, _item: PhantomData }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let count = self.count;
@@ -71,7 +68,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -84,9 +80,9 @@ mod test {
     });
 
     o.skip_last(5).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 
@@ -108,9 +104,9 @@ mod test {
     });
 
     o.skip_last(2).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
     thread::sleep(time::Duration::from_millis(1000));
   }

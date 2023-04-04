@@ -16,10 +16,7 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn new(dur: Duration) -> Delay<Item> {
-    Delay {
-      dur,
-      _item: PhantomData,
-    }
+    Delay { dur, _item: PhantomData }
   }
   pub fn execute(&self, source: Observable<'a, Item>) -> Observable<'a, Item> {
     let dur = self.dur;
@@ -56,7 +53,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -71,9 +67,9 @@ mod test {
     });
 
     o.delay(time::Duration::from_millis(1000)).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 
@@ -95,9 +91,9 @@ mod test {
     });
 
     o.skip(2).subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
     thread::sleep(time::Duration::from_millis(1000));
   }

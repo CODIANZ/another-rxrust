@@ -13,7 +13,11 @@ impl<'a, Item> Tap<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new<Next, Error, Complete>(next: Next, error: Error, complete: Complete) -> Tap<'a, Item>
+  pub fn new<Next, Error, Complete>(
+    next: Next,
+    error: Error,
+    complete: Complete,
+  ) -> Tap<'a, Item>
   where
     Next: Fn(Item) + Send + Sync + 'a,
     Error: Fn(RxError) + Send + Sync + 'a,
@@ -77,7 +81,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
 
   #[test]
   fn basic() {
@@ -90,14 +93,14 @@ mod test {
 
     o.tap(
       |x| println!("tap next {}", x),
-      |e| println!("tap error {:}", error_to_string(&e)),
+      |e| println!("tap error {:?}", e),
       || println!("tap complete"),
     )
     .map(|x| x + 100)
     .subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 
@@ -107,19 +110,19 @@ mod test {
       for n in 0..5 {
         s.next(n);
       }
-      s.error(generate_error());
+      s.error(RxError::from_error("ERR!"));
     });
 
     o.tap(
       |x| println!("tap next {}", x),
-      |e| println!("tap error {:}", error_to_string(&e)),
+      |e| println!("tap error {:?}", e),
       || println!("tap complete"),
     )
     .map(|x| x + 100)
     .subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
     );
   }
 }

@@ -67,7 +67,6 @@ where
 #[cfg(test)]
 mod test {
   use crate::prelude::*;
-  use crate::tests::common::*;
   use std::{thread, time};
 
   #[test]
@@ -79,17 +78,9 @@ mod test {
       s.complete();
     });
 
-    o.subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
-    );
+    o.subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
 
-    o.subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
-    );
+    o.subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
   }
 
   #[test]
@@ -108,11 +99,7 @@ mod test {
       });
     });
 
-    o.subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
-    );
+    o.subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
     println!("started");
   }
 
@@ -134,11 +121,7 @@ mod test {
       });
     });
 
-    let sbsc = o.subscribe(
-      |x| println!("next {}", x),
-      |e| println!("error {:}", error_to_string(&e)),
-      || println!("complete"),
-    );
+    let sbsc = o.subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
     println!("started");
     thread::sleep(time::Duration::from_millis(1000));
     sbsc.unsubscribe();
