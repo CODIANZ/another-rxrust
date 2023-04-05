@@ -5,9 +5,7 @@ pub mod combine_latest;
 pub mod concat;
 pub mod contains;
 pub mod count;
-pub mod debounce;
 pub mod default_if_empty;
-pub mod delay;
 pub mod distinct_until_changed;
 pub mod element_at;
 pub mod filter;
@@ -44,12 +42,20 @@ pub mod take_last;
 pub mod take_until;
 pub mod take_while;
 pub mod tap;
-pub mod time_interval;
-pub mod timeout;
-pub mod timestamp;
 pub mod to_vec;
 pub mod window_with_count;
 pub mod zip;
+
+#[cfg(not(feature = "web"))]
+pub mod debounce;
+#[cfg(not(feature = "web"))]
+pub mod delay;
+#[cfg(not(feature = "web"))]
+pub mod time_interval;
+#[cfg(not(feature = "web"))]
+pub mod timeout;
+#[cfg(not(feature = "web"))]
+pub mod timestamp;
 
 pub mod operators {
   pub use crate::operators::all::*;
@@ -59,9 +65,7 @@ pub mod operators {
   pub use crate::operators::concat::*;
   pub use crate::operators::contains::*;
   pub use crate::operators::count::*;
-  pub use crate::operators::debounce::*;
   pub use crate::operators::default_if_empty::*;
-  pub use crate::operators::delay::*;
   pub use crate::operators::distinct_until_changed::*;
   pub use crate::operators::element_at::*;
   pub use crate::operators::filter::*;
@@ -98,10 +102,18 @@ pub mod operators {
   pub use crate::operators::take_until::*;
   pub use crate::operators::take_while::*;
   pub use crate::operators::tap::*;
-  pub use crate::operators::time_interval::*;
-  pub use crate::operators::timeout::*;
-  pub use crate::operators::timestamp::*;
   pub use crate::operators::to_vec::*;
   pub use crate::operators::window_with_count::*;
   pub use crate::operators::zip::*;
+
+  #[cfg(not(feature = "web"))]
+  pub use crate::operators::debounce::*;
+  #[cfg(not(feature = "web"))]
+  pub use crate::operators::delay::*;
+  #[cfg(not(feature = "web"))]
+  pub use crate::operators::time_interval::*;
+  #[cfg(not(feature = "web"))]
+  pub use crate::operators::timeout::*;
+  #[cfg(not(feature = "web"))]
+  pub use crate::operators::timestamp::*;
 }

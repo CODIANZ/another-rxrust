@@ -80,7 +80,7 @@ where
   }
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(feature = "web")))]
 mod test {
   use crate::prelude::*;
   use std::{thread, time};
