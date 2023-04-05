@@ -11,6 +11,13 @@ repository = "https://github.com/CODIANZ/another-rxrust"
 keywords = ["reactivex", "rx", "rxrust", "asynchronous"]
 version = "0.0.35"
 
+[dependencies]
+wasm-bindgen = { version = "0.2.83", optional = true }
+web-sys = { version = "0.3.60", features = ["Window"], optional = true }
+
+[features]
+web = ["dep:wasm-bindgen", "dep:web-sys"]
+
 [dev-dependencies]
 anyhow = { version = "1", features = ["backtrace"] }
 tokio = { version = "1.27", features = ["full"] }

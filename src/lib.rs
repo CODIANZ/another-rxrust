@@ -16,6 +16,9 @@ pub mod schedulers;
 pub mod subjects;
 pub mod utils;
 
+#[cfg(feature = "web")]
+pub mod web;
+
 pub mod prelude {
   pub use crate::observable::*;
   pub use crate::observables::*;
@@ -25,6 +28,9 @@ pub mod prelude {
   pub use crate::schedulers::*;
   pub use crate::subjects::*;
   pub use crate::utils::*;
+
+  #[cfg(feature = "web")]
+  pub use crate::web::*;
 }
 
 #[cfg(test)]

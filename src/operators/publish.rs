@@ -50,7 +50,7 @@ where
   }
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(feature = "web")))]
 mod test {
   use crate::prelude::*;
   use crate::{print_complete, print_error, print_next_fmt};
