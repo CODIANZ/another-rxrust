@@ -37,6 +37,13 @@ or
 another-rxrust = {}
 ```
 
+If you want to use it on the web, set it as follows.
+
+```toml
+[dependencies]
+another-rxrust = {features=["web"]}
+```
+
 ## Samples
 
 ### basic

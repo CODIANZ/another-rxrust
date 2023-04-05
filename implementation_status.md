@@ -146,6 +146,7 @@ Specialty Observables that have more precisely-controlled subscription dynamics
 
 - [x] [Default](https://reactivex.io/documentation/scheduler.html) - scheduler to run on the current thread.
 - [x] [NewThread](https://reactivex.io/documentation/scheduler.html) - scheduler that creates a new thread and executes it there.
+- [x] [Async](https://reactivex.io/documentation/scheduler.html) - scheduler using setTimeout in web javascript. (`web` feature only)
 
 ## Utilities
 
