@@ -70,6 +70,21 @@ mod test {
   fn basic() {
     fn ob() -> Observable<'static, i32> {
       observables::from_iter(0..10)
+    }
+    ob().sequence_equal(&[ob(), ob()]).subscribe(
+      |x| {
+        println!("next - {}", x);
+        assert_eq!(x, true);
+      },
+      print_error!(),
+      print_complete!(),
+    );
+  }
+
+  #[test]
+  fn thread() {
+    fn ob() -> Observable<'static, i32> {
+      observables::from_iter(0..10)
         .observe_on(schedulers::new_thread_scheduler())
     }
     ob().sequence_equal(&[ob(), ob()]).subscribe(

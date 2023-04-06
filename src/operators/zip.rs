@@ -68,16 +68,15 @@ where
         }
       };
 
-      {
-        let mut id = 1usize;
-        for o in &observables {
-          {
-            let id = id;
+      // prepare subscribers
+      let mut sbs = {
+        let sctl = sctl.clone();
+        VecDeque::from_iter(
+          (0..(observables.len() + 1)).map(move |id| {
             let register = register.clone();
             let sctl_error = sctl.clone();
             let sctl_complete = sctl.clone();
-
-            o.inner_subscribe(sctl.new_observer(
+            sctl.new_observer(
               move |_, x| register(&id, x),
               move |_, e| {
                 sctl_error.sink_error(e);
@@ -85,27 +84,15 @@ where
               move |serial| {
                 sctl_complete.sink_complete(&serial);
               },
-            ));
-          }
-          id += 1;
-        }
-      }
-      {
-        let id = 0;
-        let register = register.clone();
-        let sctl_error = sctl.clone();
-        let sctl_complete = sctl.clone();
+            )
+          }),
+        )
+      };
 
-        source.inner_subscribe(sctl.new_observer(
-          move |_, x| register(&id, x),
-          move |_, e| {
-            sctl_error.sink_error(e);
-          },
-          move |serial| {
-            sctl_complete.sink_complete(&serial);
-          },
-        ));
-      }
+      source.inner_subscribe(sbs.pop_front().unwrap());
+      observables.iter().for_each(|o| {
+        o.inner_subscribe(sbs.pop_front().unwrap());
+      });
     })
   }
 }
@@ -129,6 +116,21 @@ mod test {
 
   #[test]
   fn basic() {
+    observables::from_iter(0..10)
+      .zip(&[
+        observables::from_iter(10..20),
+        observables::from_iter(20..30),
+      ])
+      .subscribe(
+        print_next_fmt!("{:?}"),
+        print_error!(),
+        print_complete!(),
+      );
+    thread::sleep(time::Duration::from_millis(1000));
+  }
+
+  #[test]
+  fn thread() {
     observables::from_iter(0..10)
       .observe_on(schedulers::new_thread_scheduler())
       .zip(&[

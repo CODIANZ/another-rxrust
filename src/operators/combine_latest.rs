@@ -83,6 +83,23 @@ mod test {
   #[test]
   fn basic() {
     observables::from_iter(0..10)
+      .combine_latest(
+        &[
+          observables::from_iter(10..20),
+          observables::from_iter(20..30),
+        ],
+        |v| format!("function {:?}", v),
+      )
+      .subscribe(
+        print_next_fmt!("{:?}"),
+        print_error!(),
+        print_complete!(),
+      );
+  }
+
+  #[test]
+  fn thread() {
+    observables::from_iter(0..10)
       .observe_on(schedulers::new_thread_scheduler())
       .combine_latest(
         &[

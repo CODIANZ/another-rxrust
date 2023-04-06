@@ -21,35 +21,32 @@ where
     Observable::<Item>::create(move |s| {
       let sctl = StreamController::new(s);
 
-      for o in &observables {
-        let sctl_next = sctl.clone();
-        let sctl_error = sctl.clone();
-        let sctl_complete = sctl.clone();
+      // prepare subscribers
+      let mut sbs = {
+        let sctl = sctl.clone();
+        Vec::from_iter(
+          (0..(observables.len() + 1)).map(move |_| {
+            let sctl_next = sctl.clone();
+            let sctl_error = sctl.clone();
+            let sctl_complete = sctl.clone();
 
-        o.inner_subscribe(sctl.new_observer(
-          move |_, x| {
-            sctl_next.sink_next(x);
-          },
-          move |_, e| {
-            sctl_error.sink_error(e);
-          },
-          move |serial| sctl_complete.sink_complete(&serial),
-        ));
-      }
+            sctl.new_observer(
+              move |_, x| {
+                sctl_next.sink_next(x);
+              },
+              move |_, e| {
+                sctl_error.sink_error(e);
+              },
+              move |serial| sctl_complete.sink_complete(&serial),
+            )
+          }),
+        )
+      };
 
-      let sctl_next = sctl.clone();
-      let sctl_error = sctl.clone();
-      let sctl_complete = sctl.clone();
-
-      source.inner_subscribe(sctl.new_observer(
-        move |_, x| {
-          sctl_next.sink_next(x);
-        },
-        move |_, e| {
-          sctl_error.sink_error(e);
-        },
-        move |serial| sctl_complete.sink_complete(&serial),
-      ));
+      source.inner_subscribe(sbs.pop().unwrap());
+      observables.iter().for_each(|o| {
+        o.inner_subscribe(sbs.pop().unwrap());
+      });
     })
   }
 }
@@ -73,6 +70,22 @@ mod test {
 
   #[test]
   fn basic() {
+    fn ob(len: usize, maker: &'static str) -> Observable<String> {
+      observables::from_iter(0..len)
+        .map(move |x| format!("{} - {} / {}", maker, x + 1, len))
+    }
+
+    ob(5, "#1")
+      .merge(&[ob(3, "#2"), ob(2, "#3"), ob(6, "#4")])
+      .subscribe(
+        print_next_fmt!("{}"),
+        print_error!(),
+        print_complete!(),
+      );
+  }
+
+  #[test]
+  fn thread() {
     fn ob(len: usize, maker: &'static str) -> Observable<String> {
       observables::interval(
         time::Duration::from_millis(100),
