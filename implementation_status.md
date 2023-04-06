@@ -154,6 +154,7 @@ Specialty Observables that have more precisely-controlled subscription dynamics
 ### utils
 
 - `ready_set_go` - Composing Observables and Functions
+- `Something` - For controlling `retry` in error flow
 
 ### subscribe macros
 
