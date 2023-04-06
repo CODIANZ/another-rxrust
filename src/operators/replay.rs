@@ -162,7 +162,7 @@ mod test {
     sbsc2.unsubscribe();
 
     println!("final wait start");
-    thread::sleep(time::Duration::from_millis(5000));
+    thread::sleep(time::Duration::from_millis(500));
     println!("final wait end");
   }
 }

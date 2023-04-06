@@ -56,16 +56,27 @@ where
           return;
         }
       }
+
+      let sbsc = Arc::new(RwLock::new(None::<Subscription>));
+      {
+        let sbsc = Arc::clone(&sbsc);
+        s.set_on_unsubscribe(move || {
+          if let Some(sbsc) = &*sbsc.read().unwrap() {
+            sbsc.unsubscribe();
+          }
+        });
+      }
+
       let s_next = s.clone();
       let s_error = s.clone();
       let s_complete = s.clone();
-      subject.observable().subscribe(
+      *sbsc.write().unwrap() = Some(subject.observable().subscribe(
         move |x| s_next.next(x),
         move |e| s_error.error(e),
         move || {
           s_complete.complete();
         },
-      );
+      ));
     })
   }
 }
@@ -79,6 +90,7 @@ mod tset {
   fn basic() {
     let sbj = subjects::BehaviorSubject::<i32>::new(100);
 
+    println!("start #1");
     sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
       |e| println!("#1 error {:?}", e),
@@ -87,13 +99,22 @@ mod tset {
 
     sbj.next(1);
     sbj.next(2);
-    sbj.next(3);
-    sbj.complete();
 
+    println!("start #2");
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
       |e| println!("#2 error {:?}", e),
       || println!("#2 complete"),
+    );
+
+    sbj.next(3);
+    sbj.complete();
+
+    println!("start #3");
+    sbj.observable().subscribe(
+      |x| println!("#3 next {}", x),
+      |e| println!("#3 error {:?}", e),
+      || println!("#3 complete"),
     );
   }
 
@@ -101,10 +122,15 @@ mod tset {
   fn double() {
     let sbj = subjects::BehaviorSubject::<i32>::new(100);
 
-    let binding = sbj.observable();
-    let sbsc1 = binding.subscribe(
+    println!("start #1");
+    let sbsc1 = sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
-      |e| println!("#1 error {:?}", e),
+      |e| {
+        println!(
+          "#1 error {:?}",
+          e.downcast_ref::<&str>()
+        )
+      },
       || println!("#1 complete"),
     );
 
@@ -112,9 +138,15 @@ mod tset {
     sbj.next(2);
     sbj.next(3);
 
+    println!("start #2");
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
-      |e| println!("#2 error {:?}", e),
+      |e| {
+        println!(
+          "#2 error {:?}",
+          e.downcast_ref::<&str>()
+        )
+      },
       || println!("#2 complete"),
     );
 
@@ -130,9 +162,15 @@ mod tset {
 
     sbj.error(RxError::from_error("ERR!"));
 
+    println!("start #3");
     sbj.observable().subscribe(
       |x| println!("#3 next {}", x),
-      |e| println!("#3 error {:?}", e.downcast_ref::<&str>()),
+      |e| {
+        println!(
+          "#3 error {:?}",
+          e.downcast_ref::<&str>()
+        )
+      },
       || println!("#3 complete"),
     );
   }
@@ -150,8 +188,8 @@ mod tset {
       sbj_thread.complete();
     });
 
-    let binding = sbj.observable();
-    let sbsc1 = binding.subscribe(
+    println!("start #1");
+    let sbsc1 = sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
       |e| println!("#1 error {:?}", e),
       || println!("#1 complete"),
@@ -159,6 +197,7 @@ mod tset {
 
     thread::sleep(time::Duration::from_millis(300));
 
+    println!("start #2");
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
       |e| println!("#2 error {:?}", e),
@@ -166,6 +205,8 @@ mod tset {
     );
 
     thread::sleep(time::Duration::from_millis(300));
+
+    println!("unsbscribe #1");
     sbsc1.unsubscribe();
 
     th.join().ok();

@@ -44,36 +44,52 @@ where
     let subject = Arc::clone(&self.subject);
 
     Observable::create(move |s| {
-      let is_continue = {
-        // block until emitted for replay
-        let items = &items.read().unwrap();
-        let was_error = &*was_error.read().unwrap();
-        let was_completed = &*was_completed.read().unwrap();
-        items.iter().for_each(|x| {
-          s.next(x.clone());
+      let sbsc = Arc::new(RwLock::new(None::<Subscription>));
+      {
+        let sbsc = Arc::clone(&sbsc);
+        s.set_on_unsubscribe(move || {
+          if let Some(sbsc) = &*sbsc.read().unwrap() {
+            sbsc.unsubscribe();
+          }
         });
-        if let Some(err) = &*was_error {
-          s.error(err.clone());
-          false
-        } else if *was_completed {
-          s.complete();
-          false
-        } else {
-          true
-        }
-      };
-      if is_continue {
-        let s_next = s.clone();
-        let s_error = s.clone();
-        let s_complete = s.clone();
-        subject.observable().subscribe(
+      }
+
+      let items = Arc::clone(&items);
+      let was_error = Arc::clone(&was_error);
+      let was_completed = Arc::clone(&was_completed);
+
+      let s_next = s.clone();
+      let s_error = s.clone();
+      let s_complete = s.clone();
+
+      *sbsc.write().unwrap() = Some(
+        utils::ready_set_go(
+          move || {
+            // block until emitted for replay
+            let items = &items.read().unwrap();
+            let was_error = &*was_error.read().unwrap();
+            let was_completed = &*was_completed.read().unwrap();
+            items.iter().for_each(|x| {
+              s.next(x.clone());
+            });
+            if let Some(err) = &*was_error {
+              s.error(err.clone());
+              return;
+            } else if *was_completed {
+              s.complete();
+              return;
+            }
+          },
+          subject.observable(),
+        )
+        .subscribe(
           move |x| s_next.next(x),
           move |e| s_error.error(e),
           move || {
             s_complete.complete();
           },
-        );
-      }
+        ),
+      );
     })
   }
 
@@ -101,6 +117,7 @@ mod tset {
   fn basic() {
     let sbj = subjects::ReplaySubject::new();
 
+    println!("start #1");
     sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
       |e| println!("#1 error {:?}", e),
@@ -109,13 +126,22 @@ mod tset {
 
     sbj.next(1);
     sbj.next(2);
-    sbj.next(3);
-    sbj.complete();
 
+    println!("start #2");
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
       |e| println!("#2 error {:?}", e),
       || println!("#2 complete"),
+    );
+
+    sbj.next(3);
+    sbj.complete();
+
+    println!("start #3");
+    sbj.observable().subscribe(
+      |x| println!("#3 next {}", x),
+      |e| println!("#3 error {:?}", e),
+      || println!("#3 complete"),
     );
   }
 
@@ -123,8 +149,8 @@ mod tset {
   fn double() {
     let sbj = subjects::ReplaySubject::new();
 
-    let binding = sbj.observable();
-    let sbsc1 = binding.subscribe(
+    println!("start #1");
+    let sbsc1 = sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
       |e| {
         println!(
@@ -139,6 +165,7 @@ mod tset {
     sbj.next(2);
     sbj.next(3);
 
+    println!("start #2");
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
       |e| {
@@ -154,6 +181,7 @@ mod tset {
     sbj.next(5);
     sbj.next(6);
 
+    println!("unsubscribe #1");
     sbsc1.unsubscribe();
 
     sbj.next(7);
@@ -162,6 +190,7 @@ mod tset {
 
     sbj.error(RxError::from_error("ERR!"));
 
+    println!("start #3");
     sbj.observable().subscribe(
       |x| println!("#3 next {}", x),
       |e| {
@@ -187,8 +216,8 @@ mod tset {
       sbj_thread.complete();
     });
 
-    let binding = sbj.observable();
-    let sbsc1 = binding.subscribe(
+    println!("start #1");
+    let sbsc1 = sbj.observable().subscribe(
       |x| println!("#1 next {}", x),
       |e| println!("#1 error {:?}", e),
       || println!("#1 complete"),
@@ -196,6 +225,7 @@ mod tset {
 
     thread::sleep(time::Duration::from_millis(300));
 
+    println!("start #2");
     sbj.observable().subscribe(
       |x| println!("#2 next {}", x),
       |e| println!("#2 error {:?}", e),
@@ -203,8 +233,17 @@ mod tset {
     );
 
     thread::sleep(time::Duration::from_millis(300));
+
+    println!("unsbscribe #1");
     sbsc1.unsubscribe();
 
     th.join().ok();
+
+    println!("start #3");
+    sbj.observable().subscribe(
+      |x| println!("#3 next {}", x),
+      |e| println!("#3 error {:?}", e),
+      || println!("#3 complete"),
+    );
   }
 }
