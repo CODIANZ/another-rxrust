@@ -110,7 +110,8 @@ Operators that evaluate one or more Observables or items emitted by Observables
 
 Operators that operate on the entire sequence of items emitted by an Observable
 
-- [ ] [Average](https://reactivex.io/documentation/operators/average.html) — calculates the average of numbers emitted by an Observable and emits this average
+- [x] [Average](https://reactivex.io/documentation/operators/average.html) — calculates the average of numbers emitted by an Observable and emits this average
+  - You can calculate with `sum_and_count` and `map` instead
 - [x] [Concat](https://reactivex.io/documentation/operators/concat.html) — emit the emissions from two or more Observables without interleaving them
 - [x] [Count](https://reactivex.io/documentation/operators/count.html) — count the number of items emitted by the source Observable and emit only this value
 - [x] [Max](https://reactivex.io/documentation/operators/max.html) — determine, and emit, the maximum-valued item emitted by an Observable
@@ -127,7 +128,7 @@ Specialty Observables that have more precisely-controlled subscription dynamics
 - [x] [Connect](https://reactivex.io/documentation/operators/connect.html) — instruct a connectable Observable to begin emitting items to its subscribers
 - [x] [Publish](https://reactivex.io/documentation/operators/publish.html) — convert an ordinary Observable into a connectable Observable
 - [x] [RefCount](https://reactivex.io/documentation/operators/refcount.html) — make a Connectable Observable behave like an ordinary Observable
-- [ ] [Replay](https://reactivex.io/documentation/operators/replay.html) — ensure that all observers see the same sequence of emitted items, even if they subscribe after the Observable has begun emitting items
+- [x] [Replay](https://reactivex.io/documentation/operators/replay.html) — ensure that all observers see the same sequence of emitted items, even if they subscribe after the Observable has begun emitting items
 
 ### Operators to Convert Observables
 
