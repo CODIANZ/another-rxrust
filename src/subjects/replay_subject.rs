@@ -76,6 +76,20 @@ where
       }
     })
   }
+
+  pub(crate) fn set_on_subscribe<F>(&self, f: F)
+  where
+    F: Fn(usize) + Send + Sync + 'a,
+  {
+    self.subject.set_on_subscribe(f);
+  }
+
+  pub(crate) fn set_on_unsubscribe<F>(&self, f: F)
+  where
+    F: Fn(usize) + Send + Sync + 'a,
+  {
+    self.subject.set_on_unsubscribe(f);
+  }
 }
 
 #[cfg(test)]

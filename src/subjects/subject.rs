@@ -28,7 +28,7 @@ where
     }
   }
 
-  pub fn fetch_observers(&self) -> Vec<Observer<'a, Item>> {
+  fn fetch_observers(&self) -> Vec<Observer<'a, Item>> {
     let binding = self.observers.read().unwrap();
     let x = binding.iter().map(|x| x.1.clone());
     Vec::from_iter(x)
@@ -84,17 +84,19 @@ where
       }
     })
   }
+  
   pub fn ref_count(&self) -> usize {
     self.observers.read().unwrap().len()
   }
-  pub fn set_on_subscribe<F>(&self, f: F)
+
+  pub(crate) fn set_on_subscribe<F>(&self, f: F)
   where
     F: Fn(usize) + Send + Sync + 'a,
   {
     *self.on_subscribe.write().unwrap() = Some(FunctionWrapper::new(f));
   }
 
-  pub fn set_on_unsubscribe<F>(&self, f: F)
+  pub(crate) fn set_on_unsubscribe<F>(&self, f: F)
   where
     F: Fn(usize) + Send + Sync + 'a,
   {

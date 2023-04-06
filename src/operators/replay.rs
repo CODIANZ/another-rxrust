@@ -1,24 +1,23 @@
 use crate::prelude::*;
 use std::sync::{Arc, RwLock};
-use subject::Subject;
 
 #[derive(Clone)]
-pub struct RefCount<'a, Item>
+pub struct Replay<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  subject: subjects::Subject<'a, Item>,
+  subject: subjects::ReplaySubject<'a, Item>,
   source: Observable<'a, Item>,
-  subscription: Arc<RwLock<Option<Subscription<'a>>>>, // i want `RwLock` for recursive
+  subscription: Arc<RwLock<Option<Subscription<'a>>>>,
 }
 
-impl<'a, Item> RefCount<'a, Item>
+impl<'a, Item> Replay<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn new(source: Observable<'a, Item>) -> RefCount<'a, Item> {
-    let _self = RefCount {
-      subject: Subject::<Item>::new(),
+  pub fn new(source: Observable<'a, Item>) -> Replay<'a, Item> {
+    let _self = Replay {
+      subject: subjects::ReplaySubject::new(),
       source,
       subscription: Arc::new(RwLock::new(None)),
     };
@@ -78,8 +77,8 @@ impl<'a, Item> Observable<'a, Item>
 where
   Item: Clone + Send + Sync,
 {
-  pub fn ref_count(&self) -> RefCount<'a, Item> {
-    RefCount::new(self.clone())
+  pub fn replay(&self) -> Replay<'a, Item> {
+    Replay::new(self.clone())
   }
 }
 
@@ -99,7 +98,7 @@ mod test {
         print_error!(),
         print_complete!(),
       )
-      .ref_count();
+      .replay();
     let obs = o.observable();
 
     println!("start #1");
@@ -134,7 +133,7 @@ mod test {
       print_error!(),
       print_complete!(),
     )
-    .ref_count();
+    .replay();
     let obs = o.observable();
 
     println!("start #1");
