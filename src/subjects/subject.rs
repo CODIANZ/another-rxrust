@@ -68,23 +68,27 @@ where
         let observers = Arc::clone(&observers);
         let on_unsubscribe = Arc::clone(&on_unsubscribe);
         s.set_on_unsubscribe(move || {
-          let mut observers = observers.write().unwrap();
-          observers.remove(&serial);
+          let len = {
+            let mut observers = observers.write().unwrap();
+            observers.remove(&serial);
+            observers.len()
+          };
           if let Some(on_unsubscribe) = &*on_unsubscribe.read().unwrap() {
-            on_unsubscribe.call(observers.len());
+            on_unsubscribe.call(len);
           }
         });
       }
-      {
+      let len = {
         let mut observers = observers.write().unwrap();
         observers.insert(serial, s);
-        if let Some(on_subscribe) = &*on_subscribe.read().unwrap() {
-          on_subscribe.call(observers.len());
-        }
+        observers.len()
+      };
+      if let Some(on_subscribe) = &*on_subscribe.read().unwrap() {
+        on_subscribe.call(len);
       }
     })
   }
-  
+
   pub fn ref_count(&self) -> usize {
     self.observers.read().unwrap().len()
   }

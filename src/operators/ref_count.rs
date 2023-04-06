@@ -9,7 +9,7 @@ where
 {
   subject: subjects::Subject<'a, Item>,
   source: Observable<'a, Item>,
-  subscription: Arc<RwLock<Option<Subscription<'a>>>>, // i want `RwLock` for recursive
+  subscription: Arc<RwLock<Option<Subscription<'a>>>>,
 }
 
 impl<'a, Item> RefCount<'a, Item>
@@ -55,7 +55,7 @@ where
 
         let mut subscription = subscription.write().unwrap();
         if subscription.is_some() {
-          panic!("publish.ref_count(): already connected!");
+          return;
         }
 
         *subscription = Some(source.subscribe(
@@ -91,7 +91,6 @@ mod test {
   use std::{thread, time};
 
   #[test]
-  #[should_panic] // i want `RwLock` for recursive
   fn basic() {
     let o = observables::from_iter(0..10)
       .tap(
@@ -109,7 +108,7 @@ mod test {
       print_complete!(),
     );
 
-    println!("start #1");
+    println!("start #2");
     let sbsc2 = obs.subscribe(
       print_next_fmt!("#2 {}"),
       print_error!(),
@@ -146,7 +145,7 @@ mod test {
 
     thread::sleep(time::Duration::from_millis(500));
 
-    println!("start #1");
+    println!("start #2");
     let sbsc2 = obs.subscribe(
       print_next_fmt!("#2 {}"),
       print_error!(),
@@ -163,6 +162,8 @@ mod test {
     println!("end #2");
     sbsc2.unsubscribe();
 
-    thread::sleep(time::Duration::from_millis(500));
+    println!("final wait start");
+    thread::sleep(time::Duration::from_millis(1000));
+    println!("final wait end");
   }
 }
