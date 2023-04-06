@@ -23,6 +23,7 @@ pub mod on_error_resume_next;
 pub mod publish;
 pub mod reduce;
 pub mod ref_count;
+pub mod replay;
 pub mod retry;
 pub mod retry_when;
 pub mod sample;
@@ -83,6 +84,7 @@ pub mod operators {
   pub use crate::operators::publish::*;
   pub use crate::operators::reduce::*;
   pub use crate::operators::ref_count::*;
+  pub use crate::operators::replay::*;
   pub use crate::operators::retry::*;
   pub use crate::operators::retry_when::*;
   pub use crate::operators::sample::*;

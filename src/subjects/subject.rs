@@ -28,7 +28,7 @@ where
     }
   }
 
-  pub fn fetch_observers(&self) -> Vec<Observer<'a, Item>> {
+  fn fetch_observers(&self) -> Vec<Observer<'a, Item>> {
     let binding = self.observers.read().unwrap();
     let x = binding.iter().map(|x| x.1.clone());
     Vec::from_iter(x)
@@ -68,33 +68,39 @@ where
         let observers = Arc::clone(&observers);
         let on_unsubscribe = Arc::clone(&on_unsubscribe);
         s.set_on_unsubscribe(move || {
-          let mut observers = observers.write().unwrap();
-          observers.remove(&serial);
+          let len = {
+            let mut observers = observers.write().unwrap();
+            observers.remove(&serial);
+            observers.len()
+          };
           if let Some(on_unsubscribe) = &*on_unsubscribe.read().unwrap() {
-            on_unsubscribe.call(observers.len());
+            on_unsubscribe.call(len);
           }
         });
       }
-      {
+      let len = {
         let mut observers = observers.write().unwrap();
         observers.insert(serial, s);
-        if let Some(on_subscribe) = &*on_subscribe.read().unwrap() {
-          on_subscribe.call(observers.len());
-        }
+        observers.len()
+      };
+      if let Some(on_subscribe) = &*on_subscribe.read().unwrap() {
+        on_subscribe.call(len);
       }
     })
   }
+
   pub fn ref_count(&self) -> usize {
     self.observers.read().unwrap().len()
   }
-  pub fn set_on_subscribe<F>(&self, f: F)
+
+  pub(crate) fn set_on_subscribe<F>(&self, f: F)
   where
     F: Fn(usize) + Send + Sync + 'a,
   {
     *self.on_subscribe.write().unwrap() = Some(FunctionWrapper::new(f));
   }
 
-  pub fn set_on_unsubscribe<F>(&self, f: F)
+  pub(crate) fn set_on_unsubscribe<F>(&self, f: F)
   where
     F: Fn(usize) + Send + Sync + 'a,
   {

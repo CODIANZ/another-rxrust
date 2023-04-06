@@ -34,71 +34,50 @@ where
         }
       };
 
-      for o in &observables {
-        let is_win_next = is_win.clone();
-        let is_win_error = is_win.clone();
-        let is_win_complete = is_win.clone();
+      // prepare subscribers
+      let mut sbs = {
+        let sctl = sctl.clone();
+        Vec::from_iter(
+          (0..(observables.len() + 1)).map(move |_| {
+            let is_win_next = is_win.clone();
+            let is_win_error = is_win.clone();
+            let is_win_complete = is_win.clone();
 
-        let sctl_next = sctl.clone();
-        let sctl_error = sctl.clone();
-        let sctl_complete = sctl.clone();
+            let sctl_next = sctl.clone();
+            let sctl_error = sctl.clone();
+            let sctl_complete = sctl.clone();
 
-        o.inner_subscribe(sctl.new_observer(
-          move |serial, x| {
-            if is_win_next(&serial) {
-              sctl_next.sink_next(x);
-            } else {
-              sctl_next.upstream_abort_observe(&serial);
-            }
-          },
-          move |serial, e| {
-            if is_win_error(&serial) {
-              sctl_error.sink_error(e);
-            } else {
-              sctl_error.upstream_abort_observe(&serial);
-            }
-          },
-          move |serial| {
-            if is_win_complete(&serial) {
-              sctl_complete.sink_complete(&serial);
-            } else {
-              sctl_complete.upstream_abort_observe(&serial);
-            }
-          },
-        ));
-      }
+            sctl.new_observer(
+              move |serial, x| {
+                if is_win_next(&serial) {
+                  sctl_next.sink_next(x);
+                } else {
+                  sctl_next.upstream_abort_observe(&serial);
+                }
+              },
+              move |serial, e| {
+                if is_win_error(&serial) {
+                  sctl_error.sink_error(e);
+                } else {
+                  sctl_error.upstream_abort_observe(&serial);
+                }
+              },
+              move |serial| {
+                if is_win_complete(&serial) {
+                  sctl_complete.sink_complete(&serial);
+                } else {
+                  sctl_complete.upstream_abort_observe(&serial);
+                }
+              },
+            )
+          }),
+        )
+      };
 
-      let is_win_next = is_win.clone();
-      let is_win_error = is_win.clone();
-      let is_win_complete = is_win.clone();
-
-      let sctl_next = sctl.clone();
-      let sctl_error = sctl.clone();
-      let sctl_complete = sctl.clone();
-
-      source.inner_subscribe(sctl.new_observer(
-        move |serial, x| {
-          if is_win_next(&serial) {
-            sctl_next.sink_next(x);
-          } else {
-            sctl_next.upstream_abort_observe(&serial);
-          }
-        },
-        move |serial, e| {
-          if is_win_error(&serial) {
-            sctl_error.sink_error(e);
-          } else {
-            sctl_error.upstream_abort_observe(&serial);
-          }
-        },
-        move |serial| {
-          if is_win_complete(&serial) {
-            sctl_complete.sink_complete(&serial);
-          } else {
-            sctl_complete.upstream_abort_observe(&serial);
-          }
-        },
-      ));
+      source.inner_subscribe(sbs.pop().unwrap());
+      observables.iter().for_each(|o| {
+        o.inner_subscribe(sbs.pop().unwrap());
+      });
     })
   }
 }
@@ -123,12 +102,27 @@ mod test {
   #[test]
   fn basic() {
     fn ob(len: usize, maker: &'static str) -> Observable<String> {
+      observables::from_iter(0..len)
+        .map(move |x| format!("{} - {} / {}", maker, x + 1, len))
+    }
+
+    ob(5, "#1")
+      .amb(&[ob(3, "#2"), ob(2, "#3"), ob(6, "#4")])
+      .subscribe(
+        print_next_fmt!("{}"),
+        print_error!(),
+        print_complete!(),
+      );
+  }
+
+  #[test]
+  fn thread() {
+    fn ob(len: usize, maker: &'static str) -> Observable<String> {
       observables::interval(
         time::Duration::from_millis(100),
         schedulers::new_thread_scheduler(),
       )
-      .take(10)
-      .take_last(len)
+      .take(len)
       .map(move |x| format!("{} - {} / {}", maker, x + 1, len))
     }
 

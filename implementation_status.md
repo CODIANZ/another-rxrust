@@ -140,7 +140,7 @@ Specialty Observables that have more precisely-controlled subscription dynamics
 - [x] [BehaviorSubject](https://reactivex.io/documentation/subject.html) - emit the current value to new subscribers
 - [x] [PublishSubject](https://reactivex.io/documentation/subject.html) - emit all subsequently observed items to the subscriber
   - `subjects::Subject`
-- [ ] [ReplaySubject](https://reactivex.io/documentation/subject.html) - emit old values to new subscribers
+- [x] [ReplaySubject](https://reactivex.io/documentation/subject.html) - emit old values to new subscribers
 
 ### Schedulers
 
