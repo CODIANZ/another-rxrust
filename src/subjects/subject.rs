@@ -89,10 +89,6 @@ where
     })
   }
 
-  pub fn ref_count(&self) -> usize {
-    self.observers.read().unwrap().len()
-  }
-
   pub(crate) fn set_on_subscribe<F>(&self, f: F)
   where
     F: Fn(usize) + Send + Sync + 'a,
@@ -132,7 +128,6 @@ mod tset {
   #[test]
   fn double() {
     let sbj = subjects::Subject::new();
-    println!("observers {}", sbj.ref_count());
 
     sbj.set_on_subscribe(|x| println!("on_subscribe {}", x));
     sbj.set_on_unsubscribe(|x| println!("on_unsubscribe {}", x));
@@ -143,7 +138,6 @@ mod tset {
       |e| println!("#1 error {:?}", e),
       || println!("#1 complete"),
     );
-    println!("observers {}", sbj.ref_count());
 
     sbj.next(1);
     sbj.next(2);
@@ -154,21 +148,18 @@ mod tset {
       |e| println!("#2 error {:?}", e),
       || println!("#2 complete"),
     );
-    println!("observers {}", sbj.ref_count());
 
     sbj.next(4);
     sbj.next(5);
     sbj.next(6);
 
     sbsc1.unsubscribe();
-    println!("observers {}", sbj.ref_count());
 
     sbj.next(7);
     sbj.next(8);
     sbj.next(9);
 
     sbj.complete();
-    println!("observers {}", sbj.ref_count());
   }
 
   #[test]
