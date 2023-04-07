@@ -46,10 +46,67 @@ another-rxrust = {features=["web"]}
 
 ## Samples
 
-### basic
+### from_iter, map, zip
 
 ```rust
-use crate::prelude::*;
+use another_rxrust::prelude::*;
+
+fn main() {
+  let ob = observables::from_iter(0..10);
+  ob.zip(&[ob.map(|x| x + 10), ob.map(|x| x + 20)]).subscribe(
+    print_next_fmt!("{:?}"),
+    print_error!(),
+    print_complete!(),
+  );
+}
+// [console-results]
+// next - [0, 10, 20]
+// next - [1, 11, 21]
+// next - [2, 12, 22]
+// next - [3, 13, 23]
+// next - [4, 14, 24]
+// next - [5, 15, 25]
+// next - [6, 16, 26]
+// next - [7, 17, 27]
+// next - [8, 18, 28]
+// next - [9, 19, 29]
+// complete
+```
+
+### subject, scheduler, take, sample
+
+```rust
+use another_rxrust::prelude::*;
+use std::{thread, time};
+
+fn main() {
+  let sbj = subjects::Subject::new();
+  observables::interval(
+    time::Duration::from_millis(100),
+    schedulers::new_thread_scheduler(),
+  )
+  .sample(sbj.observable())
+  .take(3)
+  .subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
+
+  (0..3).for_each(|_| {
+    thread::sleep(time::Duration::from_millis(500));
+    sbj.next(());
+  });
+  sbj.complete();
+  thread::sleep(time::Duration::from_millis(500));
+}
+// [console-results (Depends on execution environment)]
+// next - 3
+// next - 8
+// next - 13
+// complete
+```
+
+### just, error, emptry, never, flat_map...
+
+```rust
+use another_rxrust::prelude::*;
 use std::{thread, time};
 
 fn main() {
@@ -95,65 +152,5 @@ fn main() {
 // next 203
 // next resume "some error" 100
 // next resume "some error" 200
-// complete
-```
-
-### sample operator & subject
-
-```rust
-use crate::prelude::*;
-use std::{thread, time};
-
-fn main() {
-  let sbj = subjects::Subject::new();
-  observables::interval(
-    time::Duration::from_millis(100),
-    schedulers::new_thread_scheduler(),
-  )
-  .sample(sbj.observable())
-  .take(3)
-  .subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
-
-  (0..3).for_each(|_| {
-    thread::sleep(time::Duration::from_millis(500));
-    sbj.next(());
-  });
-  sbj.complete();
-  thread::sleep(time::Duration::from_millis(500));
-}
-// [console-results (Depends on execution environment)]
-// next - 3
-// next - 8
-// next - 13
-// complete
-```
-
-### zip
-
-```rust
-use crate::prelude::*;
-use std::{thread, time};
-
-fn main() {
-  observables::from_iter(0..10)
-    .observe_on(schedulers::new_thread_scheduler())
-    .zip(&[
-      observables::from_iter(10..20).observe_on(schedulers::new_thread_scheduler()),
-      observables::from_iter(20..30).observe_on(schedulers::new_thread_scheduler()),
-    ])
-    .subscribe(print_next_fmt!("{:?}"), print_error!(), print_complete!());
-  thread::sleep(time::Duration::from_millis(1000));
-}
-// [console-results]
-// next - [0, 10, 20]
-// next - [1, 11, 21]
-// next - [2, 12, 22]
-// next - [3, 13, 23]
-// next - [4, 14, 24]
-// next - [5, 15, 25]
-// next - [6, 16, 26]
-// next - [7, 17, 27]
-// next - [8, 18, 28]
-// next - [9, 19, 29]
 // complete
 ```

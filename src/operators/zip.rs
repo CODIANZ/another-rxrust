@@ -116,17 +116,13 @@ mod test {
 
   #[test]
   fn basic() {
-    observables::from_iter(0..10)
-      .zip(&[
-        observables::from_iter(10..20),
-        observables::from_iter(20..30),
-      ])
-      .subscribe(
-        print_next_fmt!("{:?}"),
-        print_error!(),
-        print_complete!(),
-      );
-    thread::sleep(time::Duration::from_millis(1000));
+    let ob = observables::from_iter(0..10);
+
+    ob.zip(&[ob.map(|x| x + 10), ob.map(|x| x + 20)]).subscribe(
+      print_next_fmt!("{:?}"),
+      print_error!(),
+      print_complete!(),
+    );
   }
 
   #[test]
