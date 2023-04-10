@@ -4,25 +4,25 @@ use std::marker::PhantomData;
 use std::sync::{Arc, RwLock};
 
 #[derive(Clone)]
-pub struct Sample<'a, Item, TrigerValue>
+pub struct Sample<'a, Item, TriggerValue>
 where
   Item: Clone + Send + Sync,
-  TrigerValue: Clone + Send + Sync,
+  TriggerValue: Clone + Send + Sync,
 {
-  trigger: Observable<'a, TrigerValue>,
+  trigger: Observable<'a, TriggerValue>,
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item, TrigerValue> Sample<'a, Item, TrigerValue>
+impl<'a, Item, TriggerValue> Sample<'a, Item, TriggerValue>
 where
   Item: Clone + Send + Sync,
-  TrigerValue: Clone + Send + Sync,
+  TriggerValue: Clone + Send + Sync,
 {
   pub fn new(
-    trigger: Observable<'a, TrigerValue>,
-  ) -> Sample<'a, Item, TrigerValue>
+    trigger: Observable<'a, TriggerValue>,
+  ) -> Sample<'a, Item, TriggerValue>
   where
-    TrigerValue: Clone + Send + Sync,
+    TriggerValue: Clone + Send + Sync,
   {
     Sample { trigger, _item: PhantomData }
   }

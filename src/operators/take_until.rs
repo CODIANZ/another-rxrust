@@ -3,25 +3,25 @@ use crate::prelude::*;
 use std::marker::PhantomData;
 
 #[derive(Clone)]
-pub struct TakeUntil<'a, Item, TrigerValue>
+pub struct TakeUntil<'a, Item, TriggerValue>
 where
   Item: Clone + Send + Sync,
-  TrigerValue: Clone + Send + Sync,
+  TriggerValue: Clone + Send + Sync,
 {
-  trigger: Observable<'a, TrigerValue>,
+  trigger: Observable<'a, TriggerValue>,
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item, TrigerValue> TakeUntil<'a, Item, TrigerValue>
+impl<'a, Item, TriggerValue> TakeUntil<'a, Item, TriggerValue>
 where
   Item: Clone + Send + Sync,
-  TrigerValue: Clone + Send + Sync,
+  TriggerValue: Clone + Send + Sync,
 {
   pub fn new(
-    trigger: Observable<'a, TrigerValue>,
-  ) -> TakeUntil<'a, Item, TrigerValue>
+    trigger: Observable<'a, TriggerValue>,
+  ) -> TakeUntil<'a, Item, TriggerValue>
   where
-    TrigerValue: Clone + Send + Sync,
+    TriggerValue: Clone + Send + Sync,
   {
     TakeUntil { trigger, _item: PhantomData }
   }

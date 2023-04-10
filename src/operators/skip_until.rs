@@ -6,25 +6,25 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct SkipUntil<'a, Item, TrigerValue>
+pub struct SkipUntil<'a, Item, TriggerValue>
 where
   Item: Clone + Send + Sync,
-  TrigerValue: Clone + Send + Sync,
+  TriggerValue: Clone + Send + Sync,
 {
-  trigger: Observable<'a, TrigerValue>,
+  trigger: Observable<'a, TriggerValue>,
   _item: PhantomData<Item>,
 }
 
-impl<'a, Item, TrigerValue> SkipUntil<'a, Item, TrigerValue>
+impl<'a, Item, TriggerValue> SkipUntil<'a, Item, TriggerValue>
 where
   Item: Clone + Send + Sync,
-  TrigerValue: Clone + Send + Sync,
+  TriggerValue: Clone + Send + Sync,
 {
   pub fn new(
-    trigger: Observable<'a, TrigerValue>,
-  ) -> SkipUntil<'a, Item, TrigerValue>
+    trigger: Observable<'a, TriggerValue>,
+  ) -> SkipUntil<'a, Item, TriggerValue>
   where
-    TrigerValue: Clone + Send + Sync,
+    TriggerValue: Clone + Send + Sync,
   {
     SkipUntil { trigger, _item: PhantomData }
   }
