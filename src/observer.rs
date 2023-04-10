@@ -55,7 +55,7 @@ where
   pub fn is_subscribed(&self) -> bool {
     self.fn_next.exists() && self.fn_error.exists() && self.fn_complete.exists()
   }
-  pub fn set_on_unsubscribe<F>(&self, f: F)
+  pub(crate) fn set_on_unsubscribe<F>(&self, f: F)
   where
     F: Fn() -> () + Send + Sync + 'a,
   {

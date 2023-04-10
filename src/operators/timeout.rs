@@ -119,7 +119,7 @@ mod test {
       )
       .subscribe(
         print_next_fmt!("{}"),
-        print_error!(),
+        print_error_as!(std::io::Error),
         print_complete!(),
       );
 

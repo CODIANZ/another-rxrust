@@ -115,5 +115,40 @@ mod tset {
       Some(100)
     );
     assert_eq!(f.empty(), true);
+    assert_eq!(f.call_and_clear_if_available(10), None);
+  }
+
+  #[test]
+  #[should_panic]
+  fn call_and_clear_if_available_panic() {
+    let f = FunctionWrapper::new(|x| x * x);
+    assert_eq!(
+      f.call_and_clear_if_available(10),
+      Some(100)
+    );
+    f.call(10); // should be panic
+  }
+
+  #[test]
+  fn borrow() {
+    let a = 10;
+    {
+      let ff = |x| x * x; // static
+      let f = FunctionWrapper::new(ff);
+      assert_eq!(f.call(&a), 100);
+      assert_eq!(f.call(&a), 100);
+    }
+  }
+
+  #[test]
+  fn borrow2() {
+    let a = 10;
+    let b = 1;
+    {
+      let ff = |x| x * x + b; // non static
+      let f = FunctionWrapper::new(ff);
+      assert_eq!(f.call(&a), 101);
+      assert_eq!(f.call(&a), 101);
+    }
   }
 }

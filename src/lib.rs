@@ -7,6 +7,7 @@
 mod macros;
 
 pub mod internals;
+pub mod material;
 pub mod observable;
 pub mod observables;
 pub mod observer;
@@ -20,6 +21,7 @@ pub mod utils;
 pub mod web;
 
 pub mod prelude {
+  pub use crate::material::*;
   pub use crate::observable::*;
   pub use crate::observables::*;
   pub use crate::observer::*;
