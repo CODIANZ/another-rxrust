@@ -81,7 +81,7 @@ A toolbox of useful Operators for working with Observables
 - [x] [Delay](https://reactivex.io/documentation/operators/delay.html) — shift the emissions from an Observable forward in time by a particular amount
 - [x] [Do](https://reactivex.io/documentation/operators/do.html) — register an action to take upon a variety of Observable lifecycle events
   - `tap`
-- [ ] [Materialize/Dematerialize](https://reactivex.io/documentation/operators/materialize-dematerialize.html) — represent both the items emitted and the notifications sent as emitted items, or reverse this process
+- [x] [Materialize/Dematerialize](https://reactivex.io/documentation/operators/materialize-dematerialize.html) — represent both the items emitted and the notifications sent as emitted items, or reverse this process
 - [x] [ObserveOn](https://reactivex.io/documentation/operators/observeon.html) — specify the scheduler on which an observer will observe this Observable
 - [ ] [Serialize](https://reactivex.io/documentation/operators/serialize.html) — force an Observable to make serialized calls and to be well-behaved
 - [x] [Subscribe](https://reactivex.io/documentation/operators/subscribe.html) — operate upon the emissions and notifications from an Observable
