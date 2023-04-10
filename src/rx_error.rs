@@ -3,6 +3,7 @@ use std::{any::TypeId, sync::Arc};
 #[derive(Clone)]
 pub struct RxError {
   error: Arc<Box<dyn std::any::Any + Send + Sync + 'static>>,
+  get_str: Arc<Box<dyn Fn(&Self) -> String + Send + Sync>>,
 }
 
 impl RxError {
@@ -10,7 +11,16 @@ impl RxError {
   where
     E: std::fmt::Debug + Send + Sync + 'static,
   {
-    RxError { error: Arc::new(Box::new(err)) }
+    RxError {
+      error: Arc::new(Box::new(err)),
+      get_str: Arc::new(Box::new(|x: &Self| {
+        format!(
+          "RxError({}) -> {:?}",
+          std::any::type_name::<E>(),
+          x.error.downcast_ref::<E>().unwrap()
+        )
+      })),
+    }
   }
 
   pub fn from_result<T, E>(result: Result<T, E>) -> RxError
@@ -22,6 +32,13 @@ impl RxError {
       error: Arc::new(Box::new(
         result.expect_err("Result must be Result::Err!"),
       )),
+      get_str: Arc::new(Box::new(|x: &Self| {
+        format!(
+          "RxError({}) -> {:?}",
+          std::any::type_name::<E>(),
+          x.error.downcast_ref::<E>().unwrap()
+        )
+      })),
     }
   }
 
@@ -42,14 +59,15 @@ impl RxError {
   {
     self.error.is::<T>()
   }
+
+  pub fn to_string(&self) -> String {
+    (self.get_str)(self)
+  }
 }
 
 impl std::fmt::Debug for RxError {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("RxError")
-      .field("error", &stringify!(self.error))
-      .field("type_id", &self.error.type_id())
-      .finish()
+    f.pad(&self.to_string())
   }
 }
 
