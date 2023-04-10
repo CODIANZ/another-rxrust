@@ -59,15 +59,17 @@ impl RxError {
   {
     self.error.is::<T>()
   }
-
-  pub fn to_string(&self) -> String {
-    (self.get_str)(self)
-  }
 }
 
 impl std::fmt::Debug for RxError {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     f.pad(&self.to_string())
+  }
+}
+
+impl std::string::ToString for RxError {
+  fn to_string(&self) -> String {
+    (self.get_str)(self)
   }
 }
 
