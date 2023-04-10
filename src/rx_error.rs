@@ -1,9 +1,13 @@
 use std::{any::TypeId, sync::Arc};
 
+struct RxErrorInner {
+  error: Box<dyn std::any::Any + Send + Sync + 'static>,
+  get_str: Box<dyn Fn(&Self) -> String + Send + Sync>,
+}
+
 #[derive(Clone)]
 pub struct RxError {
-  error: Arc<Box<dyn std::any::Any + Send + Sync + 'static>>,
-  get_str: Arc<Box<dyn Fn(&Self) -> String + Send + Sync>>,
+  inner: Arc<RxErrorInner>,
 }
 
 impl RxError {
@@ -12,14 +16,16 @@ impl RxError {
     E: std::fmt::Debug + Send + Sync + 'static,
   {
     RxError {
-      error: Arc::new(Box::new(err)),
-      get_str: Arc::new(Box::new(|x: &Self| {
-        format!(
-          "RxError({}) -> {:?}",
-          std::any::type_name::<E>(),
-          x.error.downcast_ref::<E>().unwrap()
-        )
-      })),
+      inner: Arc::new(RxErrorInner {
+        error: Box::new(err),
+        get_str: Box::new(|x: &RxErrorInner| {
+          format!(
+            "RxError({}) -> {:?}",
+            std::any::type_name::<E>(),
+            x.error.downcast_ref::<E>().unwrap()
+          )
+        }),
+      }),
     }
   }
 
@@ -29,16 +35,16 @@ impl RxError {
     E: std::fmt::Debug + Send + Sync + 'static,
   {
     RxError {
-      error: Arc::new(Box::new(
-        result.expect_err("Result must be Result::Err!"),
-      )),
-      get_str: Arc::new(Box::new(|x: &Self| {
-        format!(
-          "RxError({}) -> {:?}",
-          std::any::type_name::<E>(),
-          x.error.downcast_ref::<E>().unwrap()
-        )
-      })),
+      inner: Arc::new(RxErrorInner {
+        error: Box::new(result.expect_err("Result must be Result::Err!")),
+        get_str: Box::new(|x: &RxErrorInner| {
+          format!(
+            "RxError({}) -> {:?}",
+            std::any::type_name::<E>(),
+            x.error.downcast_ref::<E>().unwrap()
+          )
+        }),
+      }),
     }
   }
 
@@ -46,18 +52,18 @@ impl RxError {
   where
     E: Send + Sync + 'static,
   {
-    self.error.downcast_ref::<E>()
+    self.inner.error.downcast_ref::<E>()
   }
 
   pub fn type_id(&self) -> TypeId {
-    self.error.type_id()
+    self.inner.error.type_id()
   }
 
   pub fn is<T>(&self) -> bool
   where
     T: 'static,
   {
-    self.error.is::<T>()
+    self.inner.error.is::<T>()
   }
 }
 
@@ -69,7 +75,7 @@ impl std::fmt::Debug for RxError {
 
 impl std::string::ToString for RxError {
   fn to_string(&self) -> String {
-    (self.get_str)(self)
+    (self.inner.get_str)(&self.inner)
   }
 }
 
