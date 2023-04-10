@@ -1,7 +1,7 @@
 use crate::prelude::RxError;
 use std::fmt::Debug;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Material<T>
 where
   T: Clone + Send + Sync,
@@ -9,20 +9,6 @@ where
   Next(T),
   Error(RxError),
   Complete,
-}
-
-impl<T> Debug for Material<T>
-where
-  T: Clone + Send + Sync,
-  T: Debug,
-{
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    match &self {
-      Self::Next(x) => f.write_str(&format!("Next({:?})", x)),
-      Self::Error(x) => f.write_str(&format!("Error({:?})", x)),
-      Self::Complete => f.write_str("Complete"),
-    }
-  }
 }
 
 #[cfg(test)]
@@ -48,5 +34,19 @@ mod test {
       Error::<i32>(RxError::from_error("ERR!"))
     );
     println!("{:?}", Complete::<i32>);
+  }
+
+  #[test]
+  fn custom_type() {
+    use Material::*;
+    #[derive(Clone)]
+    struct X {}
+    let x = Next(X {});
+    // println!("{:?}", x); // compile error
+    match x {
+      Next(_) => println!("Next"),
+      Error(_) => println!("Error"),
+      Complete => println!("Complete"),
+    }
   }
 }

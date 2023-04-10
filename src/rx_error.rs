@@ -1,8 +1,13 @@
 use std::{any::TypeId, sync::Arc};
 
+struct RxErrorInner {
+  error: Box<dyn std::any::Any + Send + Sync + 'static>,
+  get_str: Box<dyn Fn(&Self) -> String + Send + Sync>,
+}
+
 #[derive(Clone)]
 pub struct RxError {
-  error: Arc<Box<dyn std::any::Any + Send + Sync + 'static>>,
+  inner: Arc<RxErrorInner>,
 }
 
 impl RxError {
@@ -10,7 +15,18 @@ impl RxError {
   where
     E: std::fmt::Debug + Send + Sync + 'static,
   {
-    RxError { error: Arc::new(Box::new(err)) }
+    RxError {
+      inner: Arc::new(RxErrorInner {
+        error: Box::new(err),
+        get_str: Box::new(|x: &RxErrorInner| {
+          format!(
+            "RxError({}) -> {:?}",
+            std::any::type_name::<E>(),
+            x.error.downcast_ref::<E>().unwrap()
+          )
+        }),
+      }),
+    }
   }
 
   pub fn from_result<T, E>(result: Result<T, E>) -> RxError
@@ -19,9 +35,16 @@ impl RxError {
     E: std::fmt::Debug + Send + Sync + 'static,
   {
     RxError {
-      error: Arc::new(Box::new(
-        result.expect_err("Result must be Result::Err!"),
-      )),
+      inner: Arc::new(RxErrorInner {
+        error: Box::new(result.expect_err("Result must be Result::Err!")),
+        get_str: Box::new(|x: &RxErrorInner| {
+          format!(
+            "RxError({}) -> {:?}",
+            std::any::type_name::<E>(),
+            x.error.downcast_ref::<E>().unwrap()
+          )
+        }),
+      }),
     }
   }
 
@@ -29,27 +52,30 @@ impl RxError {
   where
     E: Send + Sync + 'static,
   {
-    self.error.downcast_ref::<E>()
+    self.inner.error.downcast_ref::<E>()
   }
 
   pub fn type_id(&self) -> TypeId {
-    self.error.type_id()
+    self.inner.error.type_id()
   }
 
   pub fn is<T>(&self) -> bool
   where
     T: 'static,
   {
-    self.error.is::<T>()
+    self.inner.error.is::<T>()
   }
 }
 
 impl std::fmt::Debug for RxError {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    f.debug_struct("RxError")
-      .field("error", &stringify!(self.error))
-      .field("type_id", &self.error.type_id())
-      .finish()
+    f.pad(&self.to_string())
+  }
+}
+
+impl std::string::ToString for RxError {
+  fn to_string(&self) -> String {
+    (self.inner.get_str)(&self.inner)
   }
 }
 
