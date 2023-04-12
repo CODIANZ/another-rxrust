@@ -36,44 +36,28 @@ where
     let scheduler_ctor = self.scheduler_ctor.clone();
     Observable::create(move |s| {
       let scheduler = scheduler_ctor.call(());
-
       let sctl = StreamController::new(s);
-
-      let sctl_next = sctl.clone();
-      let sctl_error = sctl.clone();
-      let sctl_complete = sctl.clone();
-
       let source_next = source.clone();
-
-      let scheduler_next = scheduler.clone();
-      let scheduler_error = scheduler.clone();
-      let scheduler_complete = scheduler.clone();
 
       let scheduler_on_finalize = scheduler.clone();
       sctl.set_on_finalize(move || {
         scheduler_on_finalize.abort();
       });
 
-      source_next.inner_subscribe(sctl.new_observer(
-        move |_, x: Item| {
-          let sctl_next = sctl_next.clone();
-          scheduler_next.post(move || {
-            sctl_next.sink_next(x.clone());
-          });
-        },
-        move |_, e| {
-          let sctl_error = sctl_error.clone();
-          scheduler_error.post(move || {
-            sctl_error.sink_error(e.clone());
-          });
-        },
-        move |serial| {
-          let sctl_complete = sctl_complete.clone();
-          scheduler_complete.post(move || {
-            sctl_complete.sink_complete(&serial);
-          });
-        },
-      ));
+      scheduler.post(move || {
+        let sctl_next = sctl.clone();
+        let sctl_error = sctl.clone();
+        let sctl_complete = sctl.clone();
+        source_next.inner_subscribe(sctl.new_observer(
+          move |_, x| {
+            sctl_next.sink_next(x);
+          },
+          move |_, e| {
+            sctl_error.sink_error(e);
+          },
+          move |serial| sctl_complete.sink_complete(&serial),
+        ));
+      });
     })
   }
 }
