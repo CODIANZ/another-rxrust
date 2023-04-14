@@ -64,7 +64,7 @@ where
         move |_, e| {
           sctl_error.sink_error(e);
         },
-        move |serial| sctl_complete.sink_complete(&serial),
+        move |_| sctl_complete.sink_complete_force(), // trigger also unsubscribe
       ));
     })
   }
