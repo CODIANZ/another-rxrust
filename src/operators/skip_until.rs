@@ -32,35 +32,42 @@ where
     let trigger = self.trigger.clone();
     Observable::<Item>::create(move |s| {
       let enable = Arc::new(RwLock::new(false));
-
       let sctl = StreamController::new(s);
 
-      let enable_triggner_next = Arc::clone(&enable);
-      let sctl_trigger_next = sctl.clone();
-      trigger.inner_subscribe(sctl.new_observer(
-        move |serial, _| {
-          *enable_triggner_next.write().unwrap() = true;
-          sctl_trigger_next.upstream_abort_observe(&serial);
-        },
-        |_, _| {},
-        |_| {},
-      ));
+      let obs_trigger = {
+        let enable_triggner_next = Arc::clone(&enable);
+        let sctl_trigger_next = sctl.clone();
 
-      let sctl_next = sctl.clone();
-      let sctl_error = sctl.clone();
-      let sctl_complete = sctl.clone();
+        sctl.new_observer(
+          move |serial, _| {
+            *enable_triggner_next.write().unwrap() = true;
+            sctl_trigger_next.upstream_abort_observe(&serial);
+          },
+          |_, _| {},
+          |_| {},
+        )
+      };
 
-      source.inner_subscribe(sctl.new_observer(
-        move |_, x| {
-          if *enable.read().unwrap() {
-            sctl_next.sink_next(x);
-          }
-        },
-        move |_, e| {
-          sctl_error.sink_error(e);
-        },
-        move |serial| sctl_complete.sink_complete(&serial),
-      ));
+      let obs_source = {
+        let sctl_next = sctl.clone();
+        let sctl_error = sctl.clone();
+        let sctl_complete = sctl.clone();
+
+        sctl.new_observer(
+          move |_, x| {
+            if *enable.read().unwrap() {
+              sctl_next.sink_next(x);
+            }
+          },
+          move |_, e| {
+            sctl_error.sink_error(e);
+          },
+          move |_| sctl_complete.sink_complete_force(), // trigger also unsubscribe
+        )
+      };
+
+      trigger.inner_subscribe(obs_trigger);
+      source.inner_subscribe(obs_source);
     })
   }
 }

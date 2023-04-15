@@ -30,28 +30,36 @@ where
     Observable::<Item>::create(move |s| {
       let sctl = StreamController::new(s);
 
-      let sctl_trigger_next = sctl.clone();
-      trigger.inner_subscribe(sctl.new_observer(
-        move |_, _| {
-          sctl_trigger_next.sink_complete_force();
-        },
-        |_, _| {},
-        |_| {},
-      ));
+      let obs_trigger = {
+        let sctl_trigger_next = sctl.clone();
 
-      let sctl_next = sctl.clone();
-      let sctl_error = sctl.clone();
-      let sctl_complete = sctl.clone();
+        sctl.new_observer(
+          move |_, _| {
+            sctl_trigger_next.sink_complete_force();
+          },
+          |_, _| {},
+          |_| {},
+        )
+      };
 
-      source.inner_subscribe(sctl.new_observer(
-        move |_, x| {
-          sctl_next.sink_next(x);
-        },
-        move |_, e| {
-          sctl_error.sink_error(e);
-        },
-        move |serial| sctl_complete.sink_complete(&serial),
-      ));
+      let obs_source = {
+        let sctl_next = sctl.clone();
+        let sctl_error = sctl.clone();
+        let sctl_complete = sctl.clone();
+
+        sctl.new_observer(
+          move |_, x| {
+            sctl_next.sink_next(x);
+          },
+          move |_, e| {
+            sctl_error.sink_error(e);
+          },
+          move |_| sctl_complete.sink_complete_force(), // trigger also unsubscribe
+        )
+      };
+
+      trigger.inner_subscribe(obs_trigger);
+      source.inner_subscribe(obs_source);
     })
   }
 }
@@ -95,5 +103,28 @@ mod test {
       print_error!(),
       print_complete!(),
     );
+  }
+
+  #[test]
+  fn with_subject() {
+    let sbj = subjects::Subject::new();
+    let sbj_ = sbj.clone();
+    let sbsc = observables::interval(
+      time::Duration::from_millis(100),
+      schedulers::new_thread_scheduler(),
+    )
+    .take_until(sbj.observable())
+    .flat_map(move |x| {
+      if x == 10 {
+        sbj_.next(());
+      }
+      return observables::empty::<u64>();
+    })
+    .subscribe(
+      junk_next!(),
+      junk_error!(),
+      junk_complete!(),
+    );
+    while sbsc.is_subscribed() {}
   }
 }
