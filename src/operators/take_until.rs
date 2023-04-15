@@ -104,4 +104,27 @@ mod test {
       print_complete!(),
     );
   }
+
+  #[test]
+  fn with_subject() {
+    let sbj = subjects::Subject::new();
+    let sbj_ = sbj.clone();
+    let sbsc = observables::interval(
+      time::Duration::from_millis(100),
+      schedulers::new_thread_scheduler(),
+    )
+    .take_until(sbj.observable())
+    .flat_map(move |x| {
+      if x == 10 {
+        sbj_.next(());
+      }
+      return observables::empty::<u64>();
+    })
+    .subscribe(
+      junk_next!(),
+      junk_error!(),
+      junk_complete!(),
+    );
+    while sbsc.is_subscribed() {}
+  }
 }
