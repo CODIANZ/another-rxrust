@@ -4,19 +4,29 @@ use crate::prelude::*;
 #[derive(Clone)]
 pub struct Subscription<'a> {
   fn_unsubscribe: FunctionWrapper<'a, (), ()>,
+  fn_is_subscribed: FunctionWrapper<'a, (), bool>,
 }
 
 impl<'a> Subscription<'a> {
-  pub fn new<Unsub>(unsub: Unsub) -> Subscription<'a>
+  pub fn new<Unsub, Issub>(unsub: Unsub, issub: Issub) -> Subscription<'a>
   where
     Unsub: Fn() + Send + Sync + 'a,
+    Issub: Fn() -> bool + Send + Sync + 'a,
   {
     Subscription {
       fn_unsubscribe: FunctionWrapper::new(move |_| unsub()),
+      fn_is_subscribed: FunctionWrapper::new(move |_| issub()),
     }
   }
   pub fn unsubscribe(&self) {
     self.fn_unsubscribe.call_and_clear_if_available(());
+  }
+  pub fn is_subscribed(&self) -> bool {
+    if let Some(x) = self.fn_is_subscribed.call_if_available(()) {
+      x
+    } else {
+      false
+    }
   }
 }
 
@@ -36,17 +46,22 @@ where
   where
     Source: Fn(Observer<'a, Item>) + Send + Sync + 'a,
   {
-    Observable {
-      source: FunctionWrapper::new(source),
-    }
+    Observable { source: FunctionWrapper::new(source) }
   }
 
-  pub(crate) fn inner_subscribe(&self, observer: Observer<'a, Item>) -> Subscription<'a> {
+  pub(crate) fn inner_subscribe(
+    &self,
+    observer: Observer<'a, Item>,
+  ) -> Subscription<'a> {
     let unsub_observer = observer.clone();
+    let issub_observer = observer.clone();
     self.source.call(observer.clone());
-    Subscription::new(move || {
-      unsub_observer.unsubscribe();
-    })
+    Subscription::new(
+      move || {
+        unsub_observer.unsubscribe();
+      },
+      move || issub_observer.is_subscribed(),
+    )
   }
 
   pub fn subscribe<Next, Error, Complete>(
@@ -78,9 +93,17 @@ mod test {
       s.complete();
     });
 
-    o.subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
+    o.subscribe(
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
+    );
 
-    o.subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
+    o.subscribe(
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
+    );
   }
 
   #[test]
@@ -99,7 +122,11 @@ mod test {
       });
     });
 
-    o.subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
+    o.subscribe(
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
+    );
     println!("started");
   }
 
@@ -121,7 +148,11 @@ mod test {
       });
     });
 
-    let sbsc = o.subscribe(print_next_fmt!("{}"), print_error!(), print_complete!());
+    let sbsc = o.subscribe(
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
+    );
     println!("started");
     thread::sleep(time::Duration::from_millis(1000));
     sbsc.unsubscribe();
