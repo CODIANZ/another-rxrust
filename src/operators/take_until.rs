@@ -30,28 +30,36 @@ where
     Observable::<Item>::create(move |s| {
       let sctl = StreamController::new(s);
 
-      let sctl_trigger_next = sctl.clone();
-      trigger.inner_subscribe(sctl.new_observer(
-        move |_, _| {
-          sctl_trigger_next.sink_complete_force();
-        },
-        |_, _| {},
-        |_| {},
-      ));
+      let obs_trigger = {
+        let sctl_trigger_next = sctl.clone();
 
-      let sctl_next = sctl.clone();
-      let sctl_error = sctl.clone();
-      let sctl_complete = sctl.clone();
+        sctl.new_observer(
+          move |_, _| {
+            sctl_trigger_next.sink_complete_force();
+          },
+          |_, _| {},
+          |_| {},
+        )
+      };
 
-      source.inner_subscribe(sctl.new_observer(
-        move |_, x| {
-          sctl_next.sink_next(x);
-        },
-        move |_, e| {
-          sctl_error.sink_error(e);
-        },
-        move |_| sctl_complete.sink_complete_force(), // trigger also unsubscribe
-      ));
+      let obs_source = {
+        let sctl_next = sctl.clone();
+        let sctl_error = sctl.clone();
+        let sctl_complete = sctl.clone();
+
+        sctl.new_observer(
+          move |_, x| {
+            sctl_next.sink_next(x);
+          },
+          move |_, e| {
+            sctl_error.sink_error(e);
+          },
+          move |_| sctl_complete.sink_complete_force(), // trigger also unsubscribe
+        )
+      };
+
+      trigger.inner_subscribe(obs_trigger);
+      source.inner_subscribe(obs_source);
     })
   }
 }

@@ -30,42 +30,47 @@ where
     let trigger = self.trigger.clone();
     Observable::<Item>::create(move |s| {
       let value = Arc::new(RwLock::new(None::<Item>));
-
       let sctl = StreamController::new(s);
 
-      let value_trigger_next = Arc::clone(&value);
-      let sctl_trigger_next = sctl.clone();
+      let obs_trigger = {
+        let value_trigger_next = Arc::clone(&value);
+        let sctl_trigger_next = sctl.clone();
 
-      trigger.inner_subscribe(sctl.new_observer(
-        move |_, _| {
-          let value = {
-            let mut v = value_trigger_next.write().unwrap();
-            let vv = v.clone();
-            *v = None;
-            vv
-          };
-          if let Some(v) = value {
-            sctl_trigger_next.sink_next(v);
-          }
-        },
-        |_, _| {},
-        |_| {},
-      ));
+        sctl.new_observer(
+          move |_, _| {
+            let value = {
+              let mut v = value_trigger_next.write().unwrap();
+              let vv = v.clone();
+              *v = None;
+              vv
+            };
+            if let Some(v) = value {
+              sctl_trigger_next.sink_next(v);
+            }
+          },
+          |_, _| {},
+          |_| {},
+        )
+      };
 
-      let value_next = Arc::clone(&value);
+      let obs_source = {
+        let value_next = Arc::clone(&value);
+        let sctl_error = sctl.clone();
+        let sctl_complete = sctl.clone();
 
-      let sctl_error = sctl.clone();
-      let sctl_complete = sctl.clone();
+        sctl.new_observer(
+          move |_, x| {
+            *value_next.write().unwrap() = Some(x);
+          },
+          move |_, e| {
+            sctl_error.sink_error(e);
+          },
+          move |_| sctl_complete.sink_complete_force(), // trigger also unsubscribe
+        )
+      };
 
-      source.inner_subscribe(sctl.new_observer(
-        move |_, x| {
-          *value_next.write().unwrap() = Some(x);
-        },
-        move |_, e| {
-          sctl_error.sink_error(e);
-        },
-        move |_| sctl_complete.sink_complete_force(), // trigger also unsubscribe
-      ));
+      trigger.inner_subscribe(obs_trigger);
+      source.inner_subscribe(obs_source);
     })
   }
 }
