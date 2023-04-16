@@ -63,6 +63,7 @@ Operators that work with multiple source Observables to create a single Observab
 - [x] [Switch](https://reactivex.io/documentation/operators/switch.html) — convert an Observable that emits Observables into a single Observable that emits the items emitted by the most-recently-emitted of those Observables
   - `switch_on_next`
 - [x] [Zip](https://reactivex.io/documentation/operators/zip.html) — combine the emissions of multiple Observables together via a specified function and emit single items for each combination based on the results of this function
+  - `zip` only handles identical types. If you want to zip multiple types, you can zip by connecting each `observable` to `map_to_any`.
 
 ### Error Handling Operators
 
