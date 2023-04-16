@@ -16,6 +16,7 @@ pub mod group_by;
 pub mod ignore_elements;
 pub mod last;
 pub mod map;
+pub mod map_to_any;
 pub mod materialize;
 pub mod max;
 pub mod merge;
@@ -79,6 +80,7 @@ pub mod operators {
   pub use crate::operators::ignore_elements::*;
   pub use crate::operators::last::*;
   pub use crate::operators::map::*;
+  pub use crate::operators::map_to_any::*;
   pub use crate::operators::materialize::*;
   pub use crate::operators::max::*;
   pub use crate::operators::merge::*;
