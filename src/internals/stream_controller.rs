@@ -22,12 +22,18 @@ where
   Item: Clone + Send + Sync,
 {
   pub fn new(subscriber: Observer<Item>) -> StreamController<Item> {
-    StreamController {
+    let subscriber_ = subscriber.clone();
+    let sctl = StreamController {
       serial: Arc::new(RwLock::new(0)),
-      subscriber: subscriber,
+      subscriber,
       unscribers: Arc::new(RwLock::new(HashMap::new())),
       on_finalize: Arc::new(RwLock::new(Vec::new())),
+    };
+    {
+      let sctl = sctl.clone();
+      subscriber_.set_on_unsubscribe(move || sctl.finalize());
     }
+    sctl
   }
 
   pub fn set_on_finalize<F>(&self, f: F)
@@ -131,7 +137,9 @@ where
       x.1.call(());
     });
     self.unscribers.write().unwrap().clear();
-    self.subscriber.unsubscribe();
+    if self.subscriber.is_subscribed() {
+      self.subscriber.unsubscribe();
+    }
     let mut handlers = self.on_finalize.write().unwrap();
     handlers.iter().for_each(|h| h.call(()));
     handlers.clear();
