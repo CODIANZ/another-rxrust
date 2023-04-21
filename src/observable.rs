@@ -129,4 +129,28 @@ mod test {
     sbsc.unsubscribe();
     thread::sleep(time::Duration::from_millis(1000));
   }
+
+  #[test]
+  fn move_to_closure() {
+    let o = Observable::create(|s| {
+      s.next(1);
+      s.complete();
+    });
+    let oo = o.clone(); // prepare for `move`ing to closure
+    o.flat_map(move |_| {
+      // Be sure to clone and use the moved `oo`.
+      let ooo = oo.clone(); // prepare for `move`ing to closure
+
+      // `oo` must be cloned or an error will occur.
+      oo.clone().flat_map(move |_| {
+        // Be sure to clone and use the moved `ooo`.
+        return ooo.clone();
+      })
+    })
+    .subscribe(
+      print_next_fmt!("{}"),
+      print_error!(),
+      print_complete!(),
+    );
+  }
 }

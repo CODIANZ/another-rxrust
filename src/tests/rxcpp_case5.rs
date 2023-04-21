@@ -5,22 +5,22 @@ mod test {
 
   #[test]
   fn rxcpp_case5() {
-    fn periodical() -> Observable<'static, u64> {
-      observables::interval(
-        time::Duration::from_micros(100),
-        schedulers::new_thread_scheduler(),
-      )
-      .tap(
-        print_next_fmt!("tap {}"),
-        junk_error!(),
-        junk_complete!(),
-      )
-    }
+    let periodical = observables::interval(
+      time::Duration::from_micros(100),
+      schedulers::new_thread_scheduler(),
+    )
+    .tap(
+      print_next_fmt!("tap {}"),
+      junk_error!(),
+      junk_complete!(),
+    );
 
-    let sbsc = periodical()
+    let periodical2 = periodical.clone();
+    let sbsc = periodical
       .flat_map(move |_| {
-        return periodical().flat_map(move |_| {
-          return periodical();
+        let periodical3 = periodical2.clone();
+        return periodical2.clone().flat_map(move |_| {
+          return periodical3.clone();
         });
       })
       .take(1)
