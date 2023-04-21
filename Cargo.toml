@@ -9,7 +9,7 @@ documentation = "https://docs.rs/another-rxrust/"
 homepage = "https://github.com/CODIANZ/another-rxrust"
 repository = "https://github.com/CODIANZ/another-rxrust"
 keywords = ["reactivex", "rx", "rxrust", "asynchronous"]
-version = "0.0.44"
+version = "0.0.45"
 
 [dependencies]
 wasm-bindgen = { version = "0.2.83", optional = true }
