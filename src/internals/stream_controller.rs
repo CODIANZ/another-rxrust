@@ -14,7 +14,7 @@ where
   serial: Arc<RwLock<i32>>,
   subscriber: Observer<'a, Item>,
   unscribers: Arc<RwLock<HashMap<i32, FunctionWrapper<'a, (), ()>>>>,
-  on_finalize: Arc<RwLock<Vec<FunctionWrapper<'a, (), ()>>>>,
+  on_finalize: Arc<RwLock<Option<FunctionWrapper<'a, (), ()>>>>,
 }
 
 impl<'a, Item> StreamController<'a, Item>
@@ -27,7 +27,7 @@ where
       serial: Arc::new(RwLock::new(0)),
       subscriber,
       unscribers: Arc::new(RwLock::new(HashMap::new())),
-      on_finalize: Arc::new(RwLock::new(Vec::new())),
+      on_finalize: Arc::new(RwLock::new(None)),
     };
     {
       let sctl = sctl.clone();
@@ -40,11 +40,8 @@ where
   where
     F: Fn() + Send + Sync + 'a,
   {
-    self
-      .on_finalize
-      .write()
-      .unwrap()
-      .push(FunctionWrapper::new(move |_| f()));
+    *self.on_finalize.write().unwrap() =
+      Some(FunctionWrapper::new(move |_| f()));
   }
 
   pub fn new_observer<XItem, Next, Error, Complete>(
@@ -140,9 +137,11 @@ where
     if self.subscriber.is_subscribed() {
       self.subscriber.unsubscribe();
     }
-    let mut handlers = self.on_finalize.write().unwrap();
-    handlers.iter().for_each(|h| h.call(()));
-    handlers.clear();
+    let on_finalize = &mut *self.on_finalize.write().unwrap();
+    if let Some(f) = on_finalize {
+      f.call(());
+      *on_finalize = None;
+    }
   }
 
   pub fn is_subscribed(&self) -> bool {
