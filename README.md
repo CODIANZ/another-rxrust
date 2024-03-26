@@ -50,6 +50,7 @@ another-rxrust = {features=["web"]}
 
 ```rust
 use another_rxrust::prelude::*;
+use another_rxrust::{print_next_fmt, print_error, print_complete};
 
 fn main() {
   let ob = observables::from_iter(0..10);
@@ -78,6 +79,7 @@ fn main() {
 ```rust
 use another_rxrust::prelude::*;
 use std::{thread, time};
+use another_rxrust::{print_next_fmt, print_error, print_complete};
 
 fn main() {
   let sbj = subjects::Subject::new();
